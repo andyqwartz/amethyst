@@ -23,4 +23,8 @@ export interface GenerationSettings {
   aspectRatio: string;
   outputFormat: 'webp' | 'jpg' | 'png';
   outputQuality: number;
+  promptStrength?: number;
+  hfLoras?: string[];
+  loraScales?: number[];
+  disableSafetyChecker?: boolean;
 }
