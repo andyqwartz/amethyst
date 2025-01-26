@@ -67,30 +67,32 @@ export const ImageGenerator = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#1a1a1a] p-4 md:p-6">
+    <div className="min-h-screen p-4 md:p-6">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
-        <div className="bg-[#7c3aed] p-4 rounded-t-xl flex justify-between items-center mb-4">
-          <h1 className="text-3xl font-bold text-white">Amethyst</h1>
+        <div className="bg-primary/5 p-4 rounded-xl flex justify-between items-center mb-4 glass-card">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            Amethyst
+          </h1>
           <div className="flex gap-2">
-            <Button variant="ghost" size="icon" className="bg-white/10 hover:bg-white/20">
-              <History className="h-5 w-5 text-white" />
+            <Button variant="ghost" size="icon" className="hover:bg-primary/10">
+              <History className="h-5 w-5 text-primary" />
             </Button>
-            <Button variant="ghost" size="icon" className="bg-white/10 hover:bg-white/20">
-              <Settings className="h-5 w-5 text-white" />
+            <Button variant="ghost" size="icon" className="hover:bg-primary/10">
+              <Settings className="h-5 w-5 text-primary" />
             </Button>
-            <Button variant="ghost" size="icon" className="bg-white/10 hover:bg-white/20">
-              <HelpCircle className="h-5 w-5 text-white" />
+            <Button variant="ghost" size="icon" className="hover:bg-primary/10">
+              <HelpCircle className="h-5 w-5 text-primary" />
             </Button>
           </div>
         </div>
 
         {/* Main Content */}
-        <Card className="border-none bg-[#2a2a2a] shadow-xl">
-          <div className="p-4 space-y-4">
+        <Card className="border-none glass-card shadow-xl">
+          <div className="p-6 space-y-6">
             {/* Image Upload Area */}
-            <button className="w-full p-6 border-2 border-dashed border-purple-500/30 rounded-xl hover:bg-purple-500/5 transition-colors">
-              <div className="flex flex-col items-center gap-2 text-gray-400">
+            <button className="w-full p-6 border-2 border-dashed border-primary/30 rounded-xl hover:bg-primary/5 transition-colors">
+              <div className="flex flex-col items-center gap-2 text-primary/70">
                 <ImagePlus className="h-6 w-6" />
                 <span>Add a reference image</span>
               </div>
@@ -102,9 +104,9 @@ export const ImageGenerator = () => {
                 placeholder="Describe the image you want to generate..."
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                className="bg-[#1a1a1a] border-none text-white placeholder:text-gray-500"
+                className="bg-white/50 border-primary/20 text-foreground placeholder:text-primary/50 focus:border-primary/50"
               />
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-primary/70">
                 {prompt.length} characters
               </div>
             </div>
@@ -113,7 +115,7 @@ export const ImageGenerator = () => {
             <div className="space-y-2">
               <Button
                 onClick={() => setShowSettings(!showSettings)}
-                className="w-full bg-[#3a3a3a] hover:bg-[#4a4a4a] text-white"
+                className="w-full bg-white/50 hover:bg-white/70 text-foreground border border-primary/20"
                 variant="secondary"
               >
                 <Settings className="h-4 w-4 mr-2" />
@@ -123,7 +125,7 @@ export const ImageGenerator = () => {
               <Button
                 onClick={handleGenerate}
                 disabled={isGenerating}
-                className="w-full bg-[#7c3aed] hover:bg-[#6d28d9] text-white"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 {isGenerating ? (
                   <Sparkles className="h-4 w-4 animate-spin mr-2" />
@@ -135,7 +137,7 @@ export const ImageGenerator = () => {
             </div>
 
             {showSettings && (
-              <div className="space-y-4 p-4 bg-[#1a1a1a] rounded-xl animate-fade-in">
+              <div className="space-y-4 p-4 bg-white/50 rounded-xl animate-fade-in">
                 <ParameterInputs
                   settings={settings}
                   onSettingsChange={(newSettings) => setSettings(s => ({ ...s, ...newSettings }))}

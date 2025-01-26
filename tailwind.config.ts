@@ -39,7 +39,7 @@ export default {
           foreground: "#1A1F2C",
         },
         card: {
-          DEFAULT: "rgba(255, 255, 255, 0.05)",
+          DEFAULT: "rgba(255, 255, 255, 0.95)",
           foreground: "hsl(var(--foreground))",
         },
       },
