@@ -9,12 +9,13 @@ const corsHeaders = {
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders })
   }
 
   try {
     const REPLICATE_API_KEY = Deno.env.get('REPLICATE_API_KEY')
     if (!REPLICATE_API_KEY) {
+      console.error('REPLICATE_API_KEY is not set')
       throw new Error('REPLICATE_API_KEY is not set')
     }
 
@@ -26,15 +27,15 @@ serve(async (req) => {
     console.log("Received input:", input)
 
     if (!input || !input.prompt) {
-      return new Response(
-        JSON.stringify({ error: "Missing required field: prompt" }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400,
-        }
-      )
+      console.error('Missing required field: prompt')
+      throw new Error('Missing required field: prompt')
     }
 
-    console.log("Starting image generation with input:", input)
+    console.log("Starting image generation with input:", {
+      ...input,
+      prompt: input.prompt.substring(0, 100) + "..." // Truncate long prompts in logs
+    })
+
     const output = await replicate.run(
       "lucataco/flux-dev-multi-lora:2389224e115448d9a77c07d7d45672b3f0aa45acacf1c5bcf51857ac295e3aec",
       {
