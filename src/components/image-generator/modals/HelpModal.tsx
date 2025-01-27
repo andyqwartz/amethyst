@@ -20,7 +20,8 @@ export const HelpModal = ({ open, onOpenChange }: HelpModalProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-screen h-screen max-w-none m-0 p-6 backdrop-blur-xl bg-black/30">
-        <div className="max-w-4xl mx-auto h-full flex>
+        <div className="max-w-4xl mx-auto h-full flex flex-col">
+          <DialogHeader>
             <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               Aide & Crédits
             </DialogTitle>
