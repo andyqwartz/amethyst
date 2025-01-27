@@ -6,6 +6,7 @@ import { ImagePreview } from './image-generator/ImagePreview';
 import { Header } from './image-generator/Header';
 import { GenerationControls } from './image-generator/GenerationControls';
 import { HelpModal } from './image-generator/modals/HelpModal';
+import { HistoryModal } from './image-generator/modals/HistoryModal';
 import { useImageGeneration } from '@/hooks/useImageGeneration';
 import { useGenerationSettings } from '@/hooks/useGenerationSettings';
 import type { GenerationSettings } from '@/types/replicate';
@@ -13,6 +14,7 @@ import type { GenerationSettings } from '@/types/replicate';
 export const ImageGenerator = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const { settings, updateSettings } = useGenerationSettings();
   const { status, generatedImages, generate } = useImageGeneration();
 
@@ -36,11 +38,17 @@ export const ImageGenerator = () => {
     document.body.removeChild(link);
   };
 
+  // Simulons un historique pour l'exemple
+  const historyImages = generatedImages.map(url => ({
+    url,
+    settings: { ...settings }
+  }));
+
   return (
     <div className="min-h-screen p-4 md:p-6">
       <div className="max-w-2xl mx-auto">
         <Header
-          onHistoryClick={() => console.log('History clicked')}
+          onHistoryClick={() => setShowHistory(true)}
           onSettingsClick={() => setShowSettings(!showSettings)}
           onHelpClick={() => setShowHelp(true)}
         />
@@ -82,6 +90,14 @@ export const ImageGenerator = () => {
         <HelpModal
           open={showHelp}
           onOpenChange={setShowHelp}
+        />
+
+        <HistoryModal
+          open={showHistory}
+          onOpenChange={setShowHistory}
+          images={historyImages}
+          onDownload={handleDownload}
+          onTweak={handleTweak}
         />
       </div>
     </div>

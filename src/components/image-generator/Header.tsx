@@ -19,7 +19,7 @@ export const Header = ({
       <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
         Amethyst
       </h1>
-      <div className="flex gap-2">
+      <div className="flex items-center gap-3">
         <Button
           variant="ghost"
           size="icon"
