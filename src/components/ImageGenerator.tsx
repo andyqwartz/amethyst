@@ -23,15 +23,15 @@ export const ImageGenerator = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [referenceImage, setReferenceImage] = useState<string | null>(() => {
     return localStorage.getItem(REFERENCE_IMAGE_KEY);
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { settings, updateSettings, resetSettings } = useGenerationSettings();
   
-  // Nettoyer le localStorage et réinitialiser les paramètres au montage
   useEffect(() => {
-    localStorage.clear(); // Clear all localStorage
+    localStorage.clear();
     resetSettings();
   }, []);
 
@@ -45,7 +45,7 @@ export const ImageGenerator = () => {
         title: "Reprise de la génération",
         description: "La génération précédente a été interrompue, reprise en cours..."
       });
-      generate(savedSettings);
+      handleGenerate(savedSettings);
     }
   );
   const { history, allHistory, isLoading } = useImageHistory();
@@ -58,16 +58,43 @@ export const ImageGenerator = () => {
     }
   }, [referenceImage]);
 
-  // Restore saved file if available
   useEffect(() => {
     if (savedFile && !referenceImage) {
       setReferenceImage(savedFile);
     }
   }, [savedFile]);
 
-  const handleGenerate = () => {
-    generate(settings);
+  const handleGenerate = async (settingsToUse = settings) => {
+    if (isGenerating) {
+      toast({
+        title: "Génération en cours",
+        description: "Veuillez attendre la fin de la génération en cours",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      await generate(settingsToUse);
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
   };
+
+  useEffect(() => {
+    if (status === 'success' || status === 'error') {
+      setIsGenerating(false);
+      localStorage.removeItem('generation_status');
+      localStorage.removeItem('generation_progress');
+      localStorage.removeItem('generation_timestamp');
+      resetSettings();
+    }
+  }, [status]);
 
   const handleTweak = (imageSettings: GenerationSettings) => {
     updateSettings(imageSettings);
@@ -104,15 +131,6 @@ export const ImageGenerator = () => {
       fileInputRef.current.value = '';
     }
   };
-
-  useEffect(() => {
-    if (status === 'success' || status === 'error') {
-      localStorage.removeItem('generation_status');
-      localStorage.removeItem('generation_progress');
-      localStorage.removeItem('generation_timestamp');
-      resetSettings();
-    }
-  }, [status]);
 
   return (
     <>
@@ -166,9 +184,9 @@ export const ImageGenerator = () => {
               <GenerationControls
                 settings={settings}
                 onSettingsChange={updateSettings}
-                onGenerate={handleGenerate}
+                onGenerate={() => handleGenerate()}
                 onToggleSettings={() => setShowSettings(!showSettings)}
-                isGenerating={status === 'loading'}
+                isGenerating={isGenerating}
               />
 
               {showSettings && (
@@ -216,7 +234,7 @@ export const ImageGenerator = () => {
       </div>
 
       <GenerationLoadingState 
-        isGenerating={status === 'loading' || persistedStatus === 'loading'} 
+        isGenerating={isGenerating} 
         progress={progress}
       />
     </>
