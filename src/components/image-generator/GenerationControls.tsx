@@ -26,7 +26,7 @@ export const GenerationControls = ({
           placeholder="Décrivez l'image que vous souhaitez générer..."
           value={settings.prompt}
           onChange={(e) => onSettingsChange({ prompt: e.target.value })}
-          className="bg-white/50 border-primary/20 text-foreground placeholder:text-primary/50 focus:border-primary/50"
+          className="bg-card/80 border-primary/20 text-foreground placeholder:text-primary/50 focus:border-primary/50"
         />
         <div className="text-sm text-primary/70">
           {settings.prompt.length} caractères
