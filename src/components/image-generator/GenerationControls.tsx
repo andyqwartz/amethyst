@@ -49,8 +49,7 @@ export const GenerationControls = ({
                 block
                 w-auto
                 min-w-[60px]
-                min-h-[28px]
-                max-h-[28px]
+                h-10
                 bg-card/80 
                 border 
                 border-primary/20 
@@ -58,21 +57,22 @@ export const GenerationControls = ({
                 placeholder:text-primary/50 
                 focus:border-primary/50 
                 rounded-full
-                px-3
-                py-0.5
+                px-4
+                py-2
                 text-center
                 text-sm
                 transition-all 
                 duration-300
                 shadow-inner
-                leading-tight
-                whitespace-nowrap
+                leading-normal
                 overflow-hidden
                 focus:outline-none
                 focus:ring-2
                 focus:ring-primary/20
                 hover:border-primary/30
                 resize-none
+                overflow-y-auto
+                whitespace-normal
               "
               style={{
                 transform: settings.prompt ? 'scale(1.02)' : 'scale(1)',
