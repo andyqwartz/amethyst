@@ -50,7 +50,7 @@ export const GenerationControls = ({
           ">
             <textarea
               placeholder="Imagine..."
-              value={settings.prompt || ''}
+              value={settings.prompt}
               onChange={handleTextareaInput}
               className="
                 block

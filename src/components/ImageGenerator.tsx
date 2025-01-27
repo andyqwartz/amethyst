@@ -27,28 +27,12 @@ export const ImageGenerator = () => {
     return localStorage.getItem(REFERENCE_IMAGE_KEY);
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { settings, updateSettings } = useGenerationSettings();
+  const { settings, updateSettings, resetSettings } = useGenerationSettings();
   
   // Nettoyer le localStorage et réinitialiser les paramètres au montage
   useEffect(() => {
-    localStorage.removeItem('last_settings');
-    localStorage.removeItem('generation_status');
-    localStorage.removeItem('generation_progress');
-    localStorage.removeItem('generation_timestamp');
-    updateSettings({
-      prompt: '',
-      negativePrompt: '',
-      guidanceScale: 3.5,
-      steps: 28,
-      numOutputs: 1,
-      aspectRatio: "1:1",
-      outputFormat: "webp",
-      outputQuality: 80,
-      promptStrength: 0.8,
-      hfLoras: [],
-      loraScales: [],
-      disableSafetyChecker: false
-    });
+    localStorage.clear(); // Clear all localStorage
+    resetSettings();
   }, []);
 
   const { status, generatedImages, generate } = useImageGeneration();
@@ -80,13 +64,6 @@ export const ImageGenerator = () => {
       setReferenceImage(savedFile);
     }
   }, [savedFile]);
-
-  // Restore saved settings if available
-  useEffect(() => {
-    if (savedSettings && status === 'idle') {
-      updateSettings(savedSettings);
-    }
-  }, [savedSettings, status]);
 
   const handleGenerate = () => {
     generate(settings);
@@ -130,10 +107,10 @@ export const ImageGenerator = () => {
 
   useEffect(() => {
     if (status === 'success' || status === 'error') {
-      // Clear loading state when generation completes
       localStorage.removeItem('generation_status');
       localStorage.removeItem('generation_progress');
       localStorage.removeItem('generation_timestamp');
+      resetSettings();
     }
   }, [status]);
 
@@ -244,4 +221,3 @@ export const ImageGenerator = () => {
       />
     </>
   );
-};

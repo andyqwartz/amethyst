@@ -19,17 +19,22 @@ const DEFAULT_SETTINGS: GenerationSettings = {
 export const useGenerationSettings = () => {
   const [settings, setSettings] = useState<GenerationSettings>(DEFAULT_SETTINGS);
 
-  useEffect(() => {
-    localStorage.setItem('last_settings', JSON.stringify(settings));
-  }, [settings]);
-
   const updateSettings = (newSettings: Partial<GenerationSettings>) => {
-    setSettings(current => ({ ...current, ...newSettings }));
-    console.log('Settings updated:', newSettings);
+    setSettings(current => {
+      const updated = { ...current, ...newSettings };
+      console.log('Settings updated:', updated);
+      return updated;
+    });
+  };
+
+  const resetSettings = () => {
+    setSettings(DEFAULT_SETTINGS);
+    localStorage.removeItem('last_settings');
   };
 
   return {
     settings,
-    updateSettings
+    updateSettings,
+    resetSettings
   };
 };
