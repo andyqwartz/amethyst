@@ -1,81 +1,72 @@
-import { serve } from "https://deno.fresh.run/std@0.168.0/http/server.ts";
-
-const REPLICATE_API_TOKEN = Deno.env.get('REPLICATE_API_KEY')!;
-const MODEL_VERSION = "lucataco/flux-dev-multi-lora:2389224e115448d9a77c07d7d45672b3f0aa45acacf1c5bcf51857ac295e3aec";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import Replicate from "https://esm.sh/replicate@0.25.2"
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const { input } = await req.json();
-    console.log('Received input:', input);
-
-    if (!REPLICATE_API_TOKEN) {
-      throw new Error('REPLICATE_API_KEY is not configured');
+    const REPLICATE_API_KEY = Deno.env.get('REPLICATE_API_KEY')
+    if (!REPLICATE_API_KEY) {
+      throw new Error('REPLICATE_API_KEY is not set')
     }
 
-    // Appel initial à l'API Replicate
-    const response = await fetch("https://api.replicate.com/v1/predictions", {
-      method: "POST",
-      headers: {
-        Authorization: `Token ${REPLICATE_API_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        version: MODEL_VERSION,
-        input,
-      }),
-    });
+    const replicate = new Replicate({
+      auth: REPLICATE_API_KEY,
+    })
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Replicate API error:', errorText);
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    const { input } = await req.json()
+    console.log("Received input:", input)
 
-    const prediction = await response.json();
-    console.log('Initial prediction:', prediction);
-    
-    // Polling pour obtenir le résultat
-    let result = prediction;
-    while (result.status !== "succeeded" && result.status !== "failed") {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      const pollResponse = await fetch(
-        `https://api.replicate.com/v1/predictions/${prediction.id}`,
-        {
-          headers: {
-            Authorization: `Token ${REPLICATE_API_TOKEN}`,
-          },
+    if (!input || !input.prompt) {
+      return new Response(
+        JSON.stringify({ error: "Missing required field: prompt" }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
         }
-      );
-      result = await pollResponse.json();
-      console.log('Polling result:', result);
+      )
     }
 
-    if (result.status === "failed") {
-      console.error('Generation failed:', result.error);
-      throw new Error(result.error);
-    }
-
-    return new Response(JSON.stringify(result), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  } catch (error) {
-    console.error('Function error:', error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { 
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    console.log("Starting image generation with input:", input)
+    const output = await replicate.run(
+      "lucataco/flux-dev-multi-lora:2389224e115448d9a77c07d7d45672b3f0aa45acacf1c5bcf51857ac295e3aec",
+      {
+        input: {
+          prompt: input.prompt,
+          negative_prompt: input.negative_prompt,
+          guidance_scale: input.guidance_scale,
+          num_inference_steps: input.num_inference_steps,
+          num_outputs: input.num_outputs,
+          seed: input.seed,
+          aspect_ratio: input.aspect_ratio,
+          output_format: input.output_format,
+          output_quality: input.output_quality,
+          prompt_strength: input.prompt_strength,
+          hf_loras: input.hf_loras,
+          lora_scales: input.lora_scales,
+          disable_safety_checker: input.disable_safety_checker,
+        }
       }
-    );
+    )
+
+    console.log("Generation successful, output:", output)
+    return new Response(JSON.stringify({ output }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  } catch (error) {
+    console.error("Error in generate-image function:", error)
+    return new Response(
+      JSON.stringify({ error: error.message }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    )
   }
-});
+})
