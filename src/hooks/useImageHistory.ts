@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { GenerationSettings } from '@/types/replicate';
+import type { Json } from '@/integrations/supabase/types';
 
 interface HistoryImage {
   url: string;
@@ -8,7 +9,11 @@ interface HistoryImage {
   timestamp: number;
 }
 
-const MAX_DASHBOARD_IMAGES = 10;
+interface ImageRecord {
+  url: string;
+  settings: Json;
+  created_at: string;
+}
 
 export const useImageHistory = () => {
   const [history, setHistory] = useState<HistoryImage[]>([]);
@@ -25,7 +30,7 @@ export const useImageHistory = () => {
 
       const formattedHistory = images.map(img => ({
         url: img.url,
-        settings: img.settings as GenerationSettings,
+        settings: img.settings as unknown as GenerationSettings,
         timestamp: new Date(img.created_at).getTime()
       }));
 
@@ -40,16 +45,15 @@ export const useImageHistory = () => {
   useEffect(() => {
     fetchHistory();
 
-    // Subscribe to realtime changes
     const channel = supabase
       .channel('images_changes')
       .on('postgres_changes', 
         { event: 'INSERT', schema: 'public', table: 'images' },
         (payload) => {
-          const newImage = payload.new;
+          const newImage = payload.new as ImageRecord;
           setHistory(prev => [{
             url: newImage.url,
-            settings: newImage.settings as GenerationSettings,
+            settings: newImage.settings as unknown as GenerationSettings,
             timestamp: new Date(newImage.created_at).getTime()
           }, ...prev]);
         }
@@ -67,8 +71,9 @@ export const useImageHistory = () => {
         .from('images')
         .insert({
           url,
-          settings,
+          settings: settings as unknown as Json,
           user_id: (await supabase.auth.getUser()).data.user?.id,
+          prompt: settings.prompt
         });
 
       if (error) throw error;
@@ -77,7 +82,7 @@ export const useImageHistory = () => {
     }
   };
 
-  const getDashboardImages = () => history.slice(0, MAX_DASHBOARD_IMAGES);
+  const getDashboardImages = () => history.slice(0, 10);
   const getAllImages = () => history;
 
   return { 
