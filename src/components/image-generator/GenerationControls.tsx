@@ -28,12 +28,12 @@ export const GenerationControls = ({
   return (
     <div className="space-y-6">
       <div className="flex justify-center items-center my-6">
-        <div className="inline-block">
+        <div className="inline-flex items-center">
           <div className="
             relative 
             inline-block
-            p-2 
-            rounded-3xl 
+            p-1.5
+            rounded-2xl 
             bg-gradient-to-br 
             from-primary/5 
             to-primary/10 
@@ -48,22 +48,22 @@ export const GenerationControls = ({
               className="
                 block
                 w-auto
-                min-w-[200px]
-                min-h-[48px]
+                min-w-[80px]
+                min-h-[36px]
                 bg-card/80 
                 border 
                 border-primary/20 
                 text-foreground 
                 placeholder:text-primary/50 
                 focus:border-primary/50 
-                rounded-2xl
-                px-6
-                py-3
+                rounded-xl
+                px-3
+                py-1.5
                 text-center
                 transition-all 
                 duration-300
                 shadow-inner
-                leading-relaxed
+                leading-tight
                 break-words
                 overflow-hidden
                 focus:outline-none
