@@ -93,12 +93,12 @@ export const LoraSettings = ({ settings, onSettingsChange }: LoraSettingsProps) 
       </div>
 
       {settings.hfLoras.map((lora, index) => (
-        <div key={index} className="flex gap-2 md:gap-4">
+        <div key={index} className="flex items-center gap-2 md:gap-4 min-w-0">
           <Select
             value={lora || DEFAULT_LORAS[0]}
             onValueChange={(value) => updateLoraField(index, value)}
           >
-            <SelectTrigger className="bg-card border-primary/20 flex-grow">
+            <SelectTrigger className="bg-card border-primary/20 flex-1 min-w-0">
               <SelectValue placeholder="Select or enter LoRA path" />
             </SelectTrigger>
             <SelectContent className="bg-card border-primary/20">
@@ -126,7 +126,7 @@ export const LoraSettings = ({ settings, onSettingsChange }: LoraSettingsProps) 
             type="number"
             value={settings.loraScales[index]}
             onChange={(e) => updateLoraField(index, e.target.value, true)}
-            className="bg-card border-primary/20 w-20 md:w-24"
+            className="bg-card border-primary/20 w-16 md:w-24 shrink-0"
             step={0.1}
             min={0}
             max={1}
@@ -135,7 +135,7 @@ export const LoraSettings = ({ settings, onSettingsChange }: LoraSettingsProps) 
             onClick={() => removeLoraField(index)}
             variant="ghost"
             size="icon"
-            className="text-primary hover:bg-primary/10"
+            className="text-primary hover:bg-primary/10 shrink-0"
           >
             <Minus className="h-4 w-4" />
           </Button>
