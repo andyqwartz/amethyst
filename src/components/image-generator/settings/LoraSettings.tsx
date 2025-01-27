@@ -76,7 +76,7 @@ export const LoraSettings = ({ settings, onSettingsChange }: LoraSettingsProps) 
   );
 
   return (
-    <div className="space-y-4 p-6 bg-card/95 backdrop-blur-xl rounded-xl border border-primary/10 shadow-xl md:relative md:w-auto w-[calc(100vw-2rem)] -mx-4 md:mx-0">
+    <div className="space-y-4 p-6 bg-card/95 backdrop-blur-xl rounded-xl border border-primary/10 shadow-xl">
       <div className="flex items-center justify-between">
         <Label className="flex items-center">
           LoRA Weights {renderTooltip("Huggingface path or URL to the LoRA weights")}
