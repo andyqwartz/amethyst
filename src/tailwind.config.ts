@@ -42,6 +42,11 @@ export default {
           DEFAULT: "rgba(255, 255, 255, 0.95)",
           foreground: "hsl(var(--foreground))",
         },
+        dark: {
+          background: "#1A1F2C",
+          card: "rgba(26, 31, 44, 0.8)",
+          border: "rgba(255, 255, 255, 0.1)",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
