@@ -1,18 +1,31 @@
 import { useState, useEffect } from 'react';
 import { useGenerationPersistence } from './useGenerationPersistence';
 import { GenerationStatus } from '@/types/replicate';
+import type { GenerationSettings } from '@/types/replicate';
 
-export const useGenerationProgress = (isGenerating: boolean, referenceImage?: string | null) => {
+export const useGenerationProgress = (
+  isGenerating: boolean, 
+  referenceImage?: string | null,
+  settings?: GenerationSettings,
+  onRetry?: (settings: GenerationSettings) => void
+) => {
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState<GenerationStatus>('idle');
 
-  const { savedFile } = useGenerationPersistence(
+  const persistenceResult = useGenerationPersistence(
     isGenerating ? 'loading' : status,
     progress,
     setStatus,
     setProgress,
-    referenceImage
+    referenceImage,
+    settings
   );
+
+  useEffect(() => {
+    if (persistenceResult.shouldRetry && persistenceResult.settings && onRetry) {
+      onRetry(persistenceResult.settings);
+    }
+  }, [persistenceResult.shouldRetry, persistenceResult.settings, onRetry]);
 
   useEffect(() => {
     // Clear status and progress if not generating
@@ -44,6 +57,7 @@ export const useGenerationProgress = (isGenerating: boolean, referenceImage?: st
     progress, 
     setProgress,
     status,
-    savedFile 
+    savedFile: persistenceResult.savedFile,
+    savedSettings: persistenceResult.savedSettings
   };
 };

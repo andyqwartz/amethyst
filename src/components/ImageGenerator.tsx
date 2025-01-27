@@ -14,10 +14,12 @@ import { useGenerationProgress } from '@/hooks/useGenerationProgress';
 import { Button } from './ui/button';
 import { useImageHistory } from '@/hooks/useImageHistory';
 import type { GenerationSettings } from '@/types/replicate';
+import { useToast } from './ui/use-toast';
 
 const REFERENCE_IMAGE_KEY = 'reference_image';
 
 export const ImageGenerator = () => {
+  const { toast } = useToast();
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -27,7 +29,18 @@ export const ImageGenerator = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { settings, updateSettings } = useGenerationSettings();
   const { status, generatedImages, generate } = useImageGeneration();
-  const { progress, status: persistedStatus, savedFile } = useGenerationProgress(status === 'loading', referenceImage);
+  const { progress, status: persistedStatus, savedFile, savedSettings } = useGenerationProgress(
+    status === 'loading',
+    referenceImage,
+    settings,
+    (savedSettings) => {
+      toast({
+        title: "Reprise de la génération",
+        description: "La génération précédente a été interrompue, reprise en cours..."
+      });
+      generate(savedSettings);
+    }
+  );
   const { history, allHistory, isLoading } = useImageHistory();
 
   useEffect(() => {
@@ -44,6 +57,13 @@ export const ImageGenerator = () => {
       setReferenceImage(savedFile);
     }
   }, [savedFile]);
+
+  // Restore saved settings if available
+  useEffect(() => {
+    if (savedSettings && status === 'idle') {
+      updateSettings(savedSettings);
+    }
+  }, [savedSettings, status]);
 
   const handleGenerate = () => {
     generate(settings);
