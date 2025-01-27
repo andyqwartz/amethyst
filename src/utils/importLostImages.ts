@@ -115,8 +115,7 @@ const predictionIds = [
   "sgekvadgdxrm80cmn7fr85cbqc",
   "ks46295g9xrmc0cmn7fvv5h7h0",
   "v2tq47xg7hrm80cmn7fvsbw6dr",
-  "6stk81xg3drma0cmn7fvwqk5ac"
-  // Adding the last few IDs for example
+  "6stk81xg3drma0cmn7fvwqk5ac",
   "5rtjzccq55rmc0cmn7ftqx38m8",
   "n84s13mq8nrme0cmn7fvn5kj10",
   "83jchgcq91rmc0cmn7fvt2rbtr",
