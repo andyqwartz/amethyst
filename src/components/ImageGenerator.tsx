@@ -8,6 +8,7 @@ import { GenerationControls } from './image-generator/GenerationControls';
 import { HelpModal } from './image-generator/modals/HelpModal';
 import { useImageGeneration } from '@/hooks/useImageGeneration';
 import { useGenerationSettings } from '@/hooks/useGenerationSettings';
+import type { GenerationSettings } from '@/types/replicate';
 
 export const ImageGenerator = () => {
   const [showSettings, setShowSettings] = useState(false);
@@ -23,6 +24,16 @@ export const ImageGenerator = () => {
     console.log('Tweaking settings:', imageSettings);
     updateSettings(imageSettings);
     setShowSettings(true);
+  };
+
+  const handleDownload = (imageUrl: string) => {
+    console.log('Downloading image:', imageUrl);
+    const link = document.createElement('a');
+    link.href = imageUrl;
+    link.download = `generated-image-${Date.now()}.${settings.outputFormat}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -61,6 +72,7 @@ export const ImageGenerator = () => {
             <ImagePreview
               images={generatedImages}
               onTweak={handleTweak}
+              onDownload={handleDownload}
               settings={settings}
               className="mt-8"
             />
