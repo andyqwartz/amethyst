@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -9,38 +9,49 @@ import { AdvancedSettings } from './image-generator/AdvancedSettings';
 import { ImagePreview } from './image-generator/ImagePreview';
 import { ThemeToggle } from './image-generator/ThemeToggle';
 import { generateImage } from '@/services/replicate';
+import { useImageHistory } from '@/hooks/useImageHistory';
 
 export const ImageGenerator = () => {
   const { toast } = useToast();
   const [status, setStatus] = useState<GenerationStatus>('idle');
   const [showSettings, setShowSettings] = useState(false);
   const [generatedImages, setGeneratedImages] = useState<string[]>([]);
-  const [settings, setSettings] = useState<GenerationSettings>({
-    prompt: '',
-    negativePrompt: '',
-    guidanceScale: 3.5,
-    steps: 28,
-    numOutputs: 1,
-    aspectRatio: "1:1",
-    outputFormat: "webp",
-    outputQuality: 80,
-    promptStrength: 0.8,
-    hfLoras: [],
-    loraScales: [],
-    disableSafetyChecker: false
+  const { history, addToHistory } = useImageHistory();
+  const [settings, setSettings] = useState<GenerationSettings>(() => {
+    const saved = localStorage.getItem('last_settings');
+    return saved ? JSON.parse(saved) : {
+      prompt: '',
+      negativePrompt: '',
+      guidanceScale: 3.5,
+      steps: 28,
+      numOutputs: 1,
+      aspectRatio: "1:1",
+      outputFormat: "webp",
+      outputQuality: 80,
+      promptStrength: 0.8,
+      hfLoras: [],
+      loraScales: [],
+      disableSafetyChecker: false
+    };
   });
+
+  useEffect(() => {
+    localStorage.setItem('last_settings', JSON.stringify(settings));
+  }, [settings]);
 
   const handleGenerate = async () => {
     if (!settings.prompt.trim()) {
       toast({
-        title: "Please enter a prompt",
-        description: "The prompt cannot be empty",
+        title: "Veuillez entrer un prompt",
+        description: "Le prompt ne peut pas être vide",
         variant: "destructive"
       });
       return;
     }
 
+    console.log('Starting generation with settings:', settings);
     setStatus('loading');
+    
     try {
       const images = await generateImage({
         prompt: settings.prompt,
@@ -58,30 +69,45 @@ export const ImageGenerator = () => {
         disable_safety_checker: settings.disableSafetyChecker,
       });
       
+      console.log('Generation successful:', images);
       setGeneratedImages(images);
+      images.forEach(url => addToHistory(url, settings));
       setStatus('success');
+      
       toast({
-        title: "Images generated successfully",
-        description: `Generated ${images.length} image(s)`,
+        title: "Images générées avec succès",
+        description: `${images.length} image(s) générée(s)`,
       });
     } catch (error) {
+      console.error('Generation failed:', error);
       setStatus('error');
       toast({
-        title: "CORS Error",
+        title: "Erreur CORS",
         description: error.message,
         variant: "destructive",
-        duration: 10000, // Show for 10 seconds due to longer message
+        duration: 10000,
       });
     }
   };
 
   const handleDownload = (imageUrl: string) => {
+    console.log('Downloading image:', imageUrl);
     const link = document.createElement('a');
     link.href = imageUrl;
     link.download = `generated-image-${Date.now()}.${settings.outputFormat}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleTweak = (imageSettings: GenerationSettings) => {
+    console.log('Tweaking settings:', imageSettings);
+    setSettings(imageSettings);
+    setShowSettings(true);
+    toast({
+      title: "Paramètres importés",
+      description: "Les paramètres de l'image ont été chargés",
+    });
   };
 
   return (
@@ -110,8 +136,8 @@ export const ImageGenerator = () => {
               className="hover:bg-primary/10"
               onClick={() => {
                 toast({
-                  title: "Development Note",
-                  description: "This application requires a proxy server or serverless function to handle Replicate API calls due to CORS restrictions.",
+                  title: "Note de développement",
+                  description: "Cette application nécessite un serveur proxy ou une fonction serverless pour gérer les appels API Replicate en raison des restrictions CORS.",
                   duration: 5000,
                 });
               }}
@@ -129,20 +155,20 @@ export const ImageGenerator = () => {
             <button className="w-full p-6 border-2 border-dashed border-primary/30 rounded-xl hover:bg-primary/5 transition-colors">
               <div className="flex flex-col items-center gap-2 text-primary/70">
                 <ImagePlus className="h-6 w-6" />
-                <span>Add a reference image</span>
+                <span>Ajouter une image de référence</span>
               </div>
             </button>
 
             {/* Prompt Input */}
             <div className="space-y-2">
               <Input
-                placeholder="Describe the image you want to generate..."
+                placeholder="Décrivez l'image que vous souhaitez générer..."
                 value={settings.prompt}
                 onChange={(e) => setSettings(s => ({ ...s, prompt: e.target.value }))}
                 className="bg-white/50 border-primary/20 text-foreground placeholder:text-primary/50 focus:border-primary/50"
               />
               <div className="text-sm text-primary/70">
-                {settings.prompt.length} characters
+                {settings.prompt.length} caractères
               </div>
             </div>
 
@@ -154,7 +180,7 @@ export const ImageGenerator = () => {
                 variant="secondary"
               >
                 <Settings className="h-4 w-4 mr-2" />
-                Advanced Settings
+                Paramètres avancés
               </Button>
 
               <Button
@@ -167,7 +193,7 @@ export const ImageGenerator = () => {
                 ) : (
                   <Sparkles className="h-4 w-4 mr-2" />
                 )}
-                Generate
+                Générer
               </Button>
             </div>
 
@@ -181,6 +207,9 @@ export const ImageGenerator = () => {
             <ImagePreview
               images={generatedImages}
               onDownload={handleDownload}
+              onTweak={handleTweak}
+              settings={settings}
+              className="mt-8"
             />
           </div>
         </Card>
