@@ -27,10 +27,11 @@ export const GenerationControls = ({
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-center items-center min-h-[60px] my-6">
-        <div className="relative w-full max-w-3xl">
+      <div className="flex justify-center items-center my-6">
+        <div className="inline-block">
           <div className="
             relative 
+            inline-block
             p-2 
             rounded-3xl 
             bg-gradient-to-br 
@@ -45,7 +46,9 @@ export const GenerationControls = ({
               value={settings.prompt}
               onChange={handleTextareaInput}
               className="
-                w-full
+                block
+                w-auto
+                min-w-[200px]
                 min-h-[48px]
                 bg-card/80 
                 border 
@@ -54,8 +57,8 @@ export const GenerationControls = ({
                 placeholder:text-primary/50 
                 focus:border-primary/50 
                 rounded-2xl
-                px-8
-                py-4
+                px-6
+                py-3
                 text-center
                 transition-all 
                 duration-300
