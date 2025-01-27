@@ -29,10 +29,12 @@ export const ImageGenerator = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { settings, updateSettings } = useGenerationSettings();
   
-  // Reset prompt on component mount
+  // Reset prompt and clear local storage on component mount
   useEffect(() => {
     updateSettings({ prompt: '' });
+    localStorage.removeItem('last_settings');
   }, []);
+
   const { status, generatedImages, generate } = useImageGeneration();
   const { progress, status: persistedStatus, savedFile, savedSettings } = useGenerationProgress(
     status === 'loading',
