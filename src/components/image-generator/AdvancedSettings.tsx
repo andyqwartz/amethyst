@@ -28,7 +28,7 @@ export const AdvancedSettings = ({ settings, onSettingsChange }: AdvancedSetting
   });
 
   useEffect(() => {
-    const uniqueLoras = Array.from(new Set([...settings.hfLoras, ...loraHistory]));
+    const uniqueLoras = Array.from(new Set([...settings.hfLoras.filter(lora => lora.trim()), ...loraHistory]));
     localStorage.setItem('lora_history', JSON.stringify(uniqueLoras));
     setLoraHistory(uniqueLoras);
   }, [settings.hfLoras]);
@@ -37,7 +37,7 @@ export const AdvancedSettings = ({ settings, onSettingsChange }: AdvancedSetting
 
   const addLoraField = () => {
     onSettingsChange({
-      hfLoras: [...settings.hfLoras, DEFAULT_LORAS[0]], // Use first default LoRA instead of empty string
+      hfLoras: [...settings.hfLoras, DEFAULT_LORAS[0]],
       loraScales: [...settings.loraScales, 0.8],
     });
   };
@@ -55,7 +55,6 @@ export const AdvancedSettings = ({ settings, onSettingsChange }: AdvancedSetting
       newScales[index] = parseFloat(value);
       onSettingsChange({ loraScales: newScales });
     } else {
-      // Don't update if value is empty
       if (!value.trim()) return;
       
       const newLoras = [...settings.hfLoras];
@@ -233,29 +232,31 @@ export const AdvancedSettings = ({ settings, onSettingsChange }: AdvancedSetting
         {settings.hfLoras.map((lora, index) => (
           <div key={index} className="flex gap-4">
             <Select
-              value={lora || DEFAULT_LORAS[0]} // Ensure we always have a non-empty value
+              value={lora || DEFAULT_LORAS[0]}
               onValueChange={(value) => updateLoraField(index, value)}
             >
               <SelectTrigger className="bg-popover border-primary/20 flex-grow">
                 <SelectValue placeholder="Select or enter LoRA path" />
               </SelectTrigger>
               <SelectContent className="bg-popover/100 border-primary/20">
-                <Input
-                  value={lora}
-                  onChange={(e) => {
-                    const value = e.target.value.trim();
-                    if (value) {
-                      updateLoraField(index, value);
-                    }
-                  }}
-                  placeholder="Custom HuggingFace path or URL"
-                  className="mb-2 bg-card/80 border-primary/20"
-                />
                 {loraHistory.map((historyLora) => (
                   <SelectItem key={historyLora} value={historyLora}>
                     {historyLora}
                   </SelectItem>
                 ))}
+                <div className="px-2 py-2">
+                  <Input
+                    value={lora}
+                    onChange={(e) => {
+                      const value = e.target.value.trim();
+                      if (value) {
+                        updateLoraField(index, value);
+                      }
+                    }}
+                    placeholder="Custom HuggingFace path or URL"
+                    className="mb-2 bg-card/80 border-primary/20"
+                  />
+                </div>
               </SelectContent>
             </Select>
             <Input
