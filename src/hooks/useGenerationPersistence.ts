@@ -23,7 +23,7 @@ export const useGenerationPersistence = (
         localStorage.setItem(GENERATION_FILE_KEY, file);
       }
     } else {
-      // Clear generation state when complete or error
+      // Clear generation state when not loading
       localStorage.removeItem(GENERATION_STATUS_KEY);
       localStorage.removeItem(GENERATION_PROGRESS_KEY);
       localStorage.removeItem(GENERATION_TIMESTAMP_KEY);
@@ -39,12 +39,13 @@ export const useGenerationPersistence = (
     if (savedStatus === 'loading' && savedProgress && savedTimestamp) {
       const timePassed = Date.now() - Number(savedTimestamp);
       
-      // If more than 5 minutes have passed, assume the generation failed
+      // If more than 5 minutes have passed, clear everything
       if (timePassed > 5 * 60 * 1000) {
         localStorage.removeItem(GENERATION_STATUS_KEY);
         localStorage.removeItem(GENERATION_PROGRESS_KEY);
         localStorage.removeItem(GENERATION_TIMESTAMP_KEY);
-        setStatus('error');
+        setStatus('idle');
+        setProgress(0);
         return;
       }
 

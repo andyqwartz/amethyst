@@ -15,10 +15,9 @@ export const useGenerationProgress = (isGenerating: boolean, referenceImage?: st
   );
 
   useEffect(() => {
+    // Clear status and progress if not generating
     if (!isGenerating) {
-      if (status === 'loading') {
-        setStatus('success');
-      }
+      setStatus('idle');
       setProgress(0);
       return;
     }
