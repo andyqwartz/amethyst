@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Settings, Sparkles, MessageCircle } from 'lucide-react';
+import { Settings, Sparkles } from 'lucide-react';
 import type { GenerationSettings } from '@/types/replicate';
 
 interface GenerationControlsProps {
@@ -24,29 +24,23 @@ export const GenerationControls = ({
     <div className="space-y-6 my-8">
       <div className="flex justify-center items-center min-h-[100px]">
         <div 
-          className={`
-            relative transition-all duration-300 ease-in-out
-            ${settings.prompt ? '' : 'flex justify-center items-center'}
-          `}
+          className="relative transition-all duration-300 ease-in-out flex justify-center items-center"
           style={{ width: `${inputWidth}%` }}
         >
-          {!settings.prompt && (
-            <MessageCircle className="absolute left-1/2 -translate-x-1/2 h-5 w-5 text-primary/50 pointer-events-none" />
-          )}
           <input
             type="text"
-            placeholder="Décrivez l'image que vous souhaitez générer..."
+            placeholder="Décrivez votre image..."
             value={settings.prompt}
             onChange={(e) => onSettingsChange({ prompt: e.target.value })}
-            className={`
+            className="
               w-full h-12
               bg-card/80 border border-primary/20 text-foreground 
               placeholder:text-primary/50 focus:border-primary/50 
-              rounded-full px-6
+              rounded-full px-6 text-center
               transition-all duration-300 ease-in-out
               shadow-lg hover:shadow-xl focus:shadow-xl
-              ${settings.prompt ? '' : 'w-[300px] mx-auto block pl-12'}
-            `}
+              w-[300px]
+            "
           />
         </div>
       </div>
