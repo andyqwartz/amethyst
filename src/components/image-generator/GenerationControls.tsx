@@ -33,25 +33,20 @@ export const GenerationControls = ({
           {!settings.prompt && (
             <MessageCircle className="absolute left-1/2 -translate-x-1/2 h-5 w-5 text-primary/50 pointer-events-none" />
           )}
-          <textarea
+          <input
+            type="text"
             placeholder="Décrivez l'image que vous souhaitez générer..."
             value={settings.prompt}
             onChange={(e) => onSettingsChange({ prompt: e.target.value })}
-            rows={Math.max(1, Math.ceil(settings.prompt.length / 50))}
             className={`
-              w-full min-h-[48px]
+              w-full h-12
               bg-card/80 border border-primary/20 text-foreground 
               placeholder:text-primary/50 focus:border-primary/50 
-              rounded-full px-6 py-3 text-center
+              rounded-full px-6
               transition-all duration-300 ease-in-out
               shadow-lg hover:shadow-xl focus:shadow-xl
-              resize-none overflow-hidden
               ${settings.prompt ? '' : 'w-[300px] mx-auto block pl-12'}
             `}
-            style={{
-              lineHeight: '1.5',
-              borderRadius: settings.prompt.length > 50 ? '1.5rem' : '9999px'
-            }}
           />
         </div>
       </div>
