@@ -17,19 +17,7 @@ const DEFAULT_SETTINGS: GenerationSettings = {
 };
 
 export const useGenerationSettings = () => {
-  const [settings, setSettings] = useState<GenerationSettings>(() => {
-    try {
-      const saved = localStorage.getItem('last_settings');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        // Always ensure prompt starts empty
-        return { ...parsed, prompt: '' };
-      }
-    } catch (error) {
-      console.error('Error parsing saved settings:', error);
-    }
-    return DEFAULT_SETTINGS;
-  });
+  const [settings, setSettings] = useState<GenerationSettings>(DEFAULT_SETTINGS);
 
   useEffect(() => {
     localStorage.setItem('last_settings', JSON.stringify(settings));

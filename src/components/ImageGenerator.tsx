@@ -29,10 +29,26 @@ export const ImageGenerator = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { settings, updateSettings } = useGenerationSettings();
   
-  // Reset prompt and clear local storage on component mount
+  // Nettoyer le localStorage et réinitialiser les paramètres au montage
   useEffect(() => {
-    updateSettings({ prompt: '' });
     localStorage.removeItem('last_settings');
+    localStorage.removeItem('generation_status');
+    localStorage.removeItem('generation_progress');
+    localStorage.removeItem('generation_timestamp');
+    updateSettings({
+      prompt: '',
+      negativePrompt: '',
+      guidanceScale: 3.5,
+      steps: 28,
+      numOutputs: 1,
+      aspectRatio: "1:1",
+      outputFormat: "webp",
+      outputQuality: 80,
+      promptStrength: 0.8,
+      hfLoras: [],
+      loraScales: [],
+      disableSafetyChecker: false
+    });
   }, []);
 
   const { status, generatedImages, generate } = useImageGeneration();
