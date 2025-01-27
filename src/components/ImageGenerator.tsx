@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card } from "@/components/ui/card";
 import { ImagePlus, X } from 'lucide-react';
 import { AdvancedSettings } from './image-generator/AdvancedSettings';
@@ -12,30 +12,42 @@ import { useImageGeneration } from '@/hooks/useImageGeneration';
 import { useGenerationSettings } from '@/hooks/useGenerationSettings';
 import { useGenerationProgress } from '@/hooks/useGenerationProgress';
 import { Button } from './ui/button';
+import { useImageHistory } from '@/hooks/useImageHistory';
 import type { GenerationSettings } from '@/types/replicate';
+
+const REFERENCE_IMAGE_KEY = 'reference_image';
 
 export const ImageGenerator = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
-  const [referenceImage, setReferenceImage] = useState<string | null>(null);
+  const [referenceImage, setReferenceImage] = useState<string | null>(() => {
+    return localStorage.getItem(REFERENCE_IMAGE_KEY);
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { settings, updateSettings } = useGenerationSettings();
   const { status, generatedImages, generate } = useImageGeneration();
   const { progress } = useGenerationProgress(status === 'loading');
+  const { history, allHistory, isLoading } = useImageHistory();
+
+  useEffect(() => {
+    if (referenceImage) {
+      localStorage.setItem(REFERENCE_IMAGE_KEY, referenceImage);
+    } else {
+      localStorage.removeItem(REFERENCE_IMAGE_KEY);
+    }
+  }, [referenceImage]);
 
   const handleGenerate = () => {
     generate(settings);
   };
 
   const handleTweak = (imageSettings: GenerationSettings) => {
-    console.log('Tweaking settings:', imageSettings);
     updateSettings(imageSettings);
     setShowSettings(true);
   };
 
   const handleDownload = (imageUrl: string) => {
-    console.log('Downloading image:', imageUrl);
     const link = document.createElement('a');
     link.href = imageUrl;
     link.download = `generated-image-${Date.now()}.${settings.outputFormat}`;
@@ -66,11 +78,6 @@ export const ImageGenerator = () => {
     }
   };
 
-  const historyImages = generatedImages.map(url => ({
-    url,
-    settings: { ...settings }
-  }));
-
   return (
     <>
       <div className="min-h-screen p-4 md:p-6">
@@ -82,7 +89,7 @@ export const ImageGenerator = () => {
           />
 
           <Card className="border-none glass-card shadow-xl">
-            <div className="p-6 space-y-6">
+            <div className="p-6 space-y-8">
               <div className="relative">
                 <input
                   type="file"
@@ -142,6 +149,18 @@ export const ImageGenerator = () => {
                 settings={settings}
                 className="mt-8"
               />
+
+              {!isLoading && history.length > 0 && (
+                <div className="mt-8">
+                  <h3 className="text-lg font-semibold mb-4">Dernières générations</h3>
+                  <ImagePreview
+                    images={history.map(h => h.url)}
+                    onTweak={handleTweak}
+                    onDownload={handleDownload}
+                    settings={settings}
+                  />
+                </div>
+              )}
             </div>
           </Card>
 
@@ -153,7 +172,7 @@ export const ImageGenerator = () => {
           <HistoryModal
             open={showHistory}
             onOpenChange={setShowHistory}
-            images={historyImages}
+            images={allHistory.map(h => ({ url: h.url, settings: h.settings }))}
             onDownload={handleDownload}
             onTweak={handleTweak}
           />

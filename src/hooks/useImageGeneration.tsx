@@ -42,7 +42,12 @@ export const useImageGeneration = () => {
       
       console.log('Generation successful:', images);
       setGeneratedImages(images);
-      images.forEach(url => addToHistory(url, settings));
+      
+      // Add each generated image to history
+      for (const url of images) {
+        await addToHistory(url, settings);
+      }
+      
       setStatus('success');
       
       toast({
