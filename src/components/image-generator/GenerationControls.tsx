@@ -20,14 +20,16 @@ export const GenerationControls = ({
 }: GenerationControlsProps) => {
   const handleTextareaInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const textarea = e.target;
-    const text = textarea.value;
-    
     textarea.style.height = 'auto';
-    const lines = Math.ceil(text.length / 10);
+    const lines = Math.ceil(textarea.value.length / 50);
     const lineHeight = 24;
     textarea.style.height = `${Math.max(40, lines * lineHeight)}px`;
     
-    onSettingsChange({ prompt: text });
+    onSettingsChange({ 
+      prompt: textarea.value,
+      hfLoras: [],
+      loraScales: []
+    });
   };
 
   return (
@@ -48,7 +50,7 @@ export const GenerationControls = ({
           ">
             <textarea
               placeholder="Imagine..."
-              value={settings.prompt}
+              value={settings.prompt || ''}
               onChange={handleTextareaInput}
               className="
                 block
