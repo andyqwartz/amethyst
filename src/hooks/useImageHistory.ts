@@ -20,7 +20,7 @@ interface ImageRecord {
   seed: number;
   num_outputs: number;
   aspect_ratio: string;
-  output_format: string;
+  output_format: 'webp' | 'jpg' | 'png';
   output_quality: number;
   prompt_strength: number;
 }
@@ -38,7 +38,7 @@ export const useImageHistory = () => {
 
       if (error) throw error;
 
-      const formattedHistory = images.map((img: ImageRecord) => ({
+      const formattedHistory: HistoryImage[] = images.map((img: ImageRecord) => ({
         url: img.url,
         settings: {
           prompt: img.prompt || '',
@@ -48,7 +48,7 @@ export const useImageHistory = () => {
           seed: img.seed,
           numOutputs: img.num_outputs || 1,
           aspectRatio: img.aspect_ratio || '1:1',
-          outputFormat: img.output_format || 'webp',
+          outputFormat: (img.output_format || 'webp') as 'webp' | 'jpg' | 'png',
           outputQuality: img.output_quality || 90,
           promptStrength: img.prompt_strength || 0.8,
           hfLoras: [],
@@ -75,7 +75,7 @@ export const useImageHistory = () => {
         { event: 'INSERT', schema: 'public', table: 'images' },
         (payload) => {
           const newImage = payload.new as ImageRecord;
-          setHistory(prev => [{
+          const formattedImage: HistoryImage = {
             url: newImage.url,
             settings: {
               prompt: newImage.prompt || '',
@@ -85,7 +85,7 @@ export const useImageHistory = () => {
               seed: newImage.seed,
               numOutputs: newImage.num_outputs || 1,
               aspectRatio: newImage.aspect_ratio || '1:1',
-              outputFormat: newImage.output_format || 'webp',
+              outputFormat: (newImage.output_format || 'webp') as 'webp' | 'jpg' | 'png',
               outputQuality: newImage.output_quality || 90,
               promptStrength: newImage.prompt_strength || 0.8,
               hfLoras: [],
@@ -93,7 +93,8 @@ export const useImageHistory = () => {
               disableSafetyChecker: false
             },
             timestamp: new Date(newImage.created_at).getTime()
-          }, ...prev]);
+          };
+          setHistory(prev => [formattedImage, ...prev]);
         }
       )
       .subscribe();
