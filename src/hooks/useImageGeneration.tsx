@@ -4,7 +4,7 @@ import { generateImage } from '@/services/replicate';
 import type { GenerationSettings, GenerationStatus } from '@/types/replicate';
 import { useImageHistory } from './useImageHistory';
 
-const POLL_INTERVAL = 2000;
+const POLL_INTERVAL = 2000; // 2 seconds
 const GENERATION_KEY = 'ongoing_generation';
 
 interface GenerationState {
@@ -20,6 +20,7 @@ export const useImageGeneration = () => {
   const { addToHistory } = useImageHistory();
   const [predictionId, setPredictionId] = useState<string | null>(null);
 
+  // Restore generation state on mount
   useEffect(() => {
     const savedState = localStorage.getItem(GENERATION_KEY);
     if (savedState) {
@@ -41,6 +42,7 @@ export const useImageGeneration = () => {
     }
   }, []);
 
+  // Poll for generation status
   useEffect(() => {
     if (!predictionId || status !== 'loading') return;
 
@@ -54,7 +56,7 @@ export const useImageGeneration = () => {
           localStorage.removeItem(GENERATION_KEY);
           setPredictionId(null);
           
-          // Add generated images to history with all settings
+          // Add generated images to history
           for (const url of response.output) {
             await addToHistory(url, response.settings);
           }
@@ -66,6 +68,7 @@ export const useImageGeneration = () => {
         } else if (response.status === 'error') {
           throw new Error(response.error);
         }
+        // Continue polling if still processing
       } catch (error) {
         console.error('Error checking generation status:', error);
         setStatus('error');
@@ -83,28 +86,6 @@ export const useImageGeneration = () => {
     return () => clearInterval(pollInterval);
   }, [predictionId, status]);
 
-  const cancelGeneration = async () => {
-    if (predictionId) {
-      try {
-        await generateImage({ predictionId, action: 'cancel' });
-        setStatus('idle');
-        setPredictionId(null);
-        localStorage.removeItem(GENERATION_KEY);
-        toast({
-          title: "Génération annulée",
-          description: "La génération a été annulée avec succès",
-        });
-      } catch (error) {
-        console.error('Error cancelling generation:', error);
-        toast({
-          title: "Erreur",
-          description: "Impossible d'annuler la génération",
-          variant: "destructive",
-        });
-      }
-    }
-  };
-
   const generate = async (settings: GenerationSettings) => {
     if (!settings.prompt.trim()) {
       toast({
@@ -115,6 +96,7 @@ export const useImageGeneration = () => {
       return;
     }
 
+    // Check if there's already an ongoing generation
     if (status === 'loading') {
       toast({
         title: "Génération en cours",
@@ -124,30 +106,16 @@ export const useImageGeneration = () => {
       return;
     }
 
+    console.log('Starting generation with settings:', settings);
     setStatus('loading');
     
     try {
-      const replicateInput = {
-        prompt: settings.prompt,
-        negative_prompt: settings.negativePrompt,
-        guidance_scale: settings.guidanceScale,
-        num_inference_steps: settings.steps,
-        seed: settings.seed,
-        num_outputs: settings.numOutputs,
-        aspect_ratio: settings.aspectRatio,
-        output_format: settings.outputFormat,
-        output_quality: settings.outputQuality,
-        prompt_strength: settings.promptStrength,
-        hf_loras: settings.hfLoras,
-        lora_scales: settings.loraScales,
-        disable_safety_checker: settings.disableSafetyChecker
-      };
-
-      const response = await generateImage(replicateInput);
+      const response = await generateImage({ input: settings });
       
       if (response.status === 'started') {
         setPredictionId(response.predictionId);
         
+        // Save generation state
         const generationState: GenerationState = {
           predictionId: response.predictionId,
           settings,
@@ -172,7 +140,6 @@ export const useImageGeneration = () => {
   return {
     status,
     generatedImages,
-    generate,
-    cancelGeneration
+    generate
   };
 };

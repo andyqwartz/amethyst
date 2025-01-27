@@ -6,7 +6,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 }
 
+const GENERATION_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+const MODEL_VERSION = "lucataco/flux-dev-multi-lora:2389224e115448d9a77c07d7d45672b3f0aa45acacf1c5bcf51857ac295e3aec";
+
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -21,34 +25,8 @@ serve(async (req) => {
       auth: REPLICATE_API_KEY,
     })
 
-    const { input, predictionId, action } = await req.json()
-    console.log("Request received:", { input, predictionId, action })
-
-    // Handle cancellation request
-    if (action === 'cancel') {
-      console.log("Cancelling prediction:", predictionId)
-      if (predictionId) {
-        try {
-          await replicate.predictions.cancel(predictionId)
-          return new Response(JSON.stringify({ 
-            status: 'cancelled',
-            message: 'Prediction cancelled successfully' 
-          }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          })
-        } catch (error) {
-          console.error("Error cancelling prediction:", error)
-          // Continue execution even if cancellation fails
-        }
-      }
-      // Clear generation state from localStorage
-      return new Response(JSON.stringify({ 
-        status: 'cleared',
-        message: 'Generation state cleared' 
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
-    }
+    const { input, predictionId } = await req.json()
+    console.log("Request received:", { input, predictionId })
 
     // If checking status of existing prediction
     if (predictionId) {
@@ -57,11 +35,11 @@ serve(async (req) => {
         const prediction = await replicate.predictions.get(predictionId)
         console.log("Status check response:", prediction)
         
+        // If the prediction is completed or failed, we can return the result
         if (prediction.status === 'succeeded') {
           return new Response(JSON.stringify({ 
             status: 'success',
             output: prediction.output,
-            settings: input,
             predictionId 
           }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -76,6 +54,7 @@ serve(async (req) => {
           })
         }
         
+        // Still processing
         return new Response(JSON.stringify({ 
           status: 'processing',
           predictionId 

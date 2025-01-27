@@ -13,7 +13,6 @@ export interface ReplicateInput {
   prompt_strength?: number;
   num_inference_steps?: number;
   disable_safety_checker?: boolean;
-  action?: 'cancel';
 }
 
 export interface GenerationSettings {

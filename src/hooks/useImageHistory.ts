@@ -9,45 +9,11 @@ interface HistoryImage {
   timestamp: number;
 }
 
-interface DatabaseImageRecord {
+interface ImageRecord {
   url: string;
   settings: Json;
   created_at: string;
-  prompt: string | null;
-  negative_prompt: string | null;
-  guidance_scale: number | null;
-  steps: number | null;
-  seed: number | null;
-  num_outputs: number | null;
-  aspect_ratio: string | null;
-  output_format: string | null;
-  output_quality: number | null;
-  prompt_strength: number | null;
 }
-
-const formatDatabaseImage = (img: DatabaseImageRecord): HistoryImage => {
-  const outputFormat = (img.output_format || 'webp') as 'webp' | 'jpg' | 'png';
-  
-  return {
-    url: img.url,
-    settings: {
-      prompt: img.prompt || '',
-      negativePrompt: img.negative_prompt || '',
-      guidanceScale: img.guidance_scale || 7.5,
-      steps: img.steps || 30,
-      seed: img.seed || undefined,
-      numOutputs: img.num_outputs || 1,
-      aspectRatio: img.aspect_ratio || '1:1',
-      outputFormat,
-      outputQuality: img.output_quality || 90,
-      promptStrength: img.prompt_strength || 0.8,
-      hfLoras: [],
-      loraScales: [],
-      disableSafetyChecker: false
-    },
-    timestamp: new Date(img.created_at).getTime()
-  };
-};
 
 export const useImageHistory = () => {
   const [history, setHistory] = useState<HistoryImage[]>([]);
@@ -62,7 +28,12 @@ export const useImageHistory = () => {
 
       if (error) throw error;
 
-      const formattedHistory = (images as DatabaseImageRecord[]).map(formatDatabaseImage);
+      const formattedHistory = images.map(img => ({
+        url: img.url,
+        settings: img.settings as unknown as GenerationSettings,
+        timestamp: new Date(img.created_at).getTime()
+      }));
+
       setHistory(formattedHistory);
     } catch (error) {
       console.error('Error fetching image history:', error);
@@ -79,9 +50,12 @@ export const useImageHistory = () => {
       .on('postgres_changes', 
         { event: 'INSERT', schema: 'public', table: 'images' },
         (payload) => {
-          const newImage = payload.new as DatabaseImageRecord;
-          const formattedImage = formatDatabaseImage(newImage);
-          setHistory(prev => [formattedImage, ...prev]);
+          const newImage = payload.new as ImageRecord;
+          setHistory(prev => [{
+            url: newImage.url,
+            settings: newImage.settings as unknown as GenerationSettings,
+            timestamp: new Date(newImage.created_at).getTime()
+          }, ...prev]);
         }
       )
       .subscribe();
@@ -99,44 +73,12 @@ export const useImageHistory = () => {
           url,
           settings: settings as unknown as Json,
           user_id: (await supabase.auth.getUser()).data.user?.id,
-          prompt: settings.prompt,
-          negative_prompt: settings.negativePrompt,
-          guidance_scale: settings.guidanceScale,
-          steps: settings.steps,
-          seed: settings.seed,
-          num_outputs: settings.numOutputs,
-          aspect_ratio: settings.aspectRatio,
-          output_format: settings.outputFormat,
-          output_quality: settings.outputQuality,
-          prompt_strength: settings.promptStrength
+          prompt: settings.prompt
         });
 
       if (error) throw error;
     } catch (error) {
       console.error('Error adding image to history:', error);
-    }
-  };
-
-  const bulkImportImages = async (predictionIds: string[]) => {
-    const defaultSettings: GenerationSettings = {
-      prompt: "Restored image",
-      negativePrompt: "",
-      guidanceScale: 7.5,
-      steps: 30,
-      seed: undefined,
-      numOutputs: 1,
-      aspectRatio: "1:1",
-      outputFormat: "webp",
-      outputQuality: 90,
-      promptStrength: 0.8,
-      hfLoras: [],
-      loraScales: [],
-      disableSafetyChecker: false
-    };
-
-    for (const id of predictionIds) {
-      const url = `https://replicate.delivery/pbxt/${id}/output.png`;
-      await addToHistory(url, defaultSettings);
     }
   };
 
@@ -147,7 +89,6 @@ export const useImageHistory = () => {
     history: getDashboardImages(), 
     allHistory: getAllImages(),
     addToHistory,
-    bulkImportImages,
     isLoading 
   };
 };
