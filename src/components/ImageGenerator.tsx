@@ -28,6 +28,11 @@ export const ImageGenerator = () => {
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { settings, updateSettings } = useGenerationSettings();
+  
+  // Reset prompt on component mount
+  useEffect(() => {
+    updateSettings({ prompt: '' });
+  }, []);
   const { status, generatedImages, generate } = useImageGeneration();
   const { progress, status: persistedStatus, savedFile, savedSettings } = useGenerationProgress(
     status === 'loading',
