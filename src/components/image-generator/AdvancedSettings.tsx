@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
@@ -9,12 +9,30 @@ import { Button } from "@/components/ui/button";
 import { Plus, Minus, HelpCircle } from 'lucide-react';
 import type { GenerationSettings } from '@/types/replicate';
 
+const DEFAULT_LORAS = [
+  'AndyVampiro/joa',
+  'AndyVampiro/andy',
+  'AndyVampiro/ilenana',
+  'AndyVampiro/fog'
+];
+
 interface AdvancedSettingsProps {
   settings: GenerationSettings;
   onSettingsChange: (settings: Partial<GenerationSettings>) => void;
 }
 
 export const AdvancedSettings = ({ settings, onSettingsChange }: AdvancedSettingsProps) => {
+  const [loraHistory, setLoraHistory] = useState<string[]>(() => {
+    const saved = localStorage.getItem('lora_history');
+    return saved ? JSON.parse(saved) : DEFAULT_LORAS;
+  });
+
+  useEffect(() => {
+    const uniqueLoras = Array.from(new Set([...settings.hfLoras, ...loraHistory]));
+    localStorage.setItem('lora_history', JSON.stringify(uniqueLoras));
+    setLoraHistory(uniqueLoras);
+  }, [settings.hfLoras]);
+
   const aspectRatios = ["1:1", "16:9", "21:9", "3:2", "2:3", "4:5", "5:4", "3:4", "4:3", "9:16", "9:21"];
 
   const addLoraField = () => {
@@ -211,17 +229,32 @@ export const AdvancedSettings = ({ settings, onSettingsChange }: AdvancedSetting
 
         {settings.hfLoras.map((lora, index) => (
           <div key={index} className="flex gap-4">
-            <Input
+            <Select
               value={lora}
-              onChange={(e) => updateLoraField(index, e.target.value)}
-              placeholder="HuggingFace path or URL"
-              className="bg-card/80 border-primary/20 flex-grow"
-            />
+              onValueChange={(value) => updateLoraField(index, value)}
+            >
+              <SelectTrigger className="bg-popover border-primary/20 flex-grow">
+                <SelectValue placeholder="Select or enter LoRA path" />
+              </SelectTrigger>
+              <SelectContent className="bg-popover/100 border-primary/20">
+                <Input
+                  value={lora}
+                  onChange={(e) => updateLoraField(index, e.target.value)}
+                  placeholder="Custom HuggingFace path or URL"
+                  className="mb-2 bg-card/80 border-primary/20"
+                />
+                {loraHistory.map((historyLora) => (
+                  <SelectItem key={historyLora} value={historyLora}>
+                    {historyLora}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Input
               type="number"
               value={settings.loraScales[index]}
               onChange={(e) => updateLoraField(index, e.target.value, true)}
-              className="bg-card/80 border-primary/20 w-24"
+              className="bg-popover border-primary/20 w-24"
               step={0.1}
               min={0}
               max={1}
