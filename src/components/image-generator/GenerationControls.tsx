@@ -19,16 +19,32 @@ export const GenerationControls = ({
   onToggleSettings,
   isGenerating
 }: GenerationControlsProps) => {
+  const inputWidth = settings.prompt ? Math.min(Math.max(settings.prompt.length * 1.2, 40), 100) : 40;
+
   return (
     <div className="space-y-6 my-8">
       <div className="space-y-3">
-        <Input
-          placeholder="Décrivez l'image que vous souhaitez générer..."
-          value={settings.prompt}
-          onChange={(e) => onSettingsChange({ prompt: e.target.value })}
-          className="bg-card/80 border-primary/20 text-foreground placeholder:text-primary/50 focus:border-primary/50 rounded-full px-6 py-4 text-center h-auto transition-all duration-200 shadow-lg hover:shadow-xl focus:shadow-xl"
-        />
-        <div className="text-sm text-primary/70 text-center">
+        <div className="flex justify-center">
+          <div 
+            className="relative transition-all duration-300 ease-in-out"
+            style={{ width: `${inputWidth}%` }}
+          >
+            <Input
+              placeholder="Décrivez l'image que vous souhaitez générer..."
+              value={settings.prompt}
+              onChange={(e) => onSettingsChange({ prompt: e.target.value })}
+              className={`
+                bg-card/80 border-primary/20 text-foreground 
+                placeholder:text-primary/50 focus:border-primary/50 
+                rounded-full px-6 py-4 text-center h-auto 
+                transition-all duration-300 ease-in-out
+                shadow-lg hover:shadow-xl focus:shadow-xl
+                ${settings.prompt ? 'w-full' : 'w-[300px]'}
+              `}
+            />
+          </div>
+        </div>
+        <div className="text-sm text-primary/70 text-center animate-fade-in">
           {settings.prompt.length} caractères
         </div>
       </div>
