@@ -22,10 +22,9 @@ export const GenerationControls = ({
     const textarea = e.target;
     const text = textarea.value;
     
-    // Ajuster la hauteur en fonction du contenu
     textarea.style.height = 'auto';
-    const lines = Math.ceil(text.length / 10); // 10 caractères par ligne
-    const lineHeight = 24; // Hauteur de ligne en pixels
+    const lines = Math.ceil(text.length / 10);
+    const lineHeight = 24;
     textarea.style.height = `${Math.max(40, lines * lineHeight)}px`;
     
     onSettingsChange({ prompt: text });
@@ -78,10 +77,12 @@ export const GenerationControls = ({
                 hover:border-primary/30
                 resize-none
                 whitespace-normal
-                [text-align-last:center]
+                text-align-center
               "
               style={{
                 transform: settings.prompt ? 'scale(1.02)' : 'scale(1)',
+                textAlignLast: 'center',
+                textAlign: 'center'
               }}
               rows={1}
               onKeyDown={(e) => {
