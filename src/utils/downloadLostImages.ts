@@ -11,6 +11,11 @@ export const downloadLostImages = async () => {
   let successCount = 0;
   let failCount = 0;
 
+  toast({
+    title: "Starting downloads",
+    description: "The images will be downloaded one by one...",
+  });
+
   const downloadImage = async (id: string) => {
     try {
       const response = await fetch(`https://replicate.delivery/pbxt/${id}/output.png`);
@@ -32,11 +37,6 @@ export const downloadLostImages = async () => {
       failCount++;
     }
   };
-
-  toast({
-    title: "Starting downloads",
-    description: "The images will be downloaded one by one...",
-  });
 
   for (const id of predictionIds) {
     await downloadImage(id);
