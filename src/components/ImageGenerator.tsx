@@ -67,9 +67,10 @@ export const ImageGenerator = () => {
     } catch (error) {
       setStatus('error');
       toast({
-        title: "Generation failed",
+        title: "CORS Error",
         description: error.message,
-        variant: "destructive"
+        variant: "destructive",
+        duration: 10000, // Show for 10 seconds due to longer message
       });
     }
   };
@@ -103,7 +104,18 @@ export const ImageGenerator = () => {
             >
               <Settings className="h-5 w-5 text-primary" />
             </Button>
-            <Button variant="ghost" size="icon" className="hover:bg-primary/10">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="hover:bg-primary/10"
+              onClick={() => {
+                toast({
+                  title: "Development Note",
+                  description: "This application requires a proxy server or serverless function to handle Replicate API calls due to CORS restrictions.",
+                  duration: 5000,
+                });
+              }}
+            >
               <HelpCircle className="h-5 w-5 text-primary" />
             </Button>
             <ThemeToggle />
