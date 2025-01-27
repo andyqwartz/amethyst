@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   Dialog,
   DialogContent,
@@ -26,12 +27,10 @@ export const HistoryModal = ({
 }: HistoryModalProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto bg-card/95 backdrop-blur-xl border-primary/20">
+      <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            Historique des générations
-          </DialogTitle>
-          <DialogDescription className="text-primary/70">
+          <DialogTitle>Historique des générations</DialogTitle>
+          <DialogDescription>
             Retrouvez toutes vos images générées précédemment
           </DialogDescription>
         </DialogHeader>
@@ -48,7 +47,6 @@ export const HistoryModal = ({
                   variant="secondary"
                   size="icon"
                   onClick={() => onDownload(image.url)}
-                  className="hover-scale"
                 >
                   <Download className="h-4 w-4" />
                 </Button>
@@ -56,18 +54,12 @@ export const HistoryModal = ({
                   variant="secondary"
                   size="icon"
                   onClick={() => onTweak(image.settings)}
-                  className="hover-scale"
                 >
                   <Wand2 className="h-4 w-4" />
                 </Button>
               </div>
             </div>
           ))}
-          {images.length === 0 && (
-            <div className="col-span-2 text-center py-8 text-primary/70">
-              Aucune image générée pour le moment
-            </div>
-          )}
         </div>
       </DialogContent>
     </Dialog>
