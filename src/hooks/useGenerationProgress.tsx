@@ -1,7 +1,19 @@
 import { useState, useEffect } from 'react';
+import { useGenerationPersistence } from './useGenerationPersistence';
+import { GenerationStatus } from '@/types/replicate';
 
 export const useGenerationProgress = (isGenerating: boolean) => {
   const [progress, setProgress] = useState(0);
+  const [status, setStatus] = useState<GenerationStatus>('idle');
+
+  useGenerationPersistence(
+    isGenerating ? 'loading' : 'idle',
+    progress,
+    (newStatus) => {
+      if (newStatus === 'loading') setStatus('loading');
+    },
+    setProgress
+  );
 
   useEffect(() => {
     if (!isGenerating) {
@@ -9,7 +21,6 @@ export const useGenerationProgress = (isGenerating: boolean) => {
       return;
     }
 
-    // Simulate progress based on typical generation time
     const interval = setInterval(() => {
       setProgress(current => {
         if (current >= 95) {
@@ -28,5 +39,5 @@ export const useGenerationProgress = (isGenerating: boolean) => {
     setTimeout(() => setProgress(0), 1000);
   };
 
-  return { progress, completeProgress };
+  return { progress, completeProgress, status };
 };

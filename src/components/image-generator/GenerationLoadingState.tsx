@@ -8,11 +8,10 @@ interface GenerationLoadingStateProps {
 }
 
 const messages = [
-  "Initialisation du processus de création...",
-  "Analyse et préparation des paramètres...",
-  "Génération des premiers éléments visuels...",
-  "Affinement des détails et de la composition...",
-  "Finalisation de votre création artistique..."
+  "Démarrage...",
+  "Analyse...",
+  "Génération...",
+  "Finalisation..."
 ];
 
 export const GenerationLoadingState = ({ 
@@ -34,15 +33,12 @@ export const GenerationLoadingState = ({
     <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center z-50">
       <div className="bg-card/80 p-8 rounded-2xl max-w-md w-full mx-4 shadow-2xl animate-fade-in border border-primary/10 animate-border-glow">
         <div className="flex flex-col items-center space-y-6">
-          {/* Animation cristalline centrale */}
           <div className="relative w-32 h-32 animate-float">
-            {/* Cercles concentriques avec effet cristallin */}
             <div className="absolute inset-0 bg-primary/5 rounded-full animate-pulse" style={{ animationDelay: '0s' }} />
             <div className="absolute inset-2 bg-primary/10 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
             <div className="absolute inset-4 bg-primary/15 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
             <div className="absolute inset-6 bg-primary/20 rounded-full animate-pulse" style={{ animationDelay: '0.6s' }} />
             
-            {/* Loader central avec effet de rotation */}
             <div className="absolute inset-0 flex items-center justify-center">
               <Loader className="w-12 h-12 text-primary animate-spin" 
                      style={{ 
@@ -53,12 +49,10 @@ export const GenerationLoadingState = ({
             </div>
           </div>
 
-          {/* Message dynamique avec transition */}
           <p className="text-center text-lg text-foreground/90 font-light animate-fade-in">
             {currentMessage}
           </p>
 
-          {/* Barre de progression améliorée */}
           <div className="w-full space-y-2">
             <div className="h-1.5 w-full bg-primary/10 rounded-full overflow-hidden backdrop-blur-sm">
               <div 
