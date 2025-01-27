@@ -77,7 +77,7 @@ export const ImageGenerator = () => {
           onHelpClick={() => setShowHelp(true)}
         />
 
-        <Card className="border-none glass-card shadow-xl">
+        <Card className="border border-primary/20 glass-card shadow-xl">
           <div className="p-6 space-y-6">
             <div className="relative">
               <input
@@ -106,7 +106,7 @@ export const ImageGenerator = () => {
               ) : (
                 <button
                   onClick={handleImageClick}
-                  className="w-full p-6 border-2 border-dashed border-primary/30 rounded-xl hover:bg-primary/5 transition-colors"
+                  className="w-full p-6 border border-primary/20 rounded-xl hover:bg-primary/5 transition-colors"
                 >
                   <div className="flex flex-col items-center gap-2 text-primary/70">
                     <ImagePlus className="h-6 w-6" />
