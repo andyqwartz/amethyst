@@ -4,29 +4,34 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { History, Settings, Sparkles, HelpCircle, ImagePlus } from 'lucide-react';
-import type { GenerationSettings } from '@/types/replicate';
-import { ParameterInputs } from './image-generator/ParameterInputs';
+import type { GenerationSettings, GenerationStatus } from '@/types/replicate';
+import { AdvancedSettings } from './image-generator/AdvancedSettings';
 import { ImagePreview } from './image-generator/ImagePreview';
 import { ThemeToggle } from './image-generator/ThemeToggle';
+import { generateImage } from '@/services/replicate';
 
 export const ImageGenerator = () => {
   const { toast } = useToast();
-  const [prompt, setPrompt] = useState("");
-  const [negativePrompt, setNegativePrompt] = useState("");
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [status, setStatus] = useState<GenerationStatus>('idle');
   const [showSettings, setShowSettings] = useState(false);
   const [generatedImages, setGeneratedImages] = useState<string[]>([]);
   const [settings, setSettings] = useState<GenerationSettings>({
+    prompt: '',
+    negativePrompt: '',
     guidanceScale: 3.5,
     steps: 28,
     numOutputs: 1,
     aspectRatio: "1:1",
     outputFormat: "webp",
     outputQuality: 80,
+    promptStrength: 0.8,
+    hfLoras: [],
+    loraScales: [],
+    disableSafetyChecker: false
   });
 
   const handleGenerate = async () => {
-    if (!prompt.trim()) {
+    if (!settings.prompt.trim()) {
       toast({
         title: "Please enter a prompt",
         description: "The prompt cannot be empty",
@@ -35,35 +40,47 @@ export const ImageGenerator = () => {
       return;
     }
 
-    setIsGenerating(true);
+    setStatus('loading');
     try {
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt,
-          negativePrompt,
-          ...settings,
-        }),
+      const images = await generateImage({
+        prompt: settings.prompt,
+        negative_prompt: settings.negativePrompt,
+        guidance_scale: settings.guidanceScale,
+        num_inference_steps: settings.steps,
+        num_outputs: settings.numOutputs,
+        seed: settings.seed,
+        aspect_ratio: settings.aspectRatio,
+        output_format: settings.outputFormat,
+        output_quality: settings.outputQuality,
+        prompt_strength: settings.promptStrength,
+        hf_loras: settings.hfLoras,
+        lora_scales: settings.loraScales,
+        disable_safety_checker: settings.disableSafetyChecker,
       });
-
-      if (!response.ok) throw new Error('Generation failed');
       
-      const images = await response.json();
       setGeneratedImages(images);
+      setStatus('success');
       toast({
         title: "Images generated successfully",
         description: `Generated ${images.length} image(s)`,
       });
     } catch (error) {
+      setStatus('error');
       toast({
         title: "Generation failed",
         description: error.message,
         variant: "destructive"
       });
-    } finally {
-      setIsGenerating(false);
     }
+  };
+
+  const handleDownload = (imageUrl: string) => {
+    const link = document.createElement('a');
+    link.href = imageUrl;
+    link.download = `generated-image-${Date.now()}.${settings.outputFormat}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -78,12 +95,18 @@ export const ImageGenerator = () => {
             <Button variant="ghost" size="icon" className="hover:bg-primary/10">
               <History className="h-5 w-5 text-primary" />
             </Button>
-            <Button variant="ghost" size="icon" className="hover:bg-primary/10">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="hover:bg-primary/10"
+              onClick={() => setShowSettings(!showSettings)}
+            >
               <Settings className="h-5 w-5 text-primary" />
             </Button>
             <Button variant="ghost" size="icon" className="hover:bg-primary/10">
               <HelpCircle className="h-5 w-5 text-primary" />
             </Button>
+            <ThemeToggle />
           </div>
         </div>
 
@@ -102,12 +125,12 @@ export const ImageGenerator = () => {
             <div className="space-y-2">
               <Input
                 placeholder="Describe the image you want to generate..."
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
+                value={settings.prompt}
+                onChange={(e) => setSettings(s => ({ ...s, prompt: e.target.value }))}
                 className="bg-white/50 border-primary/20 text-foreground placeholder:text-primary/50 focus:border-primary/50"
               />
               <div className="text-sm text-primary/70">
-                {prompt.length} characters
+                {settings.prompt.length} characters
               </div>
             </div>
 
@@ -119,15 +142,15 @@ export const ImageGenerator = () => {
                 variant="secondary"
               >
                 <Settings className="h-4 w-4 mr-2" />
-                Options
+                Advanced Settings
               </Button>
 
               <Button
                 onClick={handleGenerate}
-                disabled={isGenerating}
+                disabled={status === 'loading'}
                 className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
               >
-                {isGenerating ? (
+                {status === 'loading' ? (
                   <Sparkles className="h-4 w-4 animate-spin mr-2" />
                 ) : (
                   <Sparkles className="h-4 w-4 mr-2" />
@@ -137,17 +160,15 @@ export const ImageGenerator = () => {
             </div>
 
             {showSettings && (
-              <div className="space-y-4 p-4 bg-white/50 rounded-xl animate-fade-in">
-                <ParameterInputs
-                  settings={settings}
-                  onSettingsChange={(newSettings) => setSettings(s => ({ ...s, ...newSettings }))}
-                />
-              </div>
+              <AdvancedSettings
+                settings={settings}
+                onSettingsChange={(newSettings) => setSettings(s => ({ ...s, ...newSettings }))}
+              />
             )}
 
             <ImagePreview
               images={generatedImages}
-              onDownload={() => {}}
+              onDownload={handleDownload}
             />
           </div>
         </Card>

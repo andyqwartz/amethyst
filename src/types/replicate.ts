@@ -16,6 +16,8 @@ export interface ReplicateInput {
 }
 
 export interface GenerationSettings {
+  prompt: string;
+  negativePrompt: string;
   guidanceScale: number;
   steps: number;
   seed?: number;
@@ -23,8 +25,10 @@ export interface GenerationSettings {
   aspectRatio: string;
   outputFormat: 'webp' | 'jpg' | 'png';
   outputQuality: number;
-  promptStrength?: number;
-  hfLoras?: string[];
-  loraScales?: number[];
-  disableSafetyChecker?: boolean;
+  promptStrength: number;
+  hfLoras: string[];
+  loraScales: number[];
+  disableSafetyChecker: boolean;
 }
+
+export type GenerationStatus = 'idle' | 'loading' | 'success' | 'error';
