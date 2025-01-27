@@ -22,16 +22,9 @@ export const GenerationControls = ({
     const textarea = e.target;
     const text = textarea.value;
     
-    // Calculer la largeur nécessaire basée sur la longueur du texte
-    const charWidth = 8; // Largeur approximative d'un caractère en pixels
-    const minWidth = 200; // Largeur minimale
-    const calculatedWidth = Math.max(minWidth, Math.min(text.length * charWidth, 400));
-    
-    textarea.style.width = `${calculatedWidth}px`;
-    
-    // Ajuster la hauteur automatiquement
+    // Ajuster la hauteur en fonction du contenu
     textarea.style.height = 'auto';
-    const lines = Math.ceil(text.length / 20); // Nombre de lignes basé sur 20 caractères par ligne
+    const lines = Math.ceil(text.length / 10); // 10 caractères par ligne
     const lineHeight = 24; // Hauteur de ligne en pixels
     textarea.style.height = `${Math.max(40, lines * lineHeight)}px`;
     
@@ -41,7 +34,7 @@ export const GenerationControls = ({
   return (
     <div className="space-y-6">
       <div className="flex justify-center items-center my-6">
-        <div className="inline-flex items-center">
+        <div className="inline-flex items-center max-w-[90vw]">
           <div className="
             relative 
             inline-block
@@ -61,6 +54,7 @@ export const GenerationControls = ({
               className="
                 block
                 min-w-[200px]
+                max-w-[80vw]
                 h-10
                 bg-card/80 
                 border 
