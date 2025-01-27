@@ -37,7 +37,7 @@ export const AdvancedSettings = ({ settings, onSettingsChange }: AdvancedSetting
 
   const addLoraField = () => {
     onSettingsChange({
-      hfLoras: [...settings.hfLoras, ''],
+      hfLoras: [...settings.hfLoras, DEFAULT_LORAS[0]], // Use first default LoRA instead of empty string
       loraScales: [...settings.loraScales, 0.8],
     });
   };
@@ -55,6 +55,9 @@ export const AdvancedSettings = ({ settings, onSettingsChange }: AdvancedSetting
       newScales[index] = parseFloat(value);
       onSettingsChange({ loraScales: newScales });
     } else {
+      // Don't update if value is empty
+      if (!value.trim()) return;
+      
       const newLoras = [...settings.hfLoras];
       newLoras[index] = value;
       onSettingsChange({ hfLoras: newLoras });
@@ -230,7 +233,7 @@ export const AdvancedSettings = ({ settings, onSettingsChange }: AdvancedSetting
         {settings.hfLoras.map((lora, index) => (
           <div key={index} className="flex gap-4">
             <Select
-              value={lora}
+              value={lora || DEFAULT_LORAS[0]} // Ensure we always have a non-empty value
               onValueChange={(value) => updateLoraField(index, value)}
             >
               <SelectTrigger className="bg-popover border-primary/20 flex-grow">
@@ -239,7 +242,12 @@ export const AdvancedSettings = ({ settings, onSettingsChange }: AdvancedSetting
               <SelectContent className="bg-popover/100 border-primary/20">
                 <Input
                   value={lora}
-                  onChange={(e) => updateLoraField(index, e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value.trim();
+                    if (value) {
+                      updateLoraField(index, value);
+                    }
+                  }}
                   placeholder="Custom HuggingFace path or URL"
                   className="mb-2 bg-card/80 border-primary/20"
                 />
