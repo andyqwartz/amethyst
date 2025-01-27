@@ -29,7 +29,12 @@ export const GenerationControls = ({
     const lineHeight = 24;
     textarea.style.height = `${Math.max(40, lines * lineHeight)}px`;
     
-    onSettingsChange({ prompt: text });
+    // Ensure empty string is properly handled
+    onSettingsChange({ prompt: text || '' });
+  };
+
+  const clearPrompt = () => {
+    onSettingsChange({ prompt: '' });
   };
 
   return (
