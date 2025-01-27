@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Settings, Sparkles } from 'lucide-react';
+import { Settings, Sparkles, MessageCircle } from 'lucide-react';
 import type { GenerationSettings } from '@/types/replicate';
 
 interface GenerationControlsProps {
@@ -30,6 +30,9 @@ export const GenerationControls = ({
           `}
           style={{ width: `${inputWidth}%` }}
         >
+          {!settings.prompt && (
+            <MessageCircle className="absolute left-1/2 -translate-x-1/2 h-5 w-5 text-primary/50 pointer-events-none" />
+          )}
           <textarea
             placeholder="Décrivez l'image que vous souhaitez générer..."
             value={settings.prompt}
@@ -43,7 +46,7 @@ export const GenerationControls = ({
               transition-all duration-300 ease-in-out
               shadow-lg hover:shadow-xl focus:shadow-xl
               resize-none overflow-hidden
-              ${settings.prompt ? '' : 'w-[300px] mx-auto block'}
+              ${settings.prompt ? '' : 'w-[300px] mx-auto block pl-12'}
             `}
             style={{
               lineHeight: '1.5',
