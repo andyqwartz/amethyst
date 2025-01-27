@@ -85,6 +85,15 @@ export const ImageGenerator = () => {
     }
   };
 
+  useEffect(() => {
+    if (status === 'success' || status === 'error') {
+      // Clear loading state when generation completes
+      localStorage.removeItem('generation_status');
+      localStorage.removeItem('generation_progress');
+      localStorage.removeItem('generation_timestamp');
+    }
+  }, [status]);
+
   return (
     <>
       <div className="min-h-screen p-4 md:p-6">

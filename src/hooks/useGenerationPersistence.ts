@@ -22,12 +22,11 @@ export const useGenerationPersistence = (
       if (file) {
         localStorage.setItem(GENERATION_FILE_KEY, file);
       }
-    } else if (status === 'success' || status === 'error') {
-      // Only clear if generation is complete or failed
+    } else {
+      // Clear generation state when complete or error
       localStorage.removeItem(GENERATION_STATUS_KEY);
       localStorage.removeItem(GENERATION_PROGRESS_KEY);
       localStorage.removeItem(GENERATION_TIMESTAMP_KEY);
-      // Keep the file even after generation completes
     }
   }, [status, progress, file]);
 
@@ -45,6 +44,7 @@ export const useGenerationPersistence = (
         localStorage.removeItem(GENERATION_STATUS_KEY);
         localStorage.removeItem(GENERATION_PROGRESS_KEY);
         localStorage.removeItem(GENERATION_TIMESTAMP_KEY);
+        setStatus('error');
         return;
       }
 
