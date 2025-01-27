@@ -42,4 +42,16 @@
   .hover-scale {
     @apply transition-transform duration-200 hover:scale-105;
   }
+
+  @keyframes gradient {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
 }
