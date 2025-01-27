@@ -20,12 +20,12 @@ export const ParameterInputs = ({ settings, onSettingsChange }: ParameterInputsP
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label className="flex items-center gap-2 text-gray-300">
+          <Label className="flex items-center gap-2">
             Guidance Scale
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <span className="text-xs text-gray-500">(?)</span>
+                  <span className="text-xs text-primary/50">(?)</span>
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Controls how closely the output adheres to the prompt</p>
@@ -39,18 +39,18 @@ export const ParameterInputs = ({ settings, onSettingsChange }: ParameterInputsP
             max={10}
             min={0}
             step={0.1}
-            className="[&_[role=slider]]:bg-[#7c3aed]"
+            className="[&_[role=slider]]:bg-primary"
           />
-          <span className="text-xs text-gray-500">{settings.guidanceScale}</span>
+          <span className="text-xs text-primary/50">{settings.guidanceScale}</span>
         </div>
 
         <div className="space-y-2">
-          <Label className="flex items-center gap-2 text-gray-300">
+          <Label className="flex items-center gap-2">
             Steps
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <span className="text-xs text-gray-500">(?)</span>
+                  <span className="text-xs text-primary/50">(?)</span>
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Number of inference steps</p>
@@ -64,18 +64,18 @@ export const ParameterInputs = ({ settings, onSettingsChange }: ParameterInputsP
             max={50}
             min={1}
             step={1}
-            className="[&_[role=slider]]:bg-[#7c3aed]"
+            className="[&_[role=slider]]:bg-primary"
           />
-          <span className="text-xs text-gray-500">{settings.steps}</span>
+          <span className="text-xs text-primary/50">{settings.steps}</span>
         </div>
 
         <div className="space-y-2">
-          <Label className="text-gray-300">Aspect Ratio</Label>
+          <Label>Aspect Ratio</Label>
           <Select
             value={settings.aspectRatio}
             onValueChange={(value) => onSettingsChange({ aspectRatio: value })}
           >
-            <SelectTrigger className="bg-[#1a1a1a] border-none text-gray-300">
+            <SelectTrigger className="bg-white/50 border-primary/20">
               <SelectValue placeholder="Select aspect ratio" />
             </SelectTrigger>
             <SelectContent>
@@ -89,12 +89,12 @@ export const ParameterInputs = ({ settings, onSettingsChange }: ParameterInputsP
         </div>
 
         <div className="space-y-2">
-          <Label className="text-gray-300">Output Format</Label>
+          <Label>Output Format</Label>
           <Select
             value={settings.outputFormat}
             onValueChange={(value) => onSettingsChange({ outputFormat: value as "webp" | "jpg" | "png" })}
           >
-            <SelectTrigger className="bg-[#1a1a1a] border-none text-gray-300">
+            <SelectTrigger className="bg-white/50 border-primary/20">
               <SelectValue placeholder="Select format" />
             </SelectTrigger>
             <SelectContent>
