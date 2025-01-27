@@ -27,7 +27,7 @@ export const ImageGenerator = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { settings, updateSettings } = useGenerationSettings();
   const { status, generatedImages, generate } = useImageGeneration();
-  const { progress, status: persistedStatus } = useGenerationProgress(status === 'loading');
+  const { progress, status: persistedStatus, savedFile } = useGenerationProgress(status === 'loading', referenceImage);
   const { history, allHistory, isLoading } = useImageHistory();
 
   useEffect(() => {
@@ -37,6 +37,13 @@ export const ImageGenerator = () => {
       localStorage.removeItem(REFERENCE_IMAGE_KEY);
     }
   }, [referenceImage]);
+
+  // Restore saved file if available
+  useEffect(() => {
+    if (savedFile && !referenceImage) {
+      setReferenceImage(savedFile);
+    }
+  }, [savedFile]);
 
   const handleGenerate = () => {
     generate(settings);

@@ -2,21 +2,21 @@ import { useState, useEffect } from 'react';
 import { useGenerationPersistence } from './useGenerationPersistence';
 import { GenerationStatus } from '@/types/replicate';
 
-export const useGenerationProgress = (isGenerating: boolean) => {
+export const useGenerationProgress = (isGenerating: boolean, referenceImage?: string | null) => {
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState<GenerationStatus>('idle');
 
   // Use the persistence hook to save/restore state
-  useGenerationPersistence(
+  const { savedFile } = useGenerationPersistence(
     isGenerating ? 'loading' : 'idle',
     progress,
     setStatus,
-    setProgress
+    setProgress,
+    referenceImage
   );
 
   useEffect(() => {
     if (!isGenerating) {
-      setProgress(0);
       return;
     }
 
@@ -41,6 +41,7 @@ export const useGenerationProgress = (isGenerating: boolean) => {
   return { 
     progress, 
     setProgress,
-    status 
+    status,
+    savedFile 
   };
 };

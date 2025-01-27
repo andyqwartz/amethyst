@@ -4,12 +4,14 @@ import { GenerationStatus } from '@/types/replicate';
 const GENERATION_STATUS_KEY = 'generation_status';
 const GENERATION_PROGRESS_KEY = 'generation_progress';
 const GENERATION_TIMESTAMP_KEY = 'generation_timestamp';
+const GENERATION_FILE_KEY = 'generation_file';
 
 export const useGenerationPersistence = (
   status: GenerationStatus,
   progress: number,
   setStatus: (status: GenerationStatus) => void,
-  setProgress: (progress: number) => void
+  setProgress: (progress: number) => void,
+  file?: string | null
 ) => {
   // Save state
   useEffect(() => {
@@ -17,12 +19,17 @@ export const useGenerationPersistence = (
       localStorage.setItem(GENERATION_STATUS_KEY, status);
       localStorage.setItem(GENERATION_PROGRESS_KEY, progress.toString());
       localStorage.setItem(GENERATION_TIMESTAMP_KEY, Date.now().toString());
-    } else {
+      if (file) {
+        localStorage.setItem(GENERATION_FILE_KEY, file);
+      }
+    } else if (status === 'success' || status === 'error') {
+      // Only clear if generation is complete or failed
       localStorage.removeItem(GENERATION_STATUS_KEY);
       localStorage.removeItem(GENERATION_PROGRESS_KEY);
       localStorage.removeItem(GENERATION_TIMESTAMP_KEY);
+      // Keep the file even after generation completes
     }
-  }, [status, progress]);
+  }, [status, progress, file]);
 
   // Restore state on load
   useEffect(() => {
@@ -45,4 +52,8 @@ export const useGenerationPersistence = (
       setProgress(Number(savedProgress));
     }
   }, []);
+
+  return {
+    savedFile: localStorage.getItem(GENERATION_FILE_KEY)
+  };
 };
