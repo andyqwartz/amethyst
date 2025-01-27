@@ -78,6 +78,7 @@ export const GenerationControls = ({
                 hover:border-primary/30
                 resize-none
                 whitespace-normal
+                [text-align-last:center]
               "
               style={{
                 transform: settings.prompt ? 'scale(1.02)' : 'scale(1)',
