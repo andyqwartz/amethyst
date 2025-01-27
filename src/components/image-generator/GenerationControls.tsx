@@ -64,18 +64,24 @@ export const GenerationControls = ({
                 transition-all 
                 duration-300
                 shadow-inner
-                leading-normal
+                leading-6
                 overflow-hidden
                 focus:outline-none
                 focus:ring-2
                 focus:ring-primary/20
                 hover:border-primary/30
                 resize-none
-                overflow-y-auto
-                whitespace-normal
+                whitespace-nowrap
               "
               style={{
                 transform: settings.prompt ? 'scale(1.02)' : 'scale(1)',
+              }}
+              rows={1}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  onGenerate();
+                }
               }}
             />
           </div>
