@@ -20,9 +20,22 @@ export const GenerationControls = ({
 }: GenerationControlsProps) => {
   const handleTextareaInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const textarea = e.target;
+    const text = textarea.value;
+    
+    // Calculer la largeur nécessaire basée sur la longueur du texte
+    const charWidth = 8; // Largeur approximative d'un caractère en pixels
+    const minWidth = 200; // Largeur minimale
+    const calculatedWidth = Math.max(minWidth, Math.min(text.length * charWidth, 400));
+    
+    textarea.style.width = `${calculatedWidth}px`;
+    
+    // Ajuster la hauteur automatiquement
     textarea.style.height = 'auto';
-    textarea.style.height = `${textarea.scrollHeight}px`;
-    onSettingsChange({ prompt: textarea.value });
+    const lines = Math.ceil(text.length / 20); // Nombre de lignes basé sur 20 caractères par ligne
+    const lineHeight = 24; // Hauteur de ligne en pixels
+    textarea.style.height = `${Math.max(40, lines * lineHeight)}px`;
+    
+    onSettingsChange({ prompt: text });
   };
 
   return (
@@ -47,7 +60,6 @@ export const GenerationControls = ({
               onChange={handleTextareaInput}
               className="
                 block
-                w-auto
                 min-w-[200px]
                 h-10
                 bg-card/80 
@@ -71,7 +83,7 @@ export const GenerationControls = ({
                 focus:ring-primary/20
                 hover:border-primary/30
                 resize-none
-                whitespace-nowrap
+                whitespace-normal
               "
               style={{
                 transform: settings.prompt ? 'scale(1.02)' : 'scale(1)',
