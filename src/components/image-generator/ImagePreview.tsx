@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Download, RefreshCw, Settings } from 'lucide-react';
+import { Download, Settings } from 'lucide-react';
 import type { GenerationSettings } from '@/types/replicate';
 
 interface ImagePreviewProps {
@@ -19,14 +19,7 @@ export const ImagePreview = ({
   className = "" 
 }: ImagePreviewProps) => {
   if (!images.length) {
-    return (
-      <div className="col-span-full aspect-square rounded-lg border-2 border-dashed border-primary/30 flex items-center justify-center">
-        <div className="text-center space-y-2">
-          <div className="h-12 w-12 mx-auto text-primary/30">🖼️</div>
-          <p className="text-sm text-primary/50">Les images générées apparaîtront ici</p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (
