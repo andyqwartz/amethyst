@@ -1,69 +1,90 @@
 import { toast } from "@/components/ui/use-toast";
-
-const predictionIds = [
-  "cxxj29zwndrme0cmn7ft85eehw",
-  "xtrz107wg1rmc0cmn7fs2g91rw",
-  "0r0e54fwehrme0cmn7frmbxz50",
-  // ... and all other IDs from your list
-];
+import { supabase } from "@/integrations/supabase/client";
 
 export const downloadLostImages = async () => {
   let successCount = 0;
   let failCount = 0;
-  const failedIds: string[] = [];
+  const failedUrls: string[] = [];
 
   toast({
     title: "Starting downloads",
     description: "The images will be downloaded one by one...",
   });
 
-  const downloadImage = async (id: string) => {
-    try {
-      const response = await fetch(`https://replicate.delivery/pbxt/${id}/output.png`);
-      if (!response.ok) {
-        if (response.status === 404) {
-          console.error(`Image ${id} not found (404)`);
-          failedIds.push(id);
-          throw new Error('Image not found');
-        }
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `image-${id}.png`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-      
-      successCount++;
-    } catch (error) {
-      console.error(`Failed to download image ${id}:`, error);
-      failCount++;
-    }
-  };
+  try {
+    // Get all images for the current user from the database
+    const { data: images, error } = await supabase
+      .from('images')
+      .select('url')
+      .order('created_at', { ascending: false });
 
-  for (const id of predictionIds) {
-    await downloadImage(id);
-  }
-
-  if (failCount > 0) {
-    toast({
-      title: "Download partially complete",
-      description: `Successfully downloaded ${successCount} images. ${failCount} failed because they were no longer available.`,
-      variant: "destructive",
-      duration: 5000,
-    });
+    if (error) throw error;
     
-    console.error("Failed prediction IDs:", failedIds);
-  } else {
+    if (!images || images.length === 0) {
+      toast({
+        title: "No images found",
+        description: "There are no images to download in your history.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const downloadImage = async (imageUrl: string) => {
+      try {
+        const response = await fetch(imageUrl);
+        if (!response.ok) {
+          if (response.status === 404) {
+            console.error(`Image not found (404): ${imageUrl}`);
+            failedUrls.push(imageUrl);
+            throw new Error('Image not found');
+          }
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `image-${Date.now()}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        successCount++;
+      } catch (error) {
+        console.error(`Failed to download image ${imageUrl}:`, error);
+        failCount++;
+      }
+    };
+
+    // Download each image
+    for (const image of images) {
+      await downloadImage(image.url);
+    }
+
+    if (failCount > 0) {
+      toast({
+        title: "Download partially complete",
+        description: `Successfully downloaded ${successCount} images. ${failCount} failed because they were no longer available.`,
+        variant: "destructive",
+        duration: 5000,
+      });
+      
+      console.error("Failed image URLs:", failedUrls);
+    } else {
+      toast({
+        title: "Download complete",
+        description: `Successfully downloaded ${successCount} images.`,
+        duration: 3000,
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching images:", error);
     toast({
-      title: "Download complete",
-      description: `Successfully downloaded ${successCount} images.`,
-      duration: 3000,
+      title: "Error",
+      description: "Failed to fetch images from your history.",
+      variant: "destructive",
     });
   }
 };
