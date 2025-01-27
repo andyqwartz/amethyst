@@ -7,7 +7,7 @@ const corsHeaders = {
 }
 
 const GENERATION_TIMEOUT = 5 * 60 * 1000; // 5 minutes
-const MODEL_VERSION = "lucataco/flux-dev-multi-lora:2389224e115448d9a77c07d7d45672b3f0aa45acacf1c5bcf51857ac295e3aec";
+const MODEL_VERSION = "lucataco/sdxl:c86579ac5193b3d184651424d6c766f9b699c05b5d8360e3f6c6c5c6e01013c5";
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -40,6 +40,7 @@ serve(async (req) => {
           return new Response(JSON.stringify({ 
             status: 'success',
             output: prediction.output,
+            settings: input,
             predictionId 
           }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -96,13 +97,8 @@ serve(async (req) => {
           num_inference_steps: input.num_inference_steps,
           num_outputs: input.num_outputs || 1,
           seed: input.seed,
-          aspect_ratio: input.aspect_ratio,
-          output_format: input.output_format,
-          output_quality: input.output_quality,
-          prompt_strength: input.prompt_strength,
-          hf_loras: input.hf_loras,
-          lora_scales: input.lora_scales,
-          disable_safety_checker: input.disable_safety_checker,
+          width: 1024,
+          height: 1024
         }
       })
 
