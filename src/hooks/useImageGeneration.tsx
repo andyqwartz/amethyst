@@ -132,7 +132,24 @@ export const useImageGeneration = () => {
     setStatus('loading');
     
     try {
-      const response = await generateImage({ input: settings });
+      // Convert GenerationSettings to ReplicateInput format
+      const replicateInput = {
+        prompt: settings.prompt,
+        negative_prompt: settings.negativePrompt,
+        guidance_scale: settings.guidanceScale,
+        num_inference_steps: settings.steps,
+        seed: settings.seed,
+        num_outputs: settings.numOutputs,
+        aspect_ratio: settings.aspectRatio,
+        output_format: settings.outputFormat,
+        output_quality: settings.outputQuality,
+        prompt_strength: settings.promptStrength,
+        hf_loras: settings.hfLoras,
+        lora_scales: settings.loraScales,
+        disable_safety_checker: settings.disableSafetyChecker
+      };
+
+      const response = await generateImage(replicateInput);
       
       if (response.status === 'started') {
         setPredictionId(response.predictionId);
