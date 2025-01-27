@@ -37,10 +37,10 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
           value={settings.aspectRatio}
           onValueChange={(value) => onSettingsChange({ aspectRatio: value })}
         >
-          <SelectTrigger className="bg-card/80 border-primary/20">
+          <SelectTrigger className="bg-popover border-primary/20">
             <SelectValue placeholder="Select aspect ratio" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-popover border-primary/20">
             {aspectRatios.map((ratio) => (
               <SelectItem key={ratio} value={ratio}>{ratio}</SelectItem>
             ))}

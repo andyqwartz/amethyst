@@ -75,10 +75,10 @@ export const ParameterInputs = ({ settings, onSettingsChange }: ParameterInputsP
             value={settings.aspectRatio}
             onValueChange={(value) => onSettingsChange({ aspectRatio: value })}
           >
-            <SelectTrigger className="bg-white/50 border-primary/20">
+            <SelectTrigger className="bg-popover border-primary/20">
               <SelectValue placeholder="Select aspect ratio" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-popover border-primary/20">
               {aspectRatios.map((ratio) => (
                 <SelectItem key={ratio} value={ratio}>
                   {ratio}
@@ -94,10 +94,10 @@ export const ParameterInputs = ({ settings, onSettingsChange }: ParameterInputsP
             value={settings.outputFormat}
             onValueChange={(value) => onSettingsChange({ outputFormat: value as "webp" | "jpg" | "png" })}
           >
-            <SelectTrigger className="bg-white/50 border-primary/20">
+            <SelectTrigger className="bg-popover border-primary/20">
               <SelectValue placeholder="Select format" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-popover border-primary/20">
               <SelectItem value="webp">WebP</SelectItem>
               <SelectItem value="jpg">JPG</SelectItem>
               <SelectItem value="png">PNG</SelectItem>

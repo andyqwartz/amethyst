@@ -38,7 +38,7 @@ export const OutputSettings = ({ settings, onSettingsChange }: OutputSettingsPro
           value={settings.seed || ''}
           onChange={(e) => onSettingsChange({ seed: parseInt(e.target.value) || undefined })}
           placeholder="Random seed"
-          className="bg-card/80 border-primary/20"
+          className="bg-popover border-primary/20"
         />
       </div>
 
@@ -50,10 +50,10 @@ export const OutputSettings = ({ settings, onSettingsChange }: OutputSettingsPro
           value={settings.outputFormat}
           onValueChange={(value) => onSettingsChange({ outputFormat: value as 'webp' | 'jpg' | 'png' })}
         >
-          <SelectTrigger className="bg-card/80 border-primary/20">
+          <SelectTrigger className="bg-popover border-primary/20">
             <SelectValue placeholder="Select format" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-popover border-primary/20">
             <SelectItem value="webp">WebP</SelectItem>
             <SelectItem value="jpg">JPG</SelectItem>
             <SelectItem value="png">PNG</SelectItem>
