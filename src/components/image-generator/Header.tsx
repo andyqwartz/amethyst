@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { History, Settings, HelpCircle } from 'lucide-react';
+import { History, HelpCircle } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 
 interface HeaderProps {
@@ -27,14 +27,6 @@ export const Header = ({
           className="hover:bg-primary/10"
         >
           <History className="h-5 w-5 text-primary" />
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={onSettingsClick}
-          className="hover:bg-primary/10"
-        >
-          <Settings className="h-5 w-5 text-primary" />
         </Button>
         <Button 
           variant="ghost" 
