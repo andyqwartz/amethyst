@@ -18,11 +18,11 @@ export const GenerationControls = ({
   onToggleSettings,
   isGenerating
 }: GenerationControlsProps) => {
-  const inputWidth = settings.prompt ? Math.min(Math.max(settings.prompt.length * 0.8, 40), 90) : 40;
+  const inputWidth = settings.prompt ? Math.min(Math.max(settings.prompt.length * 0.6, 60), 90) : 60;
 
   return (
     <div className="space-y-4 my-6">
-      <div className="flex justify-center items-center min-h-[100px]">
+      <div className="flex justify-center items-center min-h-[80px]">
         <div 
           className="relative transition-all duration-300 ease-in-out flex justify-center items-center"
           style={{ width: `${inputWidth}%` }}
@@ -31,7 +31,7 @@ export const GenerationControls = ({
             placeholder="Décrivez votre image..."
             value={settings.prompt}
             onChange={(e) => onSettingsChange({ prompt: e.target.value })}
-            rows={Math.ceil((settings.prompt?.length || 0) / 50) || 1}
+            rows={settings.prompt ? Math.max(Math.ceil(settings.prompt.length / 80), 1) : 1}
             className="
               w-full
               min-h-[48px]
@@ -43,7 +43,7 @@ export const GenerationControls = ({
               placeholder:text-primary/50 
               focus:border-primary/50 
               rounded-full 
-              px-6 
+              px-8
               py-3
               text-center
               transition-all 
@@ -55,6 +55,7 @@ export const GenerationControls = ({
               resize-none
               overflow-hidden
               leading-tight
+              whitespace-pre-wrap
             "
           />
         </div>
