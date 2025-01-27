@@ -16,16 +16,18 @@ interface HelpModalProps {
 export const HelpModal = ({ open, onOpenChange }: HelpModalProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] backdrop-blur-xl bg-gradient-to-br from-card/80 to-card/60 border-primary/20">
         <DialogHeader>
-          <DialogTitle>Aide & Crédits</DialogTitle>
+          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            Aide & Crédits
+          </DialogTitle>
           <DialogDescription>
             Guide d'utilisation et informations sur l'application
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-6">
           <section>
-            <h3 className="text-lg font-semibold mb-2">Comment utiliser</h3>
+            <h3 className="text-lg font-semibold mb-2 text-primary">Comment utiliser</h3>
             <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
               <li>Entrez une description détaillée de l'image souhaitée</li>
               <li>Ajoutez une image de référence (optionnel)</li>
@@ -34,10 +36,10 @@ export const HelpModal = ({ open, onOpenChange }: HelpModalProps) => {
             </ul>
           </section>
           
-          <Separator />
+          <Separator className="bg-primary/20" />
           
           <section>
-            <h3 className="text-lg font-semibold mb-2">Paramètres avancés</h3>
+            <h3 className="text-lg font-semibold mb-2 text-primary">Paramètres avancés</h3>
             <ul className="space-y-2 text-muted-foreground">
               <li><strong>Ratio d'aspect :</strong> Format de l'image (1:1, 16:9, etc.)</li>
               <li><strong>Nombre d'images :</strong> Nombre d'images à générer (1-4)</li>
@@ -46,10 +48,10 @@ export const HelpModal = ({ open, onOpenChange }: HelpModalProps) => {
             </ul>
           </section>
           
-          <Separator />
+          <Separator className="bg-primary/20" />
           
           <section>
-            <h3 className="text-lg font-semibold mb-2">Crédits</h3>
+            <h3 className="text-lg font-semibold mb-2 text-primary">Crédits</h3>
             <p className="text-muted-foreground">
               Développé avec ❤️ par l'équipe Lovable.<br />
               Propulsé par l'API Replicate et Stable Diffusion.

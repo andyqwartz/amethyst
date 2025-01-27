@@ -14,14 +14,16 @@ export const Header = ({
   onHelpClick
 }: HeaderProps) => {
   return (
-    <div className="relative overflow-hidden bg-card/80 p-6 rounded-xl flex justify-between items-center mb-4 glass-card border border-primary/20 shadow-lg animate-fade-in">
+    <div className="relative overflow-hidden p-6 rounded-xl flex justify-between items-center mb-4 backdrop-blur-xl bg-gradient-to-r from-card/40 to-card/60 border border-primary/20 shadow-lg animate-fade-in">
       <div className="flex items-center gap-3">
-        <Sparkles className="h-8 w-8 text-primary animate-pulse" />
+        <div className="relative">
+          <div className="absolute inset-0 bg-primary/20 blur-xl animate-pulse rounded-full"></div>
+          <Sparkles className="h-8 w-8 text-primary relative animate-pulse" />
+        </div>
         <div className="flex flex-col items-start">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent bg-[length:200%] animate-[gradient_8s_linear_infinite]">
             Amethyst
           </h1>
-          <span className="text-sm text-primary/70">AI Image Generator</span>
         </div>
       </div>
       
@@ -30,17 +32,19 @@ export const Header = ({
           variant="ghost"
           size="icon"
           onClick={onHistoryClick}
-          className="hover:bg-primary/10 hover-scale"
+          className="relative group hover:bg-primary/10 transition-all duration-300 hover-scale"
         >
-          <History className="h-5 w-5 text-primary" />
+          <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 blur transition-all duration-300 rounded-lg"></div>
+          <History className="h-5 w-5 text-primary relative z-10" />
         </Button>
         <Button 
           variant="ghost" 
           size="icon"
           onClick={onHelpClick}
-          className="hover:bg-primary/10 hover-scale"
+          className="relative group hover:bg-primary/10 transition-all duration-300 hover-scale"
         >
-          <HelpCircle className="h-5 w-5 text-primary" />
+          <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 blur transition-all duration-300 rounded-lg"></div>
+          <HelpCircle className="h-5 w-5 text-primary relative z-10" />
         </Button>
       </div>
     </div>
