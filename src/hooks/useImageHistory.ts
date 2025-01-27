@@ -9,21 +9,45 @@ interface HistoryImage {
   timestamp: number;
 }
 
-interface ImageRecord {
+interface DatabaseImageRecord {
   url: string;
   settings: Json;
   created_at: string;
-  prompt: string;
-  negative_prompt: string;
-  guidance_scale: number;
-  steps: number;
-  seed: number;
-  num_outputs: number;
-  aspect_ratio: string;
-  output_format: 'webp' | 'jpg' | 'png';
-  output_quality: number;
-  prompt_strength: number;
+  prompt: string | null;
+  negative_prompt: string | null;
+  guidance_scale: number | null;
+  steps: number | null;
+  seed: number | null;
+  num_outputs: number | null;
+  aspect_ratio: string | null;
+  output_format: string | null;
+  output_quality: number | null;
+  prompt_strength: number | null;
 }
+
+const formatDatabaseImage = (img: DatabaseImageRecord): HistoryImage => {
+  const outputFormat = (img.output_format || 'webp') as 'webp' | 'jpg' | 'png';
+  
+  return {
+    url: img.url,
+    settings: {
+      prompt: img.prompt || '',
+      negativePrompt: img.negative_prompt || '',
+      guidanceScale: img.guidance_scale || 7.5,
+      steps: img.steps || 30,
+      seed: img.seed || undefined,
+      numOutputs: img.num_outputs || 1,
+      aspectRatio: img.aspect_ratio || '1:1',
+      outputFormat,
+      outputQuality: img.output_quality || 90,
+      promptStrength: img.prompt_strength || 0.8,
+      hfLoras: [],
+      loraScales: [],
+      disableSafetyChecker: false
+    },
+    timestamp: new Date(img.created_at).getTime()
+  };
+};
 
 export const useImageHistory = () => {
   const [history, setHistory] = useState<HistoryImage[]>([]);
@@ -38,26 +62,7 @@ export const useImageHistory = () => {
 
       if (error) throw error;
 
-      const formattedHistory: HistoryImage[] = images.map((img: ImageRecord) => ({
-        url: img.url,
-        settings: {
-          prompt: img.prompt || '',
-          negativePrompt: img.negative_prompt || '',
-          guidanceScale: img.guidance_scale || 7.5,
-          steps: img.steps || 30,
-          seed: img.seed,
-          numOutputs: img.num_outputs || 1,
-          aspectRatio: img.aspect_ratio || '1:1',
-          outputFormat: (img.output_format || 'webp') as 'webp' | 'jpg' | 'png',
-          outputQuality: img.output_quality || 90,
-          promptStrength: img.prompt_strength || 0.8,
-          hfLoras: [],
-          loraScales: [],
-          disableSafetyChecker: false
-        },
-        timestamp: new Date(img.created_at).getTime()
-      }));
-
+      const formattedHistory = (images as DatabaseImageRecord[]).map(formatDatabaseImage);
       setHistory(formattedHistory);
     } catch (error) {
       console.error('Error fetching image history:', error);
@@ -74,26 +79,8 @@ export const useImageHistory = () => {
       .on('postgres_changes', 
         { event: 'INSERT', schema: 'public', table: 'images' },
         (payload) => {
-          const newImage = payload.new as ImageRecord;
-          const formattedImage: HistoryImage = {
-            url: newImage.url,
-            settings: {
-              prompt: newImage.prompt || '',
-              negativePrompt: newImage.negative_prompt || '',
-              guidanceScale: newImage.guidance_scale || 7.5,
-              steps: newImage.steps || 30,
-              seed: newImage.seed,
-              numOutputs: newImage.num_outputs || 1,
-              aspectRatio: newImage.aspect_ratio || '1:1',
-              outputFormat: (newImage.output_format || 'webp') as 'webp' | 'jpg' | 'png',
-              outputQuality: newImage.output_quality || 90,
-              promptStrength: newImage.prompt_strength || 0.8,
-              hfLoras: [],
-              loraScales: [],
-              disableSafetyChecker: false
-            },
-            timestamp: new Date(newImage.created_at).getTime()
-          };
+          const newImage = payload.new as DatabaseImageRecord;
+          const formattedImage = formatDatabaseImage(newImage);
           setHistory(prev => [formattedImage, ...prev]);
         }
       )
