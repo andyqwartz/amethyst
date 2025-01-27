@@ -1,4 +1,4 @@
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 
 const predictionIds = [
   "cxxj29zwndrme0cmn7ft85eehw",
@@ -8,8 +8,6 @@ const predictionIds = [
 ];
 
 export const downloadLostImages = async () => {
-  const { toast } = useToast();
-  
   let successCount = 0;
   let failCount = 0;
 
