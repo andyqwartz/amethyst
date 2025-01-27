@@ -1,57 +1,57 @@
-import { supabase } from '@/integrations/supabase/client';
+import { toast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const predictionIds = [
-  "cxxj29zwndrme0cmn7ft85eehw",
-  "xtrz107wg1rmc0cmn7fs2g91rw",
-  "0r0e54fwehrmc0cmn7frmbxz50",
-  "3ngrfdfw65rmc0cmn7fr350cj4",
-  "5w18c1qw3drmc0cmn7fvd61bvr",
-  "7m7aayfw0srme0cmn7fsqd7c50",
-  "wm1avmqvtsrm80cmn7fttd50s8",
-  "e4a4wyzvrnrm80cmn7fs91xbw8",
-  "e20dsmfvp1rm80cmn7fsd56438",
-  "3qazyxfvdnrm80cmn7fr46n1j0",
-  "8gt28zfvahrm80cmn7fsfe3hgr",
-  "gsf8xeqv59rmc0cmn7frp4nv88",
-  "pkpnjxzv55rmc0cmn7fs9x88hg",
-  "6d211xqtzsrmc0cmn7fr81x1ec",
-  "b1akzeztx9rma0cmn7fserdqp4",
-  "9xe6t0ftw5rm80cmn7fsf6c8p0",
-  "ge70p67tnsrme0cmn7fvjvc1dg",
-  "04x2x7ztdnrm80cmn7fs5xh0hg",
-  "6cef3fqt95rme0cmn7fsrq680m",
-  "q25wkyft7xrm80cmn7fs5r8y3g",
-  "a89800ft6hrmc0cmn7frjefmrg",
-  "7gxykvqsyxrme0cmn7frjv2970",
-  "0f941y7swnrm80cmn7fvxgbd2m",
-  "7894q2fss9rma0cmn7frj5cn2c",
-  "g2t4jdfsn1rm80cmn7frf3a6yw",
-  "5efsm5fsc9rma0cmn7fsqvzy8g",
-  "rm5qjhfs8drme0cmn7frt60fjr",
-  "1k3fyv7s59rmc0cmn7ftmab4rr",
-  "93wxvyfs1hrm80cmn7ftzffz0m",
-  "kd70nwqrwhrma0cmn7frfe22tw",
-  "31p839zrw9rmc0cmn7fr05fhym",
-  "2afy5w7rtxrme0cmn7fts3yh3m",
-  "kzkj6ffrtdrmc0cmn7fs1syr0c",
-  "e0hap8zrr1rmc0cmn7fr86d5c8",
-  "6gx33wfra5rma0cmn7frnjkzgw",
-  "w83fbxzqn9rmc0cmn7fs5t1gp8",
-  "cabqvjqqm9rma0cmn7frse08xm",
-  "6p3tdb7prnrme0cmn7fvej6rk8",
-  "qef7n0zpr1rme0cmn7fsmtvyyw",
-  "2ckt2fzp6drmc0cmn7fs7wgjqc",
-  "9ec24pzp59rm80cmn7fswq659g",
-  "0fjn8ezp4xrm80cmn7fs3ftj1c",
-  "gjafdafp4srm80cmn7fsq83xqc",
-  "fc6c14qp4hrm80cmn7frcyrfe8",
-  "dt4ymvzp49rme0cmn7ftejd018",
-  "b26jq2qp41rma0cmn7fvqq1jj8",
-  "mkkekkzp3xrme0cmn7fs8nfjtr",
-  "7ajq1h7p3nrme0cmn7ftth7s8m",
-  "bk2bg77p35rma0cmn7fsxvcdn8",
-  "0gqh6afp35rm80cmn7frpxydn0",
-  "xsn14s7p2drmc0cmn7fsze9b0g",
+  "92wdz9wp79rme0cmn7g883b7c8",
+  "stwxyrwnjsrme0cmn7gbgqyngw",
+  "ng72x4wnjhrmc0cmn7gat8r4ym",
+  "s6gf3gmnjhrm80cmn7gbbymr5g",
+  "j2zbwdcnj9rm80cmn7g8dk5fbc",
+  "wpcpjr4ngnrmc0cmn7gbyrzc1w",
+  "9ezsngwnfnrmc0cmn7gaeasbq8",
+  "p0x1rrmnf5rma0cmn7gapjpqj4",
+  "w55hbqwnexrma0cmn7gbwgvh7g",
+  "00wewk4ncxrma0cmn7gb6vfjyc",
+  "z94hspwnc1rmc0cmn7ga4n2cd4",
+  "6t5ae2wnbdrme0cmn7g8akghv4",
+  "k6m1k2mnbdrme0cmn7g9ajt368",
+  "rza6tdmnb5rme0cmn7g85zfp1g",
+  "z3222k4n9xrma0cmn7gad4ggcr",
+  "c9scngmn9nrmc0cmn7g8pkjf3c",
+  "9ap9t3cn85rma0cmn7gb4wdc3c",
+  "t2jt674n81rmc0cmn7g9h86sew",
+  "gb0ey04n55rme0cmn7g8mtc4jm",
+  "3fcy7p4n3xrmc0cmn7gbm06v1c",
+  "kz89mtmn2xrma0cmn7g9r3jfz0",
+  "tymy46wn2hrm80cmn7gb3nxjv8",
+  "0s2jwdcn19rm80cmn7g996dts8",
+  "b3rv2ywmxdrme0cmn7gah4wy0r",
+  "5zkat34mw5rma0cmn7g9tgdvd8",
+  "y6xs8jcmtsrma0cmn7gav7wqz8",
+  "myg3ktcmr9rme0cmn7g9zb93tc",
+  "54hrfdwmr1rma0cmn7gaqk8fb0",
+  "jcr3egwmndrme0cmn7gbrktwc0",
+  "vm5777cmn1rma0cmn7gbv26wp8",
+  "43124q4mjxrma0cmn7gac7q4jm",
+  "8szvnr4mfdrmc0cmn7g9rh04gg",
+  "4yerqtwmexrmc0cmn7gbea2y2w",
+  "qadnmqwmd9rmc0cmn7g9wwpj4g",
+  "a9amz7mmbnrme0cmn7gaz49h18",
+  "ncqw50r3tnrme0cmn7g80a16mw",
+  "tgz1bp837srma0cmn7ga0n11ym",
+  "zragws8329rme0cmn7gadwbw9g",
+  "hah7jgr2y9rm80cmn7gaysyjpg",
+  "ve857n82xsrmc0cmn7gay6z5dm",
+  "fgmknpg2rdrmc0cmn7gamwed2c",
+  "0z4fvcr2mnrmc0cmn7gbfs6ew4",
+  "73xn3402k5rma0cmn7gbp57s1w",
+  "rtgm3802j1rme0cmn7gafevgcr",
+  "vamdzsg2e9rma0cmn7gap8n9rm",
+  "svr8hvr2a9rma0cmn7gbbkhe9c",
+  "qf9m6w8285rma0cmn7gb9m7qjw",
+  "mdrd6e026hrmc0cmn7gb91x7rg",
+  "cy4qgx81x1rm80cmn7gb9ebznc",
+  "bf3mzs81vsrmc0cmn7g8qn7pdm",
   "mce0g47jmsrm80cmn7fr6a22pw",
   "jeqkmvfjjnrme0cmn7fsg66fn0",
   "8yn309qj5hrm80cmn7fs0djrnw",
@@ -116,15 +116,34 @@ const predictionIds = [
   "ks46295g9xrmc0cmn7fvv5h7h0",
   "v2tq47xg7hrm80cmn7fvsbw6dr",
   "6stk81xg3drma0cmn7fvwqk5ac"
+  // Adding the last few IDs for example
+  "5rtjzccq55rmc0cmn7ftqx38m8",
+  "n84s13mq8nrme0cmn7fvn5kj10",
+  "83jchgcq91rmc0cmn7fvt2rbtr",
+  "cyq6z5mqahrmc0cmn7frkn5s2g",
+  "4swf334qc5rm80cmn7ftqpn0n0",
+  "555529wqmsrm80cmn7frd1npp8"
 ];
 
 export const importLostImages = async () => {
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) {
-    console.error('No user logged in');
+    toast({
+      title: "Error",
+      description: "You must be logged in to import images",
+      variant: "destructive"
+    });
     return;
   }
+
+  toast({
+    title: "Starting import",
+    description: "Importing images to your history...",
+  });
+
+  let successCount = 0;
+  let failCount = 0;
 
   const defaultSettings = {
     prompt: "Restored image",
@@ -135,23 +154,46 @@ export const importLostImages = async () => {
     aspectRatio: "1:1",
     outputFormat: "webp",
     outputQuality: 90,
-    promptStrength: 0.8
+    promptStrength: 0.8,
+    hfLoras: [],
+    loraScales: [],
+    disableSafetyChecker: false
   };
 
-  const images = predictionIds.map(id => ({
-    url: `https://replicate.delivery/pbxt/${id}/output.png`,
-    settings: defaultSettings,
-    user_id: user.id,
-    ...defaultSettings
-  }));
+  for (const id of predictionIds) {
+    try {
+      const url = `https://replicate.delivery/pbxt/${id}/output.png`;
+      
+      const { error } = await supabase
+        .from('images')
+        .insert({
+          url,
+          settings: defaultSettings,
+          user_id: user.id,
+          ...defaultSettings,
+          generation_id: id
+        });
 
-  const { error } = await supabase
-    .from('images')
-    .insert(images);
+      if (error) throw error;
+      successCount++;
+    } catch (error) {
+      console.error(`Failed to import image ${id}:`, error);
+      failCount++;
+    }
+  }
 
-  if (error) {
-    console.error('Error importing images:', error);
+  if (failCount > 0) {
+    toast({
+      title: "Import partially complete",
+      description: `Successfully imported ${successCount} images. ${failCount} failed.`,
+      variant: "destructive",
+      duration: 5000,
+    });
   } else {
-    console.log('Successfully imported lost images');
+    toast({
+      title: "Import complete",
+      description: `Successfully imported ${successCount} images.`,
+      duration: 3000,
+    });
   }
 };
