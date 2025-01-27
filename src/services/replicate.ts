@@ -1,21 +1,17 @@
 import type { ReplicateInput } from '@/types/replicate';
 import { supabase } from '@/integrations/supabase/client';
 
-export async function generateImage(input: ReplicateInput): Promise<string[]> {
+export async function generateImage(input: ReplicateInput | { predictionId: string }): Promise<any> {
   try {
     const { data, error } = await supabase.functions.invoke('generate-image', {
-      body: { input },
+      body: input,
     });
 
     if (error) {
       throw error;
     }
 
-    if (!data.output) {
-      throw new Error('No output received from the model');
-    }
-
-    return data.output;
+    return data;
   } catch (error) {
     console.error('Error generating image:', error);
     throw error;

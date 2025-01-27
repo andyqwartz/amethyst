@@ -6,16 +6,18 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 }
 
+const GENERATION_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+const MODEL_VERSION = "lucataco/flux-dev-multi-lora:2389224e115448d9a77c07d7d45672b3f0aa45acacf1c5bcf51857ac295e3aec";
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const REPLICATE_API_KEY = Deno.env.get('REPLICATE_API_KEY')
     if (!REPLICATE_API_KEY) {
-      console.error('REPLICATE_API_KEY is not set')
       throw new Error('REPLICATE_API_KEY is not set')
     }
 
@@ -23,28 +25,76 @@ serve(async (req) => {
       auth: REPLICATE_API_KEY,
     })
 
-    const { input } = await req.json()
-    console.log("Received input:", input)
+    const { input, predictionId } = await req.json()
+    console.log("Request received:", { input, predictionId })
 
-    if (!input || !input.prompt) {
-      console.error('Missing required field: prompt')
-      throw new Error('Missing required field: prompt')
+    // If checking status of existing prediction
+    if (predictionId) {
+      console.log("Checking status for prediction:", predictionId)
+      try {
+        const prediction = await replicate.predictions.get(predictionId)
+        console.log("Status check response:", prediction)
+        
+        // If the prediction is completed or failed, we can return the result
+        if (prediction.status === 'succeeded') {
+          return new Response(JSON.stringify({ 
+            status: 'success',
+            output: prediction.output,
+            predictionId 
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          })
+        } else if (prediction.status === 'failed') {
+          return new Response(JSON.stringify({ 
+            status: 'error',
+            error: prediction.error,
+            predictionId 
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          })
+        }
+        
+        // Still processing
+        return new Response(JSON.stringify({ 
+          status: 'processing',
+          predictionId 
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        })
+      } catch (error) {
+        console.error("Error checking prediction status:", error)
+        return new Response(JSON.stringify({ 
+          status: 'error',
+          error: error.message,
+          predictionId
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500
+        })
+      }
     }
 
-    console.log("Starting image generation with input:", {
-      ...input,
-      prompt: input.prompt.substring(0, 100) + "..." // Truncate long prompts in logs
-    })
+    // New generation request
+    if (!input?.prompt) {
+      return new Response(JSON.stringify({ 
+        error: "Missing required field: prompt" 
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400
+      })
+    }
 
-    const output = await replicate.run(
-      "lucataco/flux-dev-multi-lora:2389224e115448d9a77c07d7d45672b3f0aa45acacf1c5bcf51857ac295e3aec",
-      {
+    console.log("Starting new generation with input:", input)
+    
+    try {
+      const prediction = await replicate.predictions.create({
+        version: MODEL_VERSION,
         input: {
           prompt: input.prompt,
           negative_prompt: input.negative_prompt,
           guidance_scale: input.guidance_scale,
           num_inference_steps: input.num_inference_steps,
-          num_outputs: input.num_outputs,
+          num_outputs: input.num_outputs || 1,
           seed: input.seed,
           aspect_ratio: input.aspect_ratio,
           output_format: input.output_format,
@@ -54,18 +104,31 @@ serve(async (req) => {
           lora_scales: input.lora_scales,
           disable_safety_checker: input.disable_safety_checker,
         }
-      }
-    )
+      })
 
-    console.log("Generation successful, output:", output)
-    return new Response(JSON.stringify({ output }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+      console.log("Generation started, prediction:", prediction)
+      
+      return new Response(JSON.stringify({ 
+        status: 'started',
+        predictionId: prediction.id 
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    } catch (error) {
+      console.error("Error starting generation:", error)
+      return new Response(JSON.stringify({ 
+        status: 'error',
+        error: error.message 
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500
+      })
+    }
   } catch (error) {
     console.error("Error in generate-image function:", error)
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500,
+      status: 500
     })
   }
 })
