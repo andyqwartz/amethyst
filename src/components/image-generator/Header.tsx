@@ -14,7 +14,7 @@ export const Header = ({
   onHelpClick
 }: HeaderProps) => {
   return (
-    <div className="relative overflow-hidden p-6 rounded-xl flex justify-between items-center mb-6 backdrop-blur-xl bg-gradient-to-r from-card/40 to-card/60 border border-primary/20 shadow-lg animate-border-glow animate-float">
+    <div className="relative overflow-hidden p-6 rounded-xl flex justify-between items-center mb-4 backdrop-blur-xl bg-gradient-to-r from-card/40 to-card/60 border border-primary/20 shadow-lg animate-border-glow animate-float">
       <div className="flex items-center gap-3">
         <div className="relative">
           <div className="absolute inset-0 bg-primary/20 blur-xl animate-pulse rounded-full"></div>
