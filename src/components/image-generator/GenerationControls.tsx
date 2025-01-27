@@ -23,7 +23,7 @@ export const GenerationControls = ({
     const text = textarea.value;
     
     // Calculer la largeur nécessaire basée sur la longueur du texte
-    const charWidth = 8; // Largeur approximative d'un caractère en pixels
+    const charWidth = 12; // Largeur approximative d'un caractère en pixels
     const minWidth = 200; // Largeur minimale
     const calculatedWidth = Math.max(minWidth, Math.min(text.length * charWidth, 400));
     
@@ -31,7 +31,7 @@ export const GenerationControls = ({
     
     // Ajuster la hauteur automatiquement
     textarea.style.height = 'auto';
-    const lines = Math.ceil(text.length / 20); // Nombre de lignes basé sur 20 caractères par ligne
+    const lines = Math.ceil(text.length / 10); // Nombre de lignes basé sur 10 caractères par ligne
     const lineHeight = 24; // Hauteur de ligne en pixels
     textarea.style.height = `${Math.max(40, lines * lineHeight)}px`;
     
