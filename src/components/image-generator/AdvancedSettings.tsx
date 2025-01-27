@@ -24,11 +24,14 @@ interface AdvancedSettingsProps {
 export const AdvancedSettings = ({ settings, onSettingsChange }: AdvancedSettingsProps) => {
   const [loraHistory, setLoraHistory] = useState<string[]>(() => {
     const saved = localStorage.getItem('lora_history');
-    return saved ? JSON.parse(saved) : DEFAULT_LORAS;
+    return saved ? JSON.parse(saved).filter((item: string) => item && item.trim()) : DEFAULT_LORAS;
   });
 
   useEffect(() => {
-    const uniqueLoras = Array.from(new Set([...settings.hfLoras.filter(lora => lora.trim()), ...loraHistory]));
+    const uniqueLoras = Array.from(new Set([
+      ...settings.hfLoras.filter(lora => lora && lora.trim()),
+      ...loraHistory.filter(lora => lora && lora.trim())
+    ]));
     localStorage.setItem('lora_history', JSON.stringify(uniqueLoras));
     setLoraHistory(uniqueLoras);
   }, [settings.hfLoras]);
@@ -55,10 +58,10 @@ export const AdvancedSettings = ({ settings, onSettingsChange }: AdvancedSetting
       newScales[index] = parseFloat(value);
       onSettingsChange({ loraScales: newScales });
     } else {
-      if (!value.trim()) return;
+      if (!value || !value.trim()) return;
       
       const newLoras = [...settings.hfLoras];
-      newLoras[index] = value;
+      newLoras[index] = value.trim();
       onSettingsChange({ hfLoras: newLoras });
     }
   };
@@ -238,8 +241,8 @@ export const AdvancedSettings = ({ settings, onSettingsChange }: AdvancedSetting
               <SelectTrigger className="bg-popover border-primary/20 flex-grow">
                 <SelectValue placeholder="Select or enter LoRA path" />
               </SelectTrigger>
-              <SelectContent className="bg-popover/100 border-primary/20">
-                {loraHistory.map((historyLora) => (
+              <SelectContent className="bg-popover border-primary/20">
+                {loraHistory.filter(item => item && item.trim()).map((historyLora) => (
                   <SelectItem key={historyLora} value={historyLora}>
                     {historyLora}
                   </SelectItem>
