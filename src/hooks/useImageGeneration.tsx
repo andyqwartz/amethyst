@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { generateImage } from '@/services/replicate';
-import type { GenerationSettings, GenerationStatus } from '@/types/replicate';
+import type { GenerationSettings, GenerationStatus, ReplicateInput } from '@/types/replicate';
 import { useImageHistory } from './useImageHistory';
 
 const POLL_INTERVAL = 2000; // 2 seconds
@@ -86,6 +86,22 @@ export const useImageGeneration = () => {
     return () => clearInterval(pollInterval);
   }, [predictionId, status]);
 
+  const mapSettingsToInput = (settings: GenerationSettings): ReplicateInput => ({
+    prompt: settings.prompt,
+    negative_prompt: settings.negativePrompt,
+    guidance_scale: settings.guidanceScale,
+    num_inference_steps: settings.steps,
+    seed: settings.seed,
+    num_outputs: settings.numOutputs,
+    aspect_ratio: settings.aspectRatio,
+    output_format: settings.outputFormat,
+    output_quality: settings.outputQuality,
+    prompt_strength: settings.promptStrength,
+    hf_loras: settings.hfLoras,
+    lora_scales: settings.loraScales,
+    disable_safety_checker: settings.disableSafetyChecker
+  });
+
   const generate = async (settings: GenerationSettings) => {
     if (!settings.prompt.trim()) {
       toast({
@@ -110,7 +126,8 @@ export const useImageGeneration = () => {
     setStatus('loading');
     
     try {
-      const response = await generateImage({ input: settings });
+      const input = mapSettingsToInput(settings);
+      const response = await generateImage({ input });
       
       if (response.status === 'started') {
         setPredictionId(response.predictionId);
