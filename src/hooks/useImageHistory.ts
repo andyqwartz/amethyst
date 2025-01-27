@@ -13,6 +13,16 @@ interface ImageRecord {
   url: string;
   settings: Json;
   created_at: string;
+  prompt: string;
+  negative_prompt: string;
+  guidance_scale: number;
+  steps: number;
+  seed: number;
+  num_outputs: number;
+  aspect_ratio: string;
+  output_format: string;
+  output_quality: number;
+  prompt_strength: number;
 }
 
 export const useImageHistory = () => {
@@ -28,9 +38,23 @@ export const useImageHistory = () => {
 
       if (error) throw error;
 
-      const formattedHistory = images.map(img => ({
+      const formattedHistory = images.map((img: ImageRecord) => ({
         url: img.url,
-        settings: img.settings as unknown as GenerationSettings,
+        settings: {
+          prompt: img.prompt || '',
+          negativePrompt: img.negative_prompt || '',
+          guidanceScale: img.guidance_scale || 7.5,
+          steps: img.steps || 30,
+          seed: img.seed,
+          numOutputs: img.num_outputs || 1,
+          aspectRatio: img.aspect_ratio || '1:1',
+          outputFormat: img.output_format || 'webp',
+          outputQuality: img.output_quality || 90,
+          promptStrength: img.prompt_strength || 0.8,
+          hfLoras: [],
+          loraScales: [],
+          disableSafetyChecker: false
+        },
         timestamp: new Date(img.created_at).getTime()
       }));
 
@@ -53,7 +77,21 @@ export const useImageHistory = () => {
           const newImage = payload.new as ImageRecord;
           setHistory(prev => [{
             url: newImage.url,
-            settings: newImage.settings as unknown as GenerationSettings,
+            settings: {
+              prompt: newImage.prompt || '',
+              negativePrompt: newImage.negative_prompt || '',
+              guidanceScale: newImage.guidance_scale || 7.5,
+              steps: newImage.steps || 30,
+              seed: newImage.seed,
+              numOutputs: newImage.num_outputs || 1,
+              aspectRatio: newImage.aspect_ratio || '1:1',
+              outputFormat: newImage.output_format || 'webp',
+              outputQuality: newImage.output_quality || 90,
+              promptStrength: newImage.prompt_strength || 0.8,
+              hfLoras: [],
+              loraScales: [],
+              disableSafetyChecker: false
+            },
             timestamp: new Date(newImage.created_at).getTime()
           }, ...prev]);
         }
@@ -73,7 +111,16 @@ export const useImageHistory = () => {
           url,
           settings: settings as unknown as Json,
           user_id: (await supabase.auth.getUser()).data.user?.id,
-          prompt: settings.prompt
+          prompt: settings.prompt,
+          negative_prompt: settings.negativePrompt,
+          guidance_scale: settings.guidanceScale,
+          steps: settings.steps,
+          seed: settings.seed,
+          num_outputs: settings.numOutputs,
+          aspect_ratio: settings.aspectRatio,
+          output_format: settings.outputFormat,
+          output_quality: settings.outputQuality,
+          prompt_strength: settings.promptStrength
         });
 
       if (error) throw error;

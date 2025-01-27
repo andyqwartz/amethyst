@@ -11,29 +11,59 @@ export type Database = {
     Tables: {
       images: {
         Row: {
+          aspect_ratio: string | null
           created_at: string
+          generation_id: string | null
+          guidance_scale: number | null
           id: string
+          negative_prompt: string | null
+          num_outputs: number | null
+          output_format: string | null
+          output_quality: number | null
           prompt: string | null
+          prompt_strength: number | null
           reference_image_url: string | null
+          seed: number | null
           settings: Json | null
+          steps: number | null
           url: string
           user_id: string
         }
         Insert: {
+          aspect_ratio?: string | null
           created_at?: string
+          generation_id?: string | null
+          guidance_scale?: number | null
           id?: string
+          negative_prompt?: string | null
+          num_outputs?: number | null
+          output_format?: string | null
+          output_quality?: number | null
           prompt?: string | null
+          prompt_strength?: number | null
           reference_image_url?: string | null
+          seed?: number | null
           settings?: Json | null
+          steps?: number | null
           url: string
           user_id: string
         }
         Update: {
+          aspect_ratio?: string | null
           created_at?: string
+          generation_id?: string | null
+          guidance_scale?: number | null
           id?: string
+          negative_prompt?: string | null
+          num_outputs?: number | null
+          output_format?: string | null
+          output_quality?: number | null
           prompt?: string | null
+          prompt_strength?: number | null
           reference_image_url?: string | null
+          seed?: number | null
           settings?: Json | null
+          steps?: number | null
           url?: string
           user_id?: string
         }

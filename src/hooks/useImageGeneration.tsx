@@ -4,7 +4,7 @@ import { generateImage } from '@/services/replicate';
 import type { GenerationSettings, GenerationStatus } from '@/types/replicate';
 import { useImageHistory } from './useImageHistory';
 
-const POLL_INTERVAL = 2000; // 2 seconds
+const POLL_INTERVAL = 2000;
 const GENERATION_KEY = 'ongoing_generation';
 
 interface GenerationState {
@@ -20,7 +20,6 @@ export const useImageGeneration = () => {
   const { addToHistory } = useImageHistory();
   const [predictionId, setPredictionId] = useState<string | null>(null);
 
-  // Restore generation state on mount
   useEffect(() => {
     const savedState = localStorage.getItem(GENERATION_KEY);
     if (savedState) {
@@ -42,7 +41,6 @@ export const useImageGeneration = () => {
     }
   }, []);
 
-  // Poll for generation status
   useEffect(() => {
     if (!predictionId || status !== 'loading') return;
 
@@ -56,7 +54,7 @@ export const useImageGeneration = () => {
           localStorage.removeItem(GENERATION_KEY);
           setPredictionId(null);
           
-          // Add generated images to history
+          // Add generated images to history with all settings
           for (const url of response.output) {
             await addToHistory(url, response.settings);
           }
@@ -68,7 +66,6 @@ export const useImageGeneration = () => {
         } else if (response.status === 'error') {
           throw new Error(response.error);
         }
-        // Continue polling if still processing
       } catch (error) {
         console.error('Error checking generation status:', error);
         setStatus('error');
@@ -118,7 +115,6 @@ export const useImageGeneration = () => {
       return;
     }
 
-    // Check if there's already an ongoing generation
     if (status === 'loading') {
       toast({
         title: "Génération en cours",
@@ -128,11 +124,9 @@ export const useImageGeneration = () => {
       return;
     }
 
-    console.log('Starting generation with settings:', settings);
     setStatus('loading');
     
     try {
-      // Convert GenerationSettings to ReplicateInput format
       const replicateInput = {
         prompt: settings.prompt,
         negative_prompt: settings.negativePrompt,
@@ -154,7 +148,6 @@ export const useImageGeneration = () => {
       if (response.status === 'started') {
         setPredictionId(response.predictionId);
         
-        // Save generation state
         const generationState: GenerationState = {
           predictionId: response.predictionId,
           settings,
