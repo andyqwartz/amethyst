@@ -93,17 +93,21 @@ export const LoraSettings = ({ settings, onSettingsChange }: LoraSettingsProps) 
       </div>
 
       {settings.hfLoras.map((lora, index) => (
-        <div key={index} className="flex items-center gap-2 md:gap-4 min-w-0">
+        <div key={index} className="flex items-center gap-2 md:gap-4">
           <Select
             value={lora || DEFAULT_LORAS[0]}
             onValueChange={(value) => updateLoraField(index, value)}
           >
-            <SelectTrigger className="bg-card border-primary/20 flex-1 min-w-0">
-              <SelectValue placeholder="Select or enter LoRA path" />
+            <SelectTrigger className="bg-card border-primary/20 flex-1 min-w-0 whitespace-normal break-words">
+              <SelectValue className="text-wrap" />
             </SelectTrigger>
-            <SelectContent className="bg-card border-primary/20">
+            <SelectContent className="bg-card border-primary/20 max-w-[90vw] md:max-w-[40vw]">
               {loraHistory.filter(item => item && item.trim()).map((historyLora) => (
-                <SelectItem key={historyLora} value={historyLora}>
+                <SelectItem 
+                  key={historyLora} 
+                  value={historyLora}
+                  className="whitespace-normal break-words pr-6"
+                >
                   {historyLora}
                 </SelectItem>
               ))}
