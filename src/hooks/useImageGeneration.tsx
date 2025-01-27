@@ -86,6 +86,28 @@ export const useImageGeneration = () => {
     return () => clearInterval(pollInterval);
   }, [predictionId, status]);
 
+  const cancelGeneration = async () => {
+    if (predictionId) {
+      try {
+        await generateImage({ predictionId, action: 'cancel' });
+        setStatus('idle');
+        setPredictionId(null);
+        localStorage.removeItem(GENERATION_KEY);
+        toast({
+          title: "Génération annulée",
+          description: "La génération a été annulée avec succès",
+        });
+      } catch (error) {
+        console.error('Error cancelling generation:', error);
+        toast({
+          title: "Erreur",
+          description: "Impossible d'annuler la génération",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   const generate = async (settings: GenerationSettings) => {
     if (!settings.prompt.trim()) {
       toast({
@@ -140,6 +162,7 @@ export const useImageGeneration = () => {
   return {
     status,
     generatedImages,
-    generate
+    generate,
+    cancelGeneration
   };
 };

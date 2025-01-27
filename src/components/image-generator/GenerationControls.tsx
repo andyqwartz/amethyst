@@ -1,12 +1,13 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Settings, Sparkles } from 'lucide-react';
+import { Settings, Sparkles, XCircle } from 'lucide-react';
 import type { GenerationSettings } from '@/types/replicate';
 
 interface GenerationControlsProps {
   settings: GenerationSettings;
   onSettingsChange: (settings: Partial<GenerationSettings>) => void;
   onGenerate: () => void;
+  onCancel: () => void;
   onToggleSettings: () => void;
   isGenerating: boolean;
 }
@@ -15,6 +16,7 @@ export const GenerationControls = ({
   settings,
   onSettingsChange,
   onGenerate,
+  onCancel,
   onToggleSettings,
   isGenerating
 }: GenerationControlsProps) => {
@@ -106,14 +108,25 @@ export const GenerationControls = ({
           Paramètres avancés
         </Button>
 
-        <Button
-          onClick={onGenerate}
-          disabled={isGenerating}
-          className="w-full bg-primary hover:bg-primary-hover text-primary-foreground rounded-full transition-all duration-200"
-        >
-          <Sparkles className={`h-4 w-4 mr-2 ${isGenerating ? 'animate-spin' : ''}`} />
-          Générer
-        </Button>
+        {isGenerating ? (
+          <Button
+            onClick={onCancel}
+            className="w-full bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-full transition-all duration-200"
+            variant="destructive"
+          >
+            <XCircle className="h-4 w-4 mr-2" />
+            Annuler la génération
+          </Button>
+        ) : (
+          <Button
+            onClick={onGenerate}
+            disabled={isGenerating}
+            className="w-full bg-primary hover:bg-primary-hover text-primary-foreground rounded-full transition-all duration-200"
+          >
+            <Sparkles className={`h-4 w-4 mr-2 ${isGenerating ? 'animate-spin' : ''}`} />
+            Générer
+          </Button>
+        )}
       </div>
     </div>
   );

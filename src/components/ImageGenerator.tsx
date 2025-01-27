@@ -28,7 +28,7 @@ export const ImageGenerator = () => {
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { settings, updateSettings } = useGenerationSettings();
-  const { status, generatedImages, generate } = useImageGeneration();
+  const { status, generatedImages, generate, cancelGeneration } = useImageGeneration();
   const { progress, status: persistedStatus, savedFile, savedSettings } = useGenerationProgress(
     status === 'loading',
     referenceImage,
@@ -167,6 +167,7 @@ export const ImageGenerator = () => {
                 settings={settings}
                 onSettingsChange={updateSettings}
                 onGenerate={handleGenerate}
+                onCancel={cancelGeneration}
                 onToggleSettings={() => setShowSettings(!showSettings)}
                 isGenerating={status === 'loading'}
               />
