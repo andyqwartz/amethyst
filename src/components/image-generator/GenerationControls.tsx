@@ -32,8 +32,8 @@ export const GenerationControls = ({
           <div className="
             relative 
             inline-block
-            p-1.5
-            rounded-2xl 
+            p-1
+            rounded-full
             bg-gradient-to-br 
             from-primary/5 
             to-primary/10 
@@ -48,23 +48,25 @@ export const GenerationControls = ({
               className="
                 block
                 w-auto
-                min-w-[80px]
-                min-h-[36px]
+                min-w-[60px]
+                min-h-[28px]
+                max-h-[28px]
                 bg-card/80 
                 border 
                 border-primary/20 
                 text-foreground 
                 placeholder:text-primary/50 
                 focus:border-primary/50 
-                rounded-xl
+                rounded-full
                 px-3
-                py-1.5
+                py-0.5
                 text-center
+                text-sm
                 transition-all 
                 duration-300
                 shadow-inner
                 leading-tight
-                break-words
+                whitespace-nowrap
                 overflow-hidden
                 focus:outline-none
                 focus:ring-2
