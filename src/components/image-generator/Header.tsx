@@ -14,14 +14,14 @@ export const Header = ({
   onHelpClick
 }: HeaderProps) => {
   return (
-    <div className="relative overflow-hidden p-6 rounded-xl flex justify-between items-center mb-4 backdrop-blur-xl bg-gradient-to-r from-card/40 to-card/60 border border-primary/20 shadow-lg animate-fade-in">
+    <div className="relative overflow-hidden p-6 rounded-xl flex justify-between items-center mb-4 backdrop-blur-xl bg-gradient-to-r from-card/40 to-card/60 border border-primary/20 shadow-lg animate-border-glow animate-float">
       <div className="flex items-center gap-3">
         <div className="relative">
           <div className="absolute inset-0 bg-primary/20 blur-xl animate-pulse rounded-full"></div>
           <Sparkles className="h-8 w-8 text-primary relative animate-pulse" />
         </div>
         <div className="flex flex-col items-start">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent bg-[length:200%] animate-[gradient_8s_linear_infinite]">
+          <h1 className="text-3xl font-bold font-outfit bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent bg-[length:200%] animate-[gradient_8s_linear_infinite] tracking-tight">
             Amethyst
           </h1>
         </div>
