@@ -48,7 +48,7 @@ export const GenerationControls = ({
               className="
                 block
                 w-auto
-                min-w-[60px]
+                min-w-[200px]
                 h-10
                 bg-card/80 
                 border 
