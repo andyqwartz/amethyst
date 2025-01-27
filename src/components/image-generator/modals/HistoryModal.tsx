@@ -39,20 +39,24 @@ export const HistoryModal = ({
           </DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4 overflow-y-auto flex-grow">
             {images.map((image, index) => (
-              <div key={index} className="relative group rounded-lg overflow-hidden hover-scale glass-card">
+              <div key={`${image.url}-${index}`} className="relative group rounded-lg overflow-hidden hover-scale glass-card">
                 <img
                   src={image.url}
                   alt={`Generated image ${index + 1}`}
                   className="w-full h-full object-cover aspect-square rounded-lg transition-transform duration-300 group-hover:scale-105"
+                  loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex flex-col justify-end p-4 gap-4">
                   <div className="text-xs text-white/80 space-y-1">
-                    <p className="font-medium">Prompt: {image.settings.prompt}</p>
+                    <p className="font-medium truncate">Prompt: {image.settings.prompt}</p>
                     {image.settings.negativePrompt && (
-                      <p>Negative: {image.settings.negativePrompt}</p>
+                      <p className="truncate">Negative: {image.settings.negativePrompt}</p>
                     )}
                     <p>Steps: {image.settings.steps} | Scale: {image.settings.guidanceScale}</p>
                     <p>Size: {image.settings.aspectRatio} | Seed: {image.settings.seed || 'Random'}</p>
+                    {image.settings.hfLoras && image.settings.hfLoras.length > 0 && (
+                      <p className="truncate">LoRAs: {image.settings.hfLoras.join(', ')}</p>
+                    )}
                   </div>
                   <div className="flex justify-center gap-2">
                     <Button
