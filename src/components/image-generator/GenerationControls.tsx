@@ -19,20 +19,19 @@ export const GenerationControls = ({
   isGenerating
 }: GenerationControlsProps) => {
   const handleTextareaInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    e.target.style.height = 'auto';
-    e.target.style.height = `${e.target.scrollHeight}px`;
-    onSettingsChange({ prompt: e.target.value });
+    const textarea = e.target;
+    // Reset height to auto to properly calculate new height
+    textarea.style.height = 'auto';
+    // Set new height based on scrollHeight
+    textarea.style.height = `${textarea.scrollHeight}px`;
+    // Update prompt in settings
+    onSettingsChange({ prompt: textarea.value });
   };
-
-  const inputWidth = settings.prompt ? Math.min(Math.max(settings.prompt.length * 0.6, 60), 90) : 60;
 
   return (
     <div className="space-y-6">
       <div className="flex justify-center items-center min-h-[60px] my-6">
-        <div 
-          className="relative transition-all duration-500 ease-in-out flex justify-center items-center"
-          style={{ width: `${inputWidth}%` }}
-        >
+        <div className="relative w-full max-w-3xl transition-all duration-500 ease-in-out">
           <textarea
             placeholder="Imagine..."
             value={settings.prompt}
@@ -60,6 +59,10 @@ export const GenerationControls = ({
               leading-relaxed
               break-words
               overflow-hidden
+              focus:outline-none
+              focus:ring-2
+              focus:ring-primary/20
+              hover:border-primary/30
             "
             style={{
               transform: settings.prompt ? 'scale(1.02)' : 'scale(1)',
