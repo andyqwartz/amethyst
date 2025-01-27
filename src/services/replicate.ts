@@ -4,14 +4,47 @@ const MODEL_VERSION = "lucataco/flux-dev-multi-lora:2389224e115448d9a77c07d7d456
 
 export async function generateImage(input: ReplicateInput): Promise<string[]> {
   try {
-    throw new Error(
-      "Due to CORS restrictions, the Replicate API cannot be called directly from the browser. " +
-      "To use this feature, you'll need to either:\n\n" +
-      "1. Set up a proxy server to handle the API calls\n" +
-      "2. Use a serverless function (e.g., Vercel Edge Functions)\n" +
-      "3. Use a CORS proxy service (note: not recommended for production)\n\n" +
-      "For development purposes, you can find example implementations in the Replicate documentation."
-    );
+    const response = await fetch('https://api.replicate.com/v1/predictions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Token ${import.meta.env.VITE_REPLICATE_API_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        version: MODEL_VERSION,
+        input,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        "To use this feature, you'll need to either:\n\n" +
+        "1. Set up a proxy server to handle the API calls\n" +
+        "2. Use a serverless function (e.g., Vercel Edge Functions)\n" +
+        "3. Create a backend API route to handle the requests\n\n" +
+        "This is required due to CORS restrictions from Replicate's API."
+      );
+    }
+
+    const prediction = await response.json();
+    
+    // Poll for the result
+    let result = prediction;
+    while (result.status !== 'succeeded' && result.status !== 'failed') {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const pollResponse = await fetch(`https://api.replicate.com/v1/predictions/${prediction.id}`, {
+        headers: {
+          'Authorization': `Token ${import.meta.env.VITE_REPLICATE_API_TOKEN}`,
+        },
+      });
+      result = await pollResponse.json();
+    }
+
+    if (result.status === 'failed') {
+      throw new Error(result.error);
+    }
+
+    return result.output;
   } catch (error) {
     console.error('Error generating image:', error);
     throw error;

@@ -32,3 +32,16 @@ export interface GenerationSettings {
 }
 
 export type GenerationStatus = 'idle' | 'loading' | 'success' | 'error';
+
+export interface ReplicatePrediction {
+  id: string;
+  version: string;
+  input: ReplicateInput;
+  output: string[] | null;
+  status: 'starting' | 'processing' | 'succeeded' | 'failed' | 'canceled';
+  error: string | null;
+  logs: string;
+  metrics: {
+    predict_time: number;
+  };
+}
