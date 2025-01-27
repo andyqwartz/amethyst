@@ -28,7 +28,7 @@ export const GenerationControls = ({
           style={{ width: `${inputWidth}%` }}
         >
           <textarea
-            placeholder="Décrivez votre image..."
+            placeholder="Imagine..."
             value={settings.prompt}
             onChange={(e) => onSettingsChange({ prompt: e.target.value })}
             rows={settings.prompt ? Math.max(Math.ceil(settings.prompt.length / 100), 1) : 1}
