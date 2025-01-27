@@ -76,7 +76,7 @@ export const LoraSettings = ({ settings, onSettingsChange }: LoraSettingsProps) 
   );
 
   return (
-    <div className="space-y-4 p-6 bg-card/95 backdrop-blur-xl rounded-xl border border-primary/10 shadow-xl">
+    <div className="space-y-4 p-4 md:p-6 bg-card/95 backdrop-blur-xl rounded-xl border border-primary/10 shadow-xl w-full overflow-x-hidden">
       <div className="flex items-center justify-between">
         <Label className="flex items-center">
           LoRA Weights {renderTooltip("Huggingface path or URL to the LoRA weights")}
@@ -93,7 +93,7 @@ export const LoraSettings = ({ settings, onSettingsChange }: LoraSettingsProps) 
       </div>
 
       {settings.hfLoras.map((lora, index) => (
-        <div key={index} className="flex gap-4">
+        <div key={index} className="flex gap-2 md:gap-4">
           <Select
             value={lora || DEFAULT_LORAS[0]}
             onValueChange={(value) => updateLoraField(index, value)}
@@ -126,7 +126,7 @@ export const LoraSettings = ({ settings, onSettingsChange }: LoraSettingsProps) 
             type="number"
             value={settings.loraScales[index]}
             onChange={(e) => updateLoraField(index, e.target.value, true)}
-            className="bg-card border-primary/20 w-24"
+            className="bg-card border-primary/20 w-20 md:w-24"
             step={0.1}
             min={0}
             max={1}
