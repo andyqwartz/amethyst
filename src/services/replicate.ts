@@ -18,11 +18,17 @@ export async function generateImage(input: ReplicateInput): Promise<string[]> {
 
     if (!response.ok) {
       throw new Error(
-        "To use this feature, you'll need to either:\n\n" +
-        "1. Set up a proxy server to handle the API calls\n" +
-        "2. Use a serverless function (e.g., Vercel Edge Functions)\n" +
-        "3. Create a backend API route to handle the requests\n\n" +
-        "This is required due to CORS restrictions from Replicate's API."
+        "Due to CORS restrictions, you'll need to implement one of these solutions:\n\n" +
+        "1. Create a proxy server (e.g., using Express.js):\n" +
+        "   - Set up a server that forwards requests to Replicate\n" +
+        "   - Add proper CORS headers in your server\n\n" +
+        "2. Use serverless functions (e.g., Vercel Edge Functions):\n" +
+        "   - Create an API route that handles the Replicate requests\n" +
+        "   - Deploy your app to Vercel\n\n" +
+        "3. Use a CORS proxy service (for development only):\n" +
+        "   - Use a service like cors-anywhere\n" +
+        "   - Update the API URL to go through the proxy\n\n" +
+        "For production, option 1 or 2 is recommended."
       );
     }
 
