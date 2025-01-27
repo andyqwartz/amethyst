@@ -6,12 +6,11 @@ export const useGenerationProgress = (isGenerating: boolean) => {
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState<GenerationStatus>('idle');
 
+  // Use the persistence hook to save/restore state
   useGenerationPersistence(
     isGenerating ? 'loading' : 'idle',
     progress,
-    (newStatus) => {
-      if (newStatus === 'loading') setStatus('loading');
-    },
+    setStatus,
     setProgress
   );
 
@@ -19,6 +18,11 @@ export const useGenerationProgress = (isGenerating: boolean) => {
     if (!isGenerating) {
       setProgress(0);
       return;
+    }
+
+    // If we're restoring a generation in progress, start from the saved progress
+    if (progress === 0) {
+      setProgress(5);
     }
 
     const interval = setInterval(() => {
@@ -34,10 +38,9 @@ export const useGenerationProgress = (isGenerating: boolean) => {
     return () => clearInterval(interval);
   }, [isGenerating]);
 
-  const completeProgress = () => {
-    setProgress(100);
-    setTimeout(() => setProgress(0), 1000);
+  return { 
+    progress, 
+    setProgress,
+    status 
   };
-
-  return { progress, completeProgress, status };
 };

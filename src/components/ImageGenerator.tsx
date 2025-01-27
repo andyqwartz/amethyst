@@ -27,7 +27,7 @@ export const ImageGenerator = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { settings, updateSettings } = useGenerationSettings();
   const { status, generatedImages, generate } = useImageGeneration();
-  const { progress } = useGenerationProgress(status === 'loading');
+  const { progress, status: persistedStatus } = useGenerationProgress(status === 'loading');
   const { history, allHistory, isLoading } = useImageHistory();
 
   useEffect(() => {
@@ -180,7 +180,7 @@ export const ImageGenerator = () => {
       </div>
 
       <GenerationLoadingState 
-        isGenerating={status === 'loading'} 
+        isGenerating={status === 'loading' || persistedStatus === 'loading'} 
         progress={progress}
       />
     </>
