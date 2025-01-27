@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useGenerationPersistence } from './useGenerationPersistence';
-import { GenerationStatus } from '@/types/replicate';
-import type { GenerationSettings } from '@/types/replicate';
+import { GenerationStatus, GenerationSettings } from '@/types/replicate';
 
 export const useGenerationProgress = (
   isGenerating: boolean, 
@@ -12,7 +11,8 @@ export const useGenerationProgress = (
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState<GenerationStatus>('idle');
 
-  const persistenceResult = useGenerationPersistence(
+  // Use the persistence hook to save/restore state
+  const { shouldRetry, savedFile, savedSettings } = useGenerationPersistence(
     isGenerating ? 'loading' : status,
     progress,
     setStatus,
@@ -22,16 +22,13 @@ export const useGenerationProgress = (
   );
 
   useEffect(() => {
-    if (persistenceResult.shouldRetry && persistenceResult.settings && onRetry) {
-      onRetry(persistenceResult.settings);
+    if (shouldRetry && savedSettings && onRetry) {
+      onRetry(savedSettings);
     }
-  }, [persistenceResult.shouldRetry, persistenceResult.settings, onRetry]);
+  }, [shouldRetry, savedSettings, onRetry]);
 
   useEffect(() => {
-    // Clear status and progress if not generating
     if (!isGenerating) {
-      setStatus('idle');
-      setProgress(0);
       return;
     }
 
@@ -57,7 +54,7 @@ export const useGenerationProgress = (
     progress, 
     setProgress,
     status,
-    savedFile: persistenceResult.savedFile,
-    savedSettings: persistenceResult.savedSettings
+    savedFile,
+    savedSettings
   };
 };

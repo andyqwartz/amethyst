@@ -33,7 +33,7 @@ export const ImageGenerator = () => {
     status === 'loading',
     referenceImage,
     settings,
-    (savedSettings) => {
+    (savedSettings: GenerationSettings) => {
       toast({
         title: "Reprise de la génération",
         description: "La génération précédente a été interrompue, reprise en cours..."
