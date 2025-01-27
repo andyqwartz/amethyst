@@ -21,25 +21,40 @@ export const GenerationControls = ({
   const inputWidth = settings.prompt ? Math.min(Math.max(settings.prompt.length * 0.8, 40), 90) : 40;
 
   return (
-    <div className="space-y-6 my-8">
+    <div className="space-y-4 my-6">
       <div className="flex justify-center items-center min-h-[100px]">
         <div 
           className="relative transition-all duration-300 ease-in-out flex justify-center items-center"
           style={{ width: `${inputWidth}%` }}
         >
-          <input
-            type="text"
+          <textarea
             placeholder="Décrivez votre image..."
             value={settings.prompt}
             onChange={(e) => onSettingsChange({ prompt: e.target.value })}
+            rows={Math.ceil((settings.prompt?.length || 0) / 50) || 1}
             className="
-              w-full h-12
-              bg-card/80 border border-primary/20 text-foreground 
-              placeholder:text-primary/50 focus:border-primary/50 
-              rounded-full px-6 text-center
-              transition-all duration-300 ease-in-out
-              shadow-lg hover:shadow-xl focus:shadow-xl
-              w-[300px]
+              w-full
+              min-h-[48px]
+              max-h-[120px]
+              bg-card/80 
+              border 
+              border-primary/20 
+              text-foreground 
+              placeholder:text-primary/50 
+              focus:border-primary/50 
+              rounded-full 
+              px-6 
+              py-3
+              text-center
+              transition-all 
+              duration-300 
+              ease-in-out
+              shadow-lg 
+              hover:shadow-xl 
+              focus:shadow-xl
+              resize-none
+              overflow-hidden
+              leading-tight
             "
           />
         </div>
