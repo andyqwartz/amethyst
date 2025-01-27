@@ -21,8 +21,8 @@ export const GenerationControls = ({
   const inputWidth = settings.prompt ? Math.min(Math.max(settings.prompt.length * 0.6, 60), 90) : 60;
 
   return (
-    <div className="space-y-4 my-6">
-      <div className="flex justify-center items-center min-h-[60px]">
+    <div className="space-y-6">
+      <div className="flex justify-center items-center min-h-[60px] my-6">
         <div 
           className="relative transition-all duration-500 ease-in-out flex justify-center items-center"
           style={{ width: `${inputWidth}%` }}
