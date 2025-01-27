@@ -76,7 +76,7 @@ export const LoraSettings = ({ settings, onSettingsChange }: LoraSettingsProps) 
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-6 bg-card/95 backdrop-blur-xl rounded-xl border border-primary/10 shadow-xl">
       <div className="flex items-center justify-between">
         <Label className="flex items-center">
           LoRA Weights {renderTooltip("Huggingface path or URL to the LoRA weights")}
@@ -98,10 +98,10 @@ export const LoraSettings = ({ settings, onSettingsChange }: LoraSettingsProps) 
             value={lora || DEFAULT_LORAS[0]}
             onValueChange={(value) => updateLoraField(index, value)}
           >
-            <SelectTrigger className="bg-popover border-primary/20 flex-grow">
+            <SelectTrigger className="bg-card border-primary/20 flex-grow">
               <SelectValue placeholder="Select or enter LoRA path" />
             </SelectTrigger>
-            <SelectContent className="bg-popover border-primary/20">
+            <SelectContent className="bg-card border-primary/20">
               {loraHistory.filter(item => item && item.trim()).map((historyLora) => (
                 <SelectItem key={historyLora} value={historyLora}>
                   {historyLora}
@@ -117,7 +117,7 @@ export const LoraSettings = ({ settings, onSettingsChange }: LoraSettingsProps) 
                     }
                   }}
                   placeholder="Custom HuggingFace path or URL"
-                  className="mb-2 bg-card/80 border-primary/20"
+                  className="bg-card border-primary/20"
                 />
               </div>
             </SelectContent>
@@ -126,7 +126,7 @@ export const LoraSettings = ({ settings, onSettingsChange }: LoraSettingsProps) 
             type="number"
             value={settings.loraScales[index]}
             onChange={(e) => updateLoraField(index, e.target.value, true)}
-            className="bg-popover border-primary/20 w-24"
+            className="bg-card border-primary/20 w-24"
             step={0.1}
             min={0}
             max={1}

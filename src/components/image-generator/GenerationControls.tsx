@@ -36,7 +36,7 @@ export const GenerationControls = ({
       <div className="space-y-2">
         <Button
           onClick={onToggleSettings}
-          className="w-full bg-white/50 hover:bg-white/70 text-foreground border border-primary/20"
+          className="w-full bg-card hover:bg-card/80 text-foreground border border-primary/20"
           variant="secondary"
         >
           <Settings className="h-4 w-4 mr-2" />
