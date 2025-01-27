@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Plus, Minus } from 'lucide-react';
+import { Plus, Minus, HelpCircle } from 'lucide-react';
 import type { GenerationSettings } from '@/types/replicate';
 
 interface AdvancedSettingsProps {
@@ -43,34 +43,61 @@ export const AdvancedSettings = ({ settings, onSettingsChange }: AdvancedSetting
     }
   };
 
+  const renderTooltip = (description: string) => (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger className="ml-2">
+          <HelpCircle className="h-4 w-4 text-primary/50" />
+        </TooltipTrigger>
+        <TooltipContent>
+          <p className="max-w-xs text-sm">{description}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+
   return (
-    <div className="space-y-6 p-4 bg-white/50 rounded-xl animate-fade-in">
+    <div className="space-y-6 p-6 bg-card/95 backdrop-blur-xl rounded-xl border border-primary/10 shadow-xl">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Basic Settings */}
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label>Negative Prompt</Label>
-            <Input
-              value={settings.negativePrompt}
-              onChange={(e) => onSettingsChange({ negativePrompt: e.target.value })}
-              placeholder="Elements to exclude from generation..."
-              className="bg-white/50 border-primary/20"
-            />
+            <Label className="flex items-center">
+              Aspect Ratio {renderTooltip("Aspect ratio for the generated image")}
+            </Label>
+            <Select
+              value={settings.aspectRatio}
+              onValueChange={(value) => onSettingsChange({ aspectRatio: value })}
+            >
+              <SelectTrigger className="bg-card/80 border-primary/20">
+                <SelectValue placeholder="Select aspect ratio" />
+              </SelectTrigger>
+              <SelectContent>
+                {aspectRatios.map((ratio) => (
+                  <SelectItem key={ratio} value={ratio}>{ratio}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
-            <Label className="flex items-center gap-2">
-              Guidance Scale
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <span className="text-xs text-primary/50">(?)</span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Controls how closely the output adheres to the prompt</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+            <Label className="flex items-center">
+              Number of Steps {renderTooltip("Number of inference steps")}
+            </Label>
+            <Slider
+              value={[settings.steps]}
+              onValueChange={([value]) => onSettingsChange({ steps: value })}
+              max={50}
+              min={1}
+              step={1}
+              className="[&_[role=slider]]:bg-primary"
+            />
+            <span className="text-xs text-primary/50">{settings.steps}</span>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="flex items-center">
+              Guidance Scale {renderTooltip("Controls how closely the output adheres to the prompt")}
             </Label>
             <Slider
               value={[settings.guidanceScale]}
@@ -80,48 +107,49 @@ export const AdvancedSettings = ({ settings, onSettingsChange }: AdvancedSetting
               step={0.1}
               className="[&_[role=slider]]:bg-primary"
             />
+            <span className="text-xs text-primary/50">{settings.guidanceScale}</span>
           </div>
 
           <div className="space-y-2">
-            <Label>Number of Outputs</Label>
-            <Select
-              value={settings.numOutputs.toString()}
-              onValueChange={(value) => onSettingsChange({ numOutputs: parseInt(value) })}
-            >
-              <SelectTrigger className="bg-white/50 border-primary/20">
-                <SelectValue placeholder="Select number of outputs" />
-              </SelectTrigger>
-              <SelectContent>
-                {[1, 2, 3, 4].map((num) => (
-                  <SelectItem key={num} value={num.toString()}>
-                    {num}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label className="flex items-center">
+              Prompt Strength {renderTooltip("Prompt strength when using image to image")}
+            </Label>
+            <Slider
+              value={[settings.promptStrength]}
+              onValueChange={([value]) => onSettingsChange({ promptStrength: value })}
+              max={1}
+              min={0}
+              step={0.1}
+              className="[&_[role=slider]]:bg-primary"
+            />
+            <span className="text-xs text-primary/50">{settings.promptStrength}</span>
           </div>
         </div>
 
         {/* Advanced Settings */}
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label>Seed (Optional)</Label>
+            <Label className="flex items-center">
+              Seed {renderTooltip("Random seed for reproducible generation")}
+            </Label>
             <Input
               type="number"
               value={settings.seed || ''}
               onChange={(e) => onSettingsChange({ seed: parseInt(e.target.value) || undefined })}
-              placeholder="Random seed for reproducible results"
-              className="bg-white/50 border-primary/20"
+              placeholder="Random seed"
+              className="bg-card/80 border-primary/20"
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Output Format</Label>
+            <Label className="flex items-center">
+              Output Format {renderTooltip("Format of the output images")}
+            </Label>
             <Select
               value={settings.outputFormat}
               onValueChange={(value) => onSettingsChange({ outputFormat: value as 'webp' | 'jpg' | 'png' })}
             >
-              <SelectTrigger className="bg-white/50 border-primary/20">
+              <SelectTrigger className="bg-card/80 border-primary/20">
                 <SelectValue placeholder="Select format" />
               </SelectTrigger>
               <SelectContent>
@@ -133,7 +161,24 @@ export const AdvancedSettings = ({ settings, onSettingsChange }: AdvancedSetting
           </div>
 
           <div className="space-y-2">
-            <Label>Safety Checker</Label>
+            <Label className="flex items-center">
+              Output Quality {renderTooltip("Quality when saving the output images (0-100)")}
+            </Label>
+            <Slider
+              value={[settings.outputQuality]}
+              onValueChange={([value]) => onSettingsChange({ outputQuality: value })}
+              max={100}
+              min={0}
+              step={1}
+              className="[&_[role=slider]]:bg-primary"
+            />
+            <span className="text-xs text-primary/50">{settings.outputQuality}</span>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="flex items-center">
+              Safety Checker {renderTooltip("Enable/disable safety checker for generated images")}
+            </Label>
             <div className="flex items-center space-x-2">
               <Switch
                 checked={!settings.disableSafetyChecker}
@@ -150,7 +195,9 @@ export const AdvancedSettings = ({ settings, onSettingsChange }: AdvancedSetting
       {/* LoRA Settings */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <Label>LoRA Weights</Label>
+          <Label className="flex items-center">
+            LoRA Weights {renderTooltip("Huggingface path or URL to the LoRA weights")}
+          </Label>
           <Button
             onClick={addLoraField}
             variant="ghost"
@@ -168,13 +215,13 @@ export const AdvancedSettings = ({ settings, onSettingsChange }: AdvancedSetting
               value={lora}
               onChange={(e) => updateLoraField(index, e.target.value)}
               placeholder="HuggingFace path or URL"
-              className="bg-white/50 border-primary/20 flex-grow"
+              className="bg-card/80 border-primary/20 flex-grow"
             />
             <Input
               type="number"
               value={settings.loraScales[index]}
               onChange={(e) => updateLoraField(index, e.target.value, true)}
-              className="bg-white/50 border-primary/20 w-24"
+              className="bg-card/80 border-primary/20 w-24"
               step={0.1}
               min={0}
               max={1}
