@@ -117,6 +117,29 @@ export const useImageHistory = () => {
     }
   };
 
+  const bulkImportImages = async (predictionIds: string[]) => {
+    const defaultSettings: GenerationSettings = {
+      prompt: "Restored image",
+      negativePrompt: "",
+      guidanceScale: 7.5,
+      steps: 30,
+      seed: undefined,
+      numOutputs: 1,
+      aspectRatio: "1:1",
+      outputFormat: "webp",
+      outputQuality: 90,
+      promptStrength: 0.8,
+      hfLoras: [],
+      loraScales: [],
+      disableSafetyChecker: false
+    };
+
+    for (const id of predictionIds) {
+      const url = `https://replicate.delivery/pbxt/${id}/output.png`;
+      await addToHistory(url, defaultSettings);
+    }
+  };
+
   const getDashboardImages = () => history.slice(0, 10);
   const getAllImages = () => history;
 
@@ -124,6 +147,7 @@ export const useImageHistory = () => {
     history: getDashboardImages(), 
     allHistory: getAllImages(),
     addToHistory,
+    bulkImportImages,
     isLoading 
   };
 };
