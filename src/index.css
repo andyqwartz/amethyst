@@ -4,29 +4,6 @@
 
 @layer base {
   :root {
-    --background: 250 30% 98%;
-    --foreground: 250 10% 3.9%;
-    --card: 250 30% 98%;
-    --card-foreground: 250 10% 3.9%;
-    --popover: 250 30% 98%;
-    --popover-foreground: 250 10% 3.9%;
-    --primary: 250 20% 95%;
-    --primary-foreground: 250 25% 10%;
-    --secondary: 250 20% 30%;
-    --secondary-foreground: 250 20% 95%;
-    --muted: 250 20% 20%;
-    --muted-foreground: 250 20% 70%;
-    --accent: 250 20% 30%;
-    --accent-foreground: 250 20% 95%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 250 20% 95%;
-    --border: 250 20% 30%;
-    --input: 250 20% 30%;
-    --ring: 250 20% 50%;
-    --radius: 0.75rem;
-  }
-
-  .dark {
     --background: 250 25% 10%;
     --foreground: 250 20% 95%;
     --card: 250 25% 12%;
@@ -46,6 +23,7 @@
     --border: 250 20% 30%;
     --input: 250 20% 30%;
     --ring: 250 20% 50%;
+    --radius: 0.75rem;
   }
 
   * {
@@ -54,18 +32,11 @@
 
   body {
     @apply bg-background text-foreground antialiased min-h-screen;
-  }
-
-  body.dark {
-    background: linear-gradient(135deg, #1A1F2C 0%, #2d2d3d 100%);
-  }
-
-  body:not(.dark) {
-    background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+    background: linear-gradient(135deg, #1A1F2C 0%, #2d1f3d 100%);
   }
 
   .glass-card {
-    @apply backdrop-blur-xl bg-white/80 border border-white/20 shadow-lg dark:bg-[#1A1F2C]/50 dark:border-white/10;
+    @apply backdrop-blur-xl bg-[#1A1F2C]/50 border-white/10 shadow-lg;
   }
 
   .hover-scale {

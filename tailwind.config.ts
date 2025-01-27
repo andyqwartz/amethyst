@@ -1,7 +1,6 @@
 import type { Config } from "tailwindcss";
 
 export default {
-  darkMode: ["class"],
   content: [
     "./pages/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
@@ -39,7 +38,7 @@ export default {
           foreground: "#1A1F2C",
         },
         card: {
-          DEFAULT: "rgba(255, 255, 255, 0.95)",
+          DEFAULT: "rgba(26, 31, 44, 0.95)",
           foreground: "hsl(var(--foreground))",
         },
       },
