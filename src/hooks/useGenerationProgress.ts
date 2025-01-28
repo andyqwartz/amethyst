@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useGenerationPersistence } from './useGenerationPersistence';
 import type { GenerationStatus, GenerationSettings } from '@/types/replicate';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface GenerationProgressProps {
   isGenerating: boolean;
