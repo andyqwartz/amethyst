@@ -26,26 +26,26 @@ export const DeleteHistoryModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-[#1a1a1a]/95 border-[#7E69AB]/20 backdrop-blur-lg">
+      <DialogContent className="sm:max-w-md bg-card/95 border-accent/20 backdrop-blur-lg">
         <DialogHeader>
-          <DialogTitle className="text-white">Delete History</DialogTitle>
+          <DialogTitle className="text-white">Supprimer l'historique</DialogTitle>
           <DialogDescription className="text-gray-300">
-            Are you sure you want to delete all your generation history? This action cannot be undone.
+            Êtes-vous sûr de vouloir supprimer tout l'historique de génération ? Cette action est irréversible.
           </DialogDescription>
         </DialogHeader>
         <div className="flex justify-end space-x-3 pt-4">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            className="bg-transparent border-[#7E69AB]/50 text-white hover:bg-[#7E69AB]/20 transition-all duration-300"
+            className="bg-transparent border-accent/50 text-white hover:bg-accent/20 transition-all duration-300"
           >
-            Cancel
+            Annuler
           </Button>
           <Button
             onClick={handleConfirm}
-            className="bg-[#7E69AB]/80 hover:bg-[#7E69AB] text-white border-none transition-all duration-300"
+            className="bg-accent/80 hover:bg-accent text-white border-none transition-all duration-300"
           >
-            Delete History
+            Supprimer
           </Button>
         </div>
       </DialogContent>
