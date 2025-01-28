@@ -6,7 +6,6 @@ import { useImageHistory } from '@/hooks/useImageHistory';
 import { useImageGeneratorState } from './useImageGeneratorState';
 import { useImageUpload } from './useImageUpload';
 import { useGenerationHandler } from './useGenerationHandler';
-import { toast } from "@/hooks/use-toast";
 import type { GenerationSettings } from '@/types/replicate';
 
 export const useImageGeneratorLogic = () => {

@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useGenerationPersistence } from './useGenerationPersistence';
-import type { GenerationStatus, GenerationSettings } from '@/types/replicate';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/hooks/use-toast";
+import type { GenerationStatus, GenerationSettings } from '@/types/replicate';
 
 export interface GenerationProgressProps {
   isGenerating: boolean;
@@ -10,39 +9,18 @@ export interface GenerationProgressProps {
   progress: number;
   setProgress: (progress: number) => void;
   status: GenerationStatus;
-  savedFile: string | null;
-  savedSettings: GenerationSettings | null;
 }
 
 export const useGenerationProgress = (
   isGenerating: boolean, 
-  referenceImage?: string | null,
   settings?: GenerationSettings,
-  onRetry?: (settings: GenerationSettings) => void
 ): GenerationProgressProps => {
   const { toast } = useToast();
   const [currentLogs, setCurrentLogs] = useState<string>('');
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState<GenerationStatus>('idle');
 
-  const { shouldRetry, savedFile, savedSettings } = useGenerationPersistence(
-    isGenerating ? 'loading' : status,
-    progress,
-    setStatus,
-    setProgress,
-    referenceImage,
-    settings
-  );
-
   useEffect(() => {
-    if (shouldRetry && savedSettings && onRetry) {
-      console.log('Resuming generation with saved settings:', savedSettings);
-      onRetry(savedSettings);
-    }
-  }, [shouldRetry, savedSettings, onRetry]);
-
-  useEffect(() => {
-    // Clear state when generation is stopped
     if (!isGenerating) {
       console.log('Generation stopped, clearing state');
       setCurrentLogs('');
@@ -124,15 +102,7 @@ export const useGenerationProgress = (
     };
 
     const interval = setInterval(checkProgress, 1000);
-    return () => {
-      clearInterval(interval);
-      if (!isGenerating) {
-        console.log('Cleaning up generation state');
-        setCurrentLogs('');
-        setStatus('idle');
-        setProgress(0);
-      }
-    };
+    return () => clearInterval(interval);
   }, [isGenerating, toast]);
 
   return { 
@@ -140,8 +110,6 @@ export const useGenerationProgress = (
     currentLogs,
     progress,
     setProgress,
-    status,
-    savedFile,
-    savedSettings
+    status
   };
 };
