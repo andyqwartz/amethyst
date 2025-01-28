@@ -11,8 +11,13 @@ export const GenerationLoadingState = ({
   isGenerating,
   currentLogs 
 }: GenerationLoadingStateProps) => {
+  console.log('GenerationLoadingState - isGenerating:', isGenerating, 'currentLogs:', currentLogs);
+  
   // If not generating, don't render anything
-  if (!isGenerating || !currentLogs) return null;
+  if (!isGenerating || !currentLogs) {
+    console.log('GenerationLoadingState - Not rendering due to:', !isGenerating ? 'not generating' : 'no logs');
+    return null;
+  }
 
   return (
     <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">

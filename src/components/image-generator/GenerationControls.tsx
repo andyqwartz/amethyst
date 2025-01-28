@@ -30,6 +30,8 @@ export const GenerationControls = ({
       });
       return;
     }
+
+    console.log('Starting generation with settings:', settings);
     onGenerate();
   };
 
