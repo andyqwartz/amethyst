@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { Checkbox } from "@/components/ui/checkbox";
-import { Github, Mail } from "lucide-react";
+import { Github, Sparkles } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
@@ -38,7 +38,14 @@ export const Auth = () => {
           })
         : await supabase.auth.signUp({ email, password });
 
-      if (error) throw error;
+      if (error) {
+        toast({
+          title: "Erreur d'authentification",
+          description: "Email ou mot de passe incorrect",
+          variant: "destructive",
+        });
+        return;
+      }
 
       if (data.user) {
         if (!rememberMe) {
@@ -153,12 +160,12 @@ export const Auth = () => {
 
         <div className="space-y-4">
           <Button 
-            className="w-full font-['Orbitron'] tracking-wider" 
+            className="w-full" 
             onClick={() => handleAuth('login')}
             disabled={loading}
           >
-            <Mail className="mr-2 h-4 w-4" />
-            ENTRER DANS LE PORTAIL AMETHYST_
+            <Sparkles className="mr-2 h-4 w-4" />
+            Entrer dans le portail Amethyst
           </Button>
           <Button 
             className="w-full" 
