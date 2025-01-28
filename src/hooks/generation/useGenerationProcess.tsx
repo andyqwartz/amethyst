@@ -4,6 +4,21 @@ import type { GenerationSettings } from '@/types/replicate';
 import { useImageHistory } from '../useImageHistory';
 import { useGenerationState } from './useGenerationState';
 
+const formatLoraPath = (lora: string): string => {
+  // Handle both URL and simple folder/model format
+  // If it's a URL, extract the last two parts
+  if (lora.includes('http')) {
+    const urlParts = lora.split('/');
+    return `${urlParts[urlParts.length - 2]}/${urlParts[urlParts.length - 1]}`;
+  }
+  // For simple paths, ensure we only have folder/model format
+  const parts = lora.split('/');
+  if (parts.length >= 2) {
+    return `${parts[parts.length - 2]}/${parts[parts.length - 1]}`;
+  }
+  return lora;
+};
+
 export const useGenerationProcess = (
   generationState: ReturnType<typeof useGenerationState>
 ) => {
@@ -50,24 +65,32 @@ export const useGenerationProcess = (
     setStatus('loading');
     generationInProgressRef.current = true;
     abortControllerRef.current = new AbortController();
+
+    // Format LoRA paths before sending
+    const formattedSettings = {
+      ...settings,
+      hf_loras: settings.hf_loras.map(formatLoraPath),
+    };
+    
+    console.log('Sending formatted settings:', formattedSettings);
     
     try {
       const response = await generateImage({
         input: {
-          prompt: settings.prompt,
-          negative_prompt: settings.negative_prompt,
-          guidance_scale: settings.guidance_scale,
-          num_inference_steps: settings.num_inference_steps,
-          num_outputs: settings.num_outputs,
-          aspect_ratio: settings.aspect_ratio,
-          output_format: settings.output_format,
-          output_quality: settings.output_quality,
-          prompt_strength: settings.prompt_strength,
-          hf_loras: settings.hf_loras,
-          lora_scales: settings.lora_scales,
-          disable_safety_checker: settings.disable_safety_checker,
-          seed: settings.seed,
-          image: settings.reference_image_url // Add the reference image URL here
+          prompt: formattedSettings.prompt,
+          negative_prompt: formattedSettings.negative_prompt,
+          guidance_scale: formattedSettings.guidance_scale,
+          num_inference_steps: formattedSettings.num_inference_steps,
+          num_outputs: formattedSettings.num_outputs,
+          aspect_ratio: formattedSettings.aspect_ratio,
+          output_format: formattedSettings.output_format,
+          output_quality: formattedSettings.output_quality,
+          prompt_strength: formattedSettings.prompt_strength,
+          hf_loras: formattedSettings.hf_loras,
+          lora_scales: formattedSettings.lora_scales,
+          disable_safety_checker: formattedSettings.disable_safety_checker,
+          seed: formattedSettings.seed,
+          image: formattedSettings.reference_image_url
         }
       });
       
@@ -88,7 +111,7 @@ export const useGenerationProcess = (
             
             if (pollResponse.status === 'succeeded' && pollResponse.output) {
               clearInterval(pollIntervalRef.current!);
-              await handleGenerationSuccess(pollResponse.output, settings);
+              await handleGenerationSuccess(pollResponse.output, formattedSettings);
             } else if (pollResponse.status === 'failed') {
               clearInterval(pollIntervalRef.current!);
               throw new Error(pollResponse.error || 'La génération a échoué');
