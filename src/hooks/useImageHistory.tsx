@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { GenerationSettings } from '@/types/replicate';
 import { useToast } from "@/hooks/use-toast";
@@ -15,11 +15,11 @@ export const useImageHistory = () => {
   const { toast } = useToast();
   const isAddingToHistory = useRef(false);
 
-  const fetchHistory = async () => {
+  const fetchHistory = useCallback(async () => {
     try {
       const { data: session } = await supabase.auth.getSession();
       if (!session?.session?.user) {
-        console.error('No authenticated user found');
+        console.log('No authenticated user found');
         setHistory([]);
         setIsLoading(false);
         return;
@@ -72,7 +72,7 @@ export const useImageHistory = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]);
 
   const addToHistory = async (url: string, settings: GenerationSettings) => {
     if (isAddingToHistory.current) {
@@ -102,7 +102,7 @@ export const useImageHistory = () => {
         .insert({
           url,
           user_id: session.session.user.id,
-          settings: settings,
+          settings,
           prompt: settings.prompt,
           negative_prompt: settings.negative_prompt,
           guidance_scale: settings.guidance_scale,
@@ -134,11 +134,12 @@ export const useImageHistory = () => {
     }
   };
 
-  // Initial fetch and auth state change handling
+  // Set up real-time subscription for updates
   useEffect(() => {
     fetchHistory();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+    // Listen for auth state changes
+    const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_IN') {
         fetchHistory();
       } else if (event === 'SIGNED_OUT') {
@@ -146,27 +147,33 @@ export const useImageHistory = () => {
       }
     });
 
-    // Set up realtime subscription for images table
+    // Set up real-time subscription for the images table
     const channel = supabase
       .channel('images_changes')
-      .on('postgres_changes', 
-        { event: 'INSERT', schema: 'public', table: 'images' },
+      .on(
+        'postgres_changes',
+        { 
+          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'images'
+        },
         (payload) => {
-          console.log('Realtime update received:', payload);
-          fetchHistory();
+          console.log('Real-time update received:', payload);
+          fetchHistory(); // Refresh the history when any change occurs
         }
       )
       .subscribe();
 
+    // Cleanup subscriptions
     return () => {
-      subscription.unsubscribe();
+      authSubscription.unsubscribe();
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [fetchHistory]);
 
   return { 
     history, 
-    allHistory: history,
+    allHistory: history, // Return all history for both dashboard and modal
     addToHistory,
     isLoading 
   };
