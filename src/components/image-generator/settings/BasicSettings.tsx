@@ -52,74 +52,64 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
           <SelectTrigger className="bg-popover border-primary/20">
             <SelectValue placeholder="Select aspect ratio" />
           </SelectTrigger>
-          <SelectContent className="bg-popover border-primary/20 max-h-[300px] w-[340px] sm:w-[420px]">
+          <SelectContent className="bg-popover border-primary/20 max-h-[300px]">
             {aspectRatios.map(({ ratio, description }) => (
               <SelectItem 
                 key={ratio} 
                 value={ratio}
                 className="flex flex-col items-start py-3"
               >
-                <div className="flex flex-col gap-2 w-full pr-4">
-                  <span className="font-medium text-sm">{ratio}</span>
-                  <span className="text-xs leading-relaxed text-primary/70 break-normal whitespace-normal">{description}</span>
-                </div>
+                <span className="font-medium">{ratio}</span>
+                <span className="text-xs text-primary/70 mt-1">{description}</span>
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
 
-      <div className="space-y-6">
-        <div className="space-y-4">
-          <Label className="flex items-center">
-            Number of Steps {renderTooltip("Number of inference steps")}
-          </Label>
-          <div className="relative pt-6">
-            <Slider
-              value={[settings.steps]}
-              onValueChange={([value]) => onSettingsChange({ steps: value })}
-              max={50}
-              min={1}
-              step={1}
-              className="[&_[role=slider]]:bg-primary"
-            />
-            <span className="absolute top-0 left-0 text-xs text-primary/50">{settings.steps}</span>
-          </div>
-        </div>
+      <div className="space-y-2">
+        <Label className="flex items-center">
+          Number of Steps {renderTooltip("Number of inference steps")}
+        </Label>
+        <Slider
+          value={[settings.steps]}
+          onValueChange={([value]) => onSettingsChange({ steps: value })}
+          max={50}
+          min={1}
+          step={1}
+          className="[&_[role=slider]]:bg-primary"
+        />
+        <span className="text-xs text-primary/50">{settings.steps}</span>
+      </div>
 
-        <div className="space-y-4">
-          <Label className="flex items-center">
-            Guidance Scale {renderTooltip("Controls how closely the output adheres to the prompt")}
-          </Label>
-          <div className="relative pt-6">
-            <Slider
-              value={[settings.guidanceScale]}
-              onValueChange={([value]) => onSettingsChange({ guidanceScale: value })}
-              max={10}
-              min={0}
-              step={0.1}
-              className="[&_[role=slider]]:bg-primary"
-            />
-            <span className="absolute top-0 left-0 text-xs text-primary/50">{settings.guidanceScale}</span>
-          </div>
-        </div>
+      <div className="space-y-2">
+        <Label className="flex items-center">
+          Guidance Scale {renderTooltip("Controls how closely the output adheres to the prompt")}
+        </Label>
+        <Slider
+          value={[settings.guidanceScale]}
+          onValueChange={([value]) => onSettingsChange({ guidanceScale: value })}
+          max={10}
+          min={0}
+          step={0.1}
+          className="[&_[role=slider]]:bg-primary"
+        />
+        <span className="text-xs text-primary/50">{settings.guidanceScale}</span>
+      </div>
 
-        <div className="space-y-4">
-          <Label className="flex items-center">
-            Prompt Strength {renderTooltip("Prompt strength when using image to image")}
-          </Label>
-          <div className="relative pt-6">
-            <Slider
-              value={[settings.promptStrength]}
-              onValueChange={([value]) => onSettingsChange({ promptStrength: value })}
-              max={1}
-              min={0}
-              step={0.1}
-              className="[&_[role=slider]]:bg-primary"
-            />
-            <span className="absolute top-0 left-0 text-xs text-primary/50">{settings.promptStrength}</span>
-          </div>
-        </div>
+      <div className="space-y-2">
+        <Label className="flex items-center">
+          Prompt Strength {renderTooltip("Prompt strength when using image to image")}
+        </Label>
+        <Slider
+          value={[settings.promptStrength]}
+          onValueChange={([value]) => onSettingsChange({ promptStrength: value })}
+          max={1}
+          min={0}
+          step={0.1}
+          className="[&_[role=slider]]:bg-primary"
+        />
+        <span className="text-xs text-primary/50">{settings.promptStrength}</span>
       </div>
     </div>
   );

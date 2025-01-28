@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import type { GenerationSettings } from '@/types/replicate';
-import { supabase } from '@/integrations/supabase/client';
 
 export const useGenerationHandler = (
   status: string,
@@ -33,24 +32,10 @@ export const useGenerationHandler = (
       return;
     }
 
-    // Vérifier si la clé API Replicate est configurée
+    setIsProcessing(true);
+    setIsGenerating(true);
+    
     try {
-      const { data, error } = await supabase.functions.invoke('check-replicate-key');
-      
-      if (error) throw error;
-      
-      if (!data.hasReplicateKey) {
-        toast({
-          title: "Configuration requise",
-          description: "Veuillez configurer votre clé API Replicate pour générer des images",
-          className: "bg-primary/10 text-primary border-primary/20 rounded-xl",
-        });
-        return;
-      }
-
-      setIsProcessing(true);
-      setIsGenerating(true);
-      
       await generate(settings);
     } catch (error) {
       toast({
