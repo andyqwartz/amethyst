@@ -43,7 +43,7 @@ export const DeleteHistoryModal = ({
           </Button>
           <Button
             onClick={handleConfirm}
-            className="bg-[#7E69AB]/80 hover:bg-[#7E69AB] text-white border-none transition-all duration-300"
+            className="bg-[#7E69AB] hover:bg-[#7E69AB]/80 text-white border-none transition-all duration-300"
           >
             Delete History
           </Button>
