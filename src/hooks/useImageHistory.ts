@@ -52,8 +52,8 @@ export const useImageHistory = () => {
           output_format: img.output_format || "webp",
           output_quality: img.output_quality || 80,
           prompt_strength: img.prompt_strength || 0.8,
-          hf_loras: img.settings?.hf_loras || [],
-          lora_scales: img.settings?.lora_scales || [],
+          hf_loras: Array.isArray(img.settings?.hf_loras) ? img.settings.hf_loras : [],
+          lora_scales: Array.isArray(img.settings?.lora_scales) ? img.settings.lora_scales : [],
           disable_safety_checker: false,
           reference_image_url: img.reference_image_url || null
         } as GenerationSettings,
@@ -101,7 +101,7 @@ export const useImageHistory = () => {
         .insert({
           url,
           user_id: session.session.user.id,
-          settings,
+          settings: settings as unknown as Json,
           prompt: settings.prompt,
           negative_prompt: settings.negative_prompt,
           guidance_scale: settings.guidance_scale,
