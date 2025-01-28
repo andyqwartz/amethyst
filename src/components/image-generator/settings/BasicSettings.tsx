@@ -12,7 +12,19 @@ interface BasicSettingsProps {
 }
 
 export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps) => {
-  const aspectRatios = ["1:1", "16:9", "21:9", "3:2", "2:3", "4:5", "5:4", "3:4", "4:3", "9:16", "9:21"];
+  const aspectRatios = [
+    { ratio: "1:1", description: "Square format (1024x1024px) - Perfect for profile pictures and social media posts" },
+    { ratio: "16:9", description: "Widescreen (1024x576px) - Ideal for YouTube thumbnails and presentations" },
+    { ratio: "21:9", description: "Ultra-wide (1024x439px) - Cinematic format for movie scenes and landscapes" },
+    { ratio: "3:2", description: "Standard photo (1024x683px) - Classic DSLR camera ratio" },
+    { ratio: "2:3", description: "Portrait (683x1024px) - Vertical format for phone wallpapers" },
+    { ratio: "4:5", description: "Instagram portrait (819x1024px) - Optimized for Instagram posts" },
+    { ratio: "5:4", description: "Large format (1024x819px) - Common for printed photographs" },
+    { ratio: "3:4", description: "Classic portrait (768x1024px) - Traditional portrait photography" },
+    { ratio: "4:3", description: "Standard screen (1024x768px) - Classic monitor aspect ratio" },
+    { ratio: "9:16", description: "Mobile (576x1024px) - Perfect for Stories and TikTok" },
+    { ratio: "9:21", description: "Vertical panorama (439x1024px) - Tall architectural shots" }
+  ];
 
   const renderTooltip = (description: string) => (
     <TooltipProvider>
@@ -31,7 +43,7 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
     <div className="space-y-4">
       <div className="space-y-2">
         <Label className="flex items-center">
-          Aspect Ratio {renderTooltip("Aspect ratio for the generated image")}
+          Aspect Ratio {renderTooltip("Choose the dimensions for your generated image")}
         </Label>
         <Select
           value={settings.aspectRatio}
@@ -40,9 +52,16 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
           <SelectTrigger className="bg-popover border-primary/20">
             <SelectValue placeholder="Select aspect ratio" />
           </SelectTrigger>
-          <SelectContent className="bg-popover border-primary/20">
-            {aspectRatios.map((ratio) => (
-              <SelectItem key={ratio} value={ratio}>{ratio}</SelectItem>
+          <SelectContent className="bg-popover border-primary/20 max-h-[300px]">
+            {aspectRatios.map(({ ratio, description }) => (
+              <SelectItem 
+                key={ratio} 
+                value={ratio}
+                className="flex flex-col items-start py-3"
+              >
+                <span className="font-medium">{ratio}</span>
+                <span className="text-xs text-primary/70 mt-1">{description}</span>
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
