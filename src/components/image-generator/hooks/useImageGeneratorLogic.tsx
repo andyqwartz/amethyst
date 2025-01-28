@@ -55,7 +55,6 @@ export const useImageGeneratorLogic = () => {
     toast
   );
 
-  // Clear local storage on initial load to prevent stale state
   useEffect(() => {
     localStorage.removeItem('generation_status');
     localStorage.removeItem('generation_progress');
@@ -70,9 +69,21 @@ export const useImageGeneratorLogic = () => {
     }
   }, [savedFile]);
 
+  useEffect(() => {
+    if (referenceImage) {
+      updateSettings({ reference_image_url: referenceImage });
+    } else {
+      updateSettings({ reference_image_url: null });
+    }
+  }, [referenceImage]);
+
   const handleGenerate = (settingsToUse = settings) => {
     if (!isGenerating) {
-      handleGenerateBase(generate, settingsToUse, isGenerating);
+      const settingsWithImage = {
+        ...settingsToUse,
+        reference_image_url: referenceImage
+      };
+      handleGenerateBase(generate, settingsWithImage, isGenerating);
     }
   };
 

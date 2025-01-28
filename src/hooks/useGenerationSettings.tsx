@@ -13,7 +13,8 @@ const DEFAULT_SETTINGS: GenerationSettings = {
   prompt_strength: 0.8,
   hf_loras: ['AndyVampiro/joa'],
   lora_scales: [0.8],
-  disable_safety_checker: true
+  disable_safety_checker: true,
+  reference_image_url: null
 };
 
 export const useGenerationSettings = () => {

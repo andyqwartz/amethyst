@@ -13,7 +13,7 @@ export interface ReplicateInput {
   prompt_strength?: number;
   num_inference_steps?: number;
   disable_safety_checker?: boolean;
-  reference_image_url?: string;
+  reference_image_url?: string | null;
 }
 
 export interface GenerationSettings {
@@ -30,7 +30,7 @@ export interface GenerationSettings {
   hf_loras: string[];
   lora_scales: number[];
   disable_safety_checker: boolean;
-  reference_image_url?: string;
+  reference_image_url?: string | null;
 }
 
 export type GenerationStatus = 'idle' | 'loading' | 'success' | 'error';
