@@ -74,7 +74,7 @@ export const ImageGenerator = () => {
   const handleDownload = (imageUrl: string) => {
     const link = document.createElement('a');
     link.href = imageUrl;
-    link.download = `generated-image-${Date.now()}.${settings.outputFormat}`;
+    link.download = `generated-image-${Date.now()}.${settings.output_format}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

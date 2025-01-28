@@ -12,15 +12,15 @@ interface ParameterInputsProps {
 }
 
 export const ParameterInputs = ({ settings, onSettingsChange }: ParameterInputsProps) => {
+  console.log('ParameterInputs - numOutputs:', settings.num_outputs);
   console.log('ParameterInputs - settings:', settings);
-  console.log('ParameterInputs - numOutputs:', settings.numOutputs);
 
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-4">
         <GuidanceScale
-          value={settings.guidanceScale}
-          onChange={(value) => onSettingsChange({ guidanceScale: value })}
+          value={settings.guidance_scale}
+          onChange={(value) => onSettingsChange({ guidance_scale: value })}
         />
       </div>
 
@@ -39,8 +39,8 @@ export const ParameterInputs = ({ settings, onSettingsChange }: ParameterInputsP
           </TooltipProvider>
         </Label>
         <Select
-          value={settings.numOutputs?.toString()}
-          onValueChange={(value) => onSettingsChange({ numOutputs: parseInt(value) })}
+          value={settings.num_outputs?.toString()}
+          onValueChange={(value) => onSettingsChange({ num_outputs: parseInt(value) })}
         >
           <SelectTrigger className="w-full bg-popover border-primary/20">
             <SelectValue placeholder="Sélectionner le nombre d'images" />

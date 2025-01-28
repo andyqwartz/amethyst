@@ -4,7 +4,7 @@ import { generateImage } from '@/services/replicate';
 import type { GenerationSettings, GenerationStatus } from '@/types/replicate';
 import { useImageHistory } from './useImageHistory';
 
-const POLL_INTERVAL = 2000;
+const POLL_INTERVAL = 2000; // 2 secondes
 const GENERATION_ID_KEY = 'generation_id';
 
 export const useImageGeneration = () => {
@@ -41,7 +41,7 @@ export const useImageGeneration = () => {
           setPredictionId(null);
           
           for (const url of pollResponse.output) {
-            await addToHistory(url, settings);
+            await addToHistory(url, pollResponse.settings);
           }
           
           toast({
@@ -52,7 +52,23 @@ export const useImageGeneration = () => {
         }
       }
 
-      const response = await generateImage({ input: settings });
+      const response = await generateImage({
+        input: {
+          prompt: settings.prompt,
+          negative_prompt: settings.negative_prompt,
+          guidance_scale: settings.guidance_scale,
+          num_inference_steps: settings.num_inference_steps,
+          num_outputs: settings.num_outputs,
+          aspect_ratio: settings.aspect_ratio,
+          output_format: settings.output_format,
+          output_quality: settings.output_quality,
+          prompt_strength: settings.prompt_strength,
+          hf_loras: settings.hf_loras,
+          lora_scales: settings.lora_scales,
+          disable_safety_checker: settings.disable_safety_checker,
+          seed: settings.seed
+        }
+      });
       
       if (response.status === 'started') {
         console.log('Generation started with prediction ID:', response.predictionId);
@@ -64,14 +80,14 @@ export const useImageGeneration = () => {
             const pollResponse = await generateImage({ predictionId: response.predictionId });
             
             if (pollResponse.status === 'success') {
-              clearInterval(pollInterval);
               setGeneratedImages(pollResponse.output);
               setStatus('success');
+              clearInterval(pollInterval);
               localStorage.removeItem(GENERATION_ID_KEY);
               setPredictionId(null);
               
               for (const url of pollResponse.output) {
-                await addToHistory(url, settings);
+                await addToHistory(url, pollResponse.settings);
               }
               
               toast({
@@ -79,13 +95,12 @@ export const useImageGeneration = () => {
                 description: `${pollResponse.output.length} image(s) générée(s)`,
               });
             } else if (pollResponse.status === 'error') {
-              clearInterval(pollInterval);
               throw new Error(pollResponse.error);
             }
           } catch (error) {
-            clearInterval(pollInterval);
             console.error('Error checking generation status:', error);
             setStatus('error');
+            clearInterval(pollInterval);
             localStorage.removeItem(GENERATION_ID_KEY);
             setPredictionId(null);
             throw error;

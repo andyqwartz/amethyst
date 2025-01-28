@@ -17,18 +17,18 @@ export interface ReplicateInput {
 
 export interface GenerationSettings {
   prompt: string;
-  negativePrompt: string;
-  guidanceScale: number;
-  steps: number;
+  negative_prompt: string;
+  guidance_scale: number;
+  num_inference_steps: number;
   seed?: number;
-  numOutputs: number;
-  aspectRatio: string;
-  outputFormat: 'webp' | 'jpg' | 'png';
-  outputQuality: number;
-  promptStrength: number;
-  hfLoras: string[];
-  loraScales: number[];
-  disableSafetyChecker: boolean;
+  num_outputs: number;
+  aspect_ratio: string;
+  output_format: 'webp' | 'jpg' | 'png';
+  output_quality: number;
+  prompt_strength: number;
+  hf_loras: string[];
+  lora_scales: number[];
+  disable_safety_checker: boolean;
 }
 
 export type GenerationStatus = 'idle' | 'loading' | 'success' | 'error';

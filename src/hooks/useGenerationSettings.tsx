@@ -3,17 +3,17 @@ import type { GenerationSettings } from '@/types/replicate';
 
 const DEFAULT_SETTINGS: GenerationSettings = {
   prompt: '',
-  negativePrompt: '',
-  guidanceScale: 3.5,
-  steps: 28,
-  numOutputs: 1,
-  aspectRatio: "1:1",
-  outputFormat: "webp",
-  outputQuality: 80,
-  promptStrength: 0.8,
-  hfLoras: [],
-  loraScales: [],
-  disableSafetyChecker: false
+  negative_prompt: '',
+  guidance_scale: 3.5,
+  num_inference_steps: 28,
+  num_outputs: 1,
+  aspect_ratio: "1:1",
+  output_format: "webp",
+  output_quality: 80,
+  prompt_strength: 0.8,
+  hf_loras: [],
+  lora_scales: [],
+  disable_safety_checker: false
 };
 
 export const useGenerationSettings = () => {
