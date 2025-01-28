@@ -20,7 +20,7 @@ export const useGenerationProgress = (
     settings
   );
 
-  // Réinitialiser le progrès quand la génération est terminée
+  // Reset progress when generation stops
   useEffect(() => {
     if (!isGenerating) {
       setProgress(0);
@@ -32,26 +32,30 @@ export const useGenerationProgress = (
     }
   }, [isGenerating]);
 
-  // Gérer la reprise d'une génération en cours
+  // Handle generation retry
   useEffect(() => {
     if (shouldRetry && savedSettings && onRetry) {
-      console.log('Reprise de la génération avec les paramètres sauvegardés:', savedSettings);
+      console.log('Reprising generation with saved settings:', savedSettings);
       onRetry(savedSettings);
     }
   }, [shouldRetry, savedSettings, onRetry]);
 
-  // Mettre à jour la progression uniquement pendant la génération
+  // Update progress based on generation status
   useEffect(() => {
     if (!isGenerating) return;
 
     const interval = setInterval(() => {
       setProgress(current => {
-        if (current >= 95) {
+        // If we're at 100%, clear the interval
+        if (current >= 100) {
           clearInterval(interval);
-          return current;
+          return 100;
         }
-        const increment = Math.max(0.5, (95 - current) * 0.05);
-        return Math.min(95, current + increment);
+
+        // Calculate the next progress value based on current progress
+        const remaining = 100 - current;
+        const increment = Math.max(0.5, remaining * 0.05);
+        return Math.min(99, current + increment);
       });
     }, 1000);
 

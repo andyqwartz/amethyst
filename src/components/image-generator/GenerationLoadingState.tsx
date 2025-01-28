@@ -8,9 +8,9 @@ interface GenerationLoadingStateProps {
 }
 
 const messages = [
-  "Démarrage...",
-  "Analyse...",
-  "Génération...",
+  "Initialisation...",
+  "Analyse des paramètres...",
+  "Génération en cours...",
   "Finalisation..."
 ];
 
@@ -19,7 +19,6 @@ export const GenerationLoadingState = ({
   progress 
 }: GenerationLoadingStateProps) => {
   const [currentMessage, setCurrentMessage] = useState(messages[0]);
-  const [lastProgress, setLastProgress] = useState(0);
   const [shouldShow, setShouldShow] = useState(false);
 
   // Gérer l'affichage de l'animation
@@ -27,30 +26,24 @@ export const GenerationLoadingState = ({
     if (isGenerating) {
       setShouldShow(true);
     } else {
-      // Petit délai avant de cacher l'animation pour une transition plus fluide
       const timeout = setTimeout(() => {
         setShouldShow(false);
-        setLastProgress(0);
         setCurrentMessage(messages[0]);
       }, 300);
       return () => clearTimeout(timeout);
     }
   }, [isGenerating]);
 
-  // Mettre à jour les messages en fonction de la progression
+  // Mettre à jour les messages en fonction de la progression réelle
   useEffect(() => {
     if (!isGenerating) return;
 
-    const progressThreshold = Math.floor(progress / 25);
-    const lastProgressThreshold = Math.floor(lastProgress / 25);
-
-    if (progressThreshold !== lastProgressThreshold) {
-      const messageIndex = Math.min(progressThreshold, messages.length - 1);
-      setCurrentMessage(messages[messageIndex]);
-      setLastProgress(progress);
-      console.log(`Progression mise à jour: ${progress}%, Message: ${messages[messageIndex]}`);
-    }
-  }, [isGenerating, progress, lastProgress]);
+    const messageIndex = Math.min(
+      Math.floor((progress / 100) * messages.length),
+      messages.length - 1
+    );
+    setCurrentMessage(messages[messageIndex]);
+  }, [isGenerating, progress]);
 
   if (!shouldShow) return null;
 
@@ -66,11 +59,11 @@ export const GenerationLoadingState = ({
             
             <div className="absolute inset-0 flex items-center justify-center">
               <Loader 
-                className="w-12 h-12 text-primary" 
-                style={{ 
-                  animation: 'spin 3s linear infinite',
-                  filter: 'drop-shadow(0 0 8px rgba(155, 135, 245, 0.5))'
-                }} 
+                className={cn(
+                  "w-12 h-12 text-primary",
+                  isGenerating ? "animate-spin" : ""
+                )}
+                style={{ filter: 'drop-shadow(0 0 8px rgba(155, 135, 245, 0.5))' }}
               />
             </div>
           </div>
