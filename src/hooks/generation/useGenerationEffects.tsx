@@ -21,19 +21,30 @@ export const useGenerationEffects = (
 
   // Effect for handling generation completion
   useEffect(() => {
-    if (generationStatus === 'success' && generatedImages.length > 0) {
-      console.log('Generation completed successfully, adding to history:', generatedImages);
-      generatedImages.forEach(async (url) => {
+    let isAddingToHistory = false;
+
+    const addImagesToHistory = async () => {
+      if (generationStatus === 'success' && generatedImages.length > 0 && !isAddingToHistory) {
+        isAddingToHistory = true;
+        console.log('Adding generated images to history:', generatedImages);
+        
         try {
-          await addToHistory(url, settings);
+          // Process each image sequentially to avoid race conditions
+          for (const url of generatedImages) {
+            await addToHistory(url, settings);
+          }
         } catch (error) {
-          console.error('Failed to add image to history:', error);
+          console.error('Failed to add images to history:', error);
+        } finally {
+          isAddingToHistory = false;
+          setIsGenerating(false);
         }
-      });
-      setIsGenerating(false);
-    } else if (generationStatus === 'error') {
-      console.log('Generation failed');
-      setIsGenerating(false);
-    }
+      } else if (generationStatus === 'error') {
+        console.log('Generation failed');
+        setIsGenerating(false);
+      }
+    };
+
+    addImagesToHistory();
   }, [generationStatus, generatedImages, settings, addToHistory, setIsGenerating]);
 };
