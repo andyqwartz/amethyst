@@ -27,6 +27,7 @@ interface ImageGeneratorContainerProps {
   handleDownload: (imageUrl: string) => void;
   updateSettings: (settings: Partial<GenerationSettings>) => void;
   setReferenceImage: (image: string | null) => void;
+  handleRemoveReferenceImage: () => void;
   handleDeleteHistory: () => Promise<void>;
 }
 
@@ -51,6 +52,7 @@ export const ImageGeneratorContainer = ({
   handleDownload,
   updateSettings,
   setReferenceImage,
+  handleRemoveReferenceImage,
   handleDeleteHistory
 }: ImageGeneratorContainerProps) => {
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
@@ -73,7 +75,7 @@ export const ImageGeneratorContainer = ({
           isLoading={isLoading}
           onImageUpload={handleImageUpload}
           onImageClick={handleImageClick}
-          onRemoveImage={() => setReferenceImage(null)}
+          onRemoveImage={handleRemoveReferenceImage}
           onSettingsChange={updateSettings}
           onGenerate={handleGenerate}
           onToggleSettings={() => setShowSettings(!showSettings)}
