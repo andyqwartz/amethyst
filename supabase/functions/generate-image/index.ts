@@ -45,7 +45,7 @@ serve(async (req) => {
       )
     }
 
-    // Prepare the input with the reference image and LoRA settings
+    // Prepare the input with the reference image
     const input = {
       prompt: body.input.prompt,
       negative_prompt: body.input.negative_prompt || "",
@@ -61,29 +61,25 @@ serve(async (req) => {
       disable_safety_checker: true
     }
 
-    // Add image if present for img2img mode
+    // Add reference image if present
     if (body.input.reference_image_url) {
       console.log("Reference image URL detected:", body.input.reference_image_url)
       input.image = body.input.reference_image_url
-      input.mode = "img2img"
-    } else {
-      input.mode = "txt2img"
     }
 
-    console.log("Generating image with input:", {
+    console.log("Starting generation with input:", {
       ...input,
-      image: input.image ? "Image URL present" : "No image",
-      mode: input.mode,
-      hf_loras: input.hf_loras,
-      lora_scales: input.lora_scales
+      image: input.image ? "Reference image present" : "No reference image"
     })
     
     const prediction = await replicate.predictions.create({
       version: "2389224e115448d9a77c07d7d45672b3f0aa45acacf1c5bcf51857ac295e3aec",
-      input: input
+      input: input,
+      webhook: null,
+      webhook_events_filter: ["completed"]
     })
 
-    console.log("Generation response:", prediction)
+    console.log("Generation started:", prediction)
     return new Response(JSON.stringify(prediction), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
