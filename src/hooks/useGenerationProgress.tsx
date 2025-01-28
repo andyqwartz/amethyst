@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useGenerationPersistence } from './useGenerationPersistence';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/hooks/use-toast";
 import type { GenerationStatus, GenerationSettings } from '@/types/replicate';
@@ -10,29 +9,16 @@ export interface GenerationProgressProps {
   progress: number;
   setProgress: (progress: number) => void;
   status: GenerationStatus;
-  savedFile: string | null;
-  savedSettings: GenerationSettings | null;
 }
 
 export const useGenerationProgress = (
   isGenerating: boolean, 
-  referenceImage?: string | null,
   settings?: GenerationSettings,
-  onRetry?: (settings: GenerationSettings) => void
 ): GenerationProgressProps => {
   const { toast } = useToast();
   const [currentLogs, setCurrentLogs] = useState<string>('');
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState<GenerationStatus>('idle');
-
-  const { shouldRetry, savedFile, savedSettings } = useGenerationPersistence(
-    isGenerating ? 'loading' : status,
-    progress,
-    setStatus,
-    setProgress,
-    referenceImage,
-    settings
-  );
 
   // Clear state when generation stops
   useEffect(() => {
@@ -42,18 +28,6 @@ export const useGenerationProgress = (
       setStatus('idle');
       setProgress(0);
       localStorage.removeItem('generation_id');
-    }
-  }, [isGenerating]);
-
-  useEffect(() => {
-    if (shouldRetry && savedSettings && onRetry) {
-      console.log('Resuming generation with saved settings:', savedSettings);
-      onRetry(savedSettings);
-    }
-  }, [shouldRetry, savedSettings, onRetry]);
-
-  useEffect(() => {
-    if (!isGenerating) {
       return;
     }
 
@@ -139,8 +113,6 @@ export const useGenerationProgress = (
     currentLogs,
     progress,
     setProgress,
-    status,
-    savedFile,
-    savedSettings
+    status
   };
 };

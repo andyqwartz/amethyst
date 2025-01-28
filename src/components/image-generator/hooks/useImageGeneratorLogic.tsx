@@ -29,24 +29,10 @@ export const useImageGeneratorLogic = () => {
     progress, 
     setProgress,
     status,
-    savedFile,
-    savedSettings,
     currentLogs 
   } = useGenerationProgress(
     generationStatus === 'loading',
-    referenceImage,
-    settings,
-    (savedSettings) => {
-      // Only show the toast if we're actually resuming a generation
-      if (!isGenerating && savedSettings) {
-        toast({
-          title: "Reprise de la génération",
-          description: "La génération précédente a été interrompue, reprise en cours...",
-          className: "animate-fade-in"
-        });
-        handleGenerate(savedSettings);
-      }
-    }
+    settings
   );
   const { history, allHistory, isLoading } = useImageHistory();
 
@@ -64,12 +50,6 @@ export const useImageGeneratorLogic = () => {
     localStorage.removeItem('generation_id');
     resetSettings();
   }, []);
-
-  useEffect(() => {
-    if (savedFile && !referenceImage) {
-      setReferenceImage(savedFile);
-    }
-  }, [savedFile]);
 
   useEffect(() => {
     if (referenceImage) {
