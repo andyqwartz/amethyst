@@ -1,142 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import { Loader, Clock, AlertCircle } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import React from 'react';
 
 interface GenerationLoadingStateProps {
   isGenerating: boolean;
-  progress: number;
   currentLogs?: string;
 }
 
-export const GenerationLoadingState = ({ 
+export const GenerationLoadingState = ({
   isGenerating,
-  progress,
-  currentLogs = ''
+  currentLogs
 }: GenerationLoadingStateProps) => {
-  const [shouldShow, setShouldShow] = useState(false);
-  const [currentMessage, setCurrentMessage] = useState('');
-  const [generationStartTime] = useState(Date.now());
-  const [showLongWaitMessage, setShowLongWaitMessage] = useState(false);
-
-  useEffect(() => {
-    if (isGenerating) {
-      setShouldShow(true);
-    } else {
-      const timeout = setTimeout(() => {
-        setShouldShow(false);
-        setShowLongWaitMessage(false);
-      }, 300);
-      return () => clearTimeout(timeout);
-    }
-  }, [isGenerating]);
-
-  useEffect(() => {
-    if (!currentLogs) return;
-    const lines = currentLogs.split('\n').filter(Boolean);
-    const lastLine = lines[lines.length - 1] || '';
-    
-    // Determine message based on logs content
-    if (lastLine.toLowerCase().includes('queued')) {
-      setCurrentMessage('En attente dans la file...');
-    } else if (lastLine.toLowerCase().includes('processing')) {
-      setCurrentMessage('Génération en cours...');
-    } else {
-      setCurrentMessage(lastLine || 'Initialisation...');
-    }
-  }, [currentLogs]);
-
-  // Check for long generation time
-  useEffect(() => {
-    if (!isGenerating) return;
-
-    const longWaitTimeout = setTimeout(() => {
-      setShowLongWaitMessage(true);
-    }, 20000); // 20 seconds
-
-    return () => clearTimeout(longWaitTimeout);
-  }, [isGenerating]);
-
-  const getStatusIcon = () => {
-    if (currentMessage.toLowerCase().includes('attente')) {
-      return <Clock className="w-12 h-12 text-primary animate-pulse" />;
-    }
-    return (
-      <Loader 
-        className={cn(
-          "w-12 h-12 text-primary",
-          isGenerating ? "animate-spin" : ""
-        )}
-        style={{ filter: 'drop-shadow(0 0 8px rgba(155, 135, 245, 0.5))' }}
-      />
-    );
-  };
-
-  const getProgressAnimation = () => {
-    if (currentMessage.toLowerCase().includes('attente')) {
-      return 'transition-all duration-1000 ease-in-out';
-    }
-    return 'transition-all duration-300 ease-out';
-  };
-
-  if (!shouldShow) return null;
+  if (!isGenerating) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center z-50">
-      <div className="bg-card/80 p-8 rounded-2xl max-w-md w-full mx-4 shadow-2xl animate-fade-in border border-primary/10">
-        <div className="flex flex-col items-center space-y-6">
-          <div className="relative w-32 h-32">
-            <div className="absolute inset-0 bg-primary/5 rounded-full animate-pulse" />
-            <div className="absolute inset-2 bg-primary/10 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
-            <div className="absolute inset-4 bg-primary/15 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
-            <div className="absolute inset-6 bg-primary/20 rounded-full animate-pulse" style={{ animationDelay: '0.6s' }} />
-            
-            <div className="absolute inset-0 flex items-center justify-center">
-              {getStatusIcon()}
-            </div>
-          </div>
-
-          <div className="space-y-2 text-center">
-            <p className="text-lg text-foreground/90 font-light">
-              {currentMessage}
-            </p>
-            
-            {showLongWaitMessage && (
-              <div className="flex items-center justify-center gap-2 text-sm text-yellow-500">
-                <AlertCircle className="w-4 h-4" />
-                <span>La génération prend plus de temps que prévu...</span>
-              </div>
-            )}
-          </div>
-
-          <div className="w-full space-y-2">
-            <div className="h-1.5 w-full bg-primary/10 rounded-full overflow-hidden">
-              <div 
-                className={cn(
-                  "h-full bg-gradient-to-r from-primary/60 to-primary rounded-full",
-                  getProgressAnimation()
-                )}
-                style={{ 
-                  width: `${progress}%`,
-                  boxShadow: '0 0 10px rgba(155, 135, 245, 0.3)'
-                }}
-              />
-            </div>
-            <div className="flex justify-between items-center text-sm text-foreground/70">
-              <span>Progression</span>
-              <span className="font-medium">{Math.round(progress)}%</span>
-            </div>
-          </div>
-
-          {currentLogs && (
-            <div className="w-full mt-4 p-2 bg-black/10 rounded-lg max-h-32 overflow-y-auto text-xs font-mono">
-              {currentLogs.split('\n').map((line, index) => (
-                <div key={index} className="text-foreground/70">
-                  {line}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+    <div className="fixed bottom-4 right-4 p-4 bg-background/80 backdrop-blur-sm rounded-lg shadow-lg border max-w-md">
+      <div className="text-sm font-mono whitespace-pre-wrap">
+        {currentLogs || 'Génération en cours...'}
       </div>
     </div>
   );

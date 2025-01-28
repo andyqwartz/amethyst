@@ -29,12 +29,6 @@ export const useGenerationProcess = (
         await addToHistory(url, settings);
       }
       console.log('Successfully added images to history');
-      
-      toast({
-        title: "Images générées avec succès",
-        description: `${images.length} image(s) générée(s)`,
-        className: "animate-fade-in"
-      });
     } catch (error) {
       console.error('Failed to add images to history:', error);
       toast({
@@ -45,17 +39,6 @@ export const useGenerationProcess = (
     } finally {
       cleanupGeneration();
     }
-  };
-
-  const handleGenerationError = (error: Error) => {
-    console.error('Generation failed:', error);
-    setStatus('error');
-    cleanupGeneration();
-    toast({
-      title: "Erreur de génération",
-      description: error.message,
-      variant: "destructive"
-    });
   };
 
   const generate = async (settings: GenerationSettings) => {
@@ -112,21 +95,22 @@ export const useGenerationProcess = (
               await handleGenerationSuccess(pollResponse.output, settings);
             } else if (pollResponse.status === 'failed') {
               clearInterval(pollIntervalRef.current!);
-              handleGenerationError(new Error(pollResponse.error || 'La génération a échoué'));
-            } else if (pollResponse.status === 'processing') {
-              console.log('Generation in progress:', pollResponse.logs);
+              throw new Error(pollResponse.error || 'La génération a échoué');
             }
           } catch (error) {
             console.error('Error checking generation status:', error);
             clearInterval(pollIntervalRef.current!);
-            handleGenerationError(error as Error);
+            throw error;
           }
-        }, 1000); // Polling plus fréquent pour une meilleure réactivité
+        }, 1000);
       } else {
         throw new Error('Failed to start generation');
       }
     } catch (error) {
-      handleGenerationError(error as Error);
+      console.error('Generation failed:', error);
+      setStatus('error');
+      cleanupGeneration();
+      throw error;
     }
   };
 

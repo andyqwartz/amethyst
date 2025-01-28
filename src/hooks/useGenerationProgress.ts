@@ -12,7 +12,6 @@ export const useGenerationProgress = (
 ) => {
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState<GenerationStatus>('idle');
-  const [hasNotifiedRetry, setHasNotifiedRetry] = useState(false);
   const [currentLogs, setCurrentLogs] = useState<string>('');
   const { toast } = useToast();
 
@@ -30,7 +29,6 @@ export const useGenerationProgress = (
     if (!isGenerating) {
       setProgress(0);
       setStatus('idle');
-      setHasNotifiedRetry(false);
       setCurrentLogs('');
       localStorage.removeItem('generation_status');
       localStorage.removeItem('generation_progress');
@@ -40,41 +38,11 @@ export const useGenerationProgress = (
 
   // Handle generation retry
   useEffect(() => {
-    if (shouldRetry && savedSettings && onRetry && !hasNotifiedRetry) {
+    if (shouldRetry && savedSettings && onRetry) {
       console.log('Reprising generation with saved settings:', savedSettings);
-      setHasNotifiedRetry(true);
-      toast({
-        title: "Reprise de la génération",
-        description: "Une génération précédente a été interrompue, reprise en cours...",
-      });
       onRetry(savedSettings);
     }
-  }, [shouldRetry, savedSettings, onRetry, hasNotifiedRetry]);
-
-  const calculateProgressFromLogs = (logs: string): number => {
-    if (!logs) return 0;
-
-    const lines = logs.split('\n').filter(Boolean);
-    const lastLine = lines[lines.length - 1]?.toLowerCase() || '';
-
-    if (lastLine.includes('finalizing') || lastLine.includes('saving')) {
-      return 95;
-    } else if (lastLine.includes('processing output')) {
-      return 85;
-    } else if (lastLine.includes('step') && lastLine.includes('/')) {
-      const match = lastLine.match(/step (\d+)\/(\d+)/i);
-      if (match) {
-        const [, current, total] = match;
-        return Math.min(80, (Number(current) / Number(total)) * 80);
-      }
-    } else if (lastLine.includes('starting')) {
-      return 10;
-    } else if (lastLine.includes('preparing')) {
-      return 5;
-    }
-
-    return progress;
-  };
+  }, [shouldRetry, savedSettings, onRetry]);
 
   // Update progress based on real generation status
   useEffect(() => {
@@ -85,6 +53,7 @@ export const useGenerationProgress = (
 
     const checkProgress = async () => {
       try {
+        console.log('Checking progress for generation:', generationId);
         const { data: prediction, error } = await supabase.functions.invoke('check-progress', {
           body: { predictionId: generationId }
         });
@@ -102,10 +71,12 @@ export const useGenerationProgress = (
         console.log('Generation progress update:', prediction);
 
         if (prediction.status === 'succeeded') {
+          console.log('Generation succeeded:', prediction.output);
           setProgress(100);
           setStatus('success');
           localStorage.removeItem('generation_id');
         } else if (prediction.status === 'failed') {
+          console.error('Generation failed:', prediction.error);
           setProgress(0);
           setStatus('error');
           localStorage.removeItem('generation_id');
@@ -115,9 +86,9 @@ export const useGenerationProgress = (
             variant: "destructive"
           });
         } else if (prediction.status === 'processing' && prediction.logs) {
+          console.log('Generation processing:', prediction.logs);
           setCurrentLogs(prediction.logs);
-          const calculatedProgress = calculateProgressFromLogs(prediction.logs);
-          setProgress(calculatedProgress);
+          setProgress(50); // Simplified progress indication
         }
       } catch (error) {
         console.error('Error checking progress:', error);
@@ -126,7 +97,7 @@ export const useGenerationProgress = (
 
     const interval = setInterval(checkProgress, 1000);
     return () => clearInterval(interval);
-  }, [isGenerating]);
+  }, [isGenerating, toast]);
 
   return { 
     progress, 
