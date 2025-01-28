@@ -84,7 +84,7 @@ export const HelpModal = ({ open, onOpenChange }: HelpModalProps) => {
                   <div className="flex items-center gap-2">
                     <Github className="h-4 w-4 text-primary" />
                     <a 
-                      href="https://github.com/votre-username" 
+                      href="https://github.com/andyqwartz" 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="hover:text-primary transition-colors"
