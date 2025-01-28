@@ -23,7 +23,6 @@ export const useGenerationProgress = (
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState<GenerationStatus>('idle');
 
-  // Use the persistence hook to save/restore state
   const { shouldRetry, savedFile, savedSettings } = useGenerationPersistence(
     isGenerating ? 'loading' : status,
     progress,
@@ -33,7 +32,6 @@ export const useGenerationProgress = (
     settings
   );
 
-  // Si une génération était en cours et qu'on a les paramètres sauvegardés, on la reprend
   useEffect(() => {
     if (shouldRetry && savedSettings && onRetry) {
       console.log('Resuming generation with saved settings:', savedSettings);
@@ -42,22 +40,31 @@ export const useGenerationProgress = (
   }, [shouldRetry, savedSettings, onRetry]);
 
   useEffect(() => {
+    // Clear logs and reset status when generation is stopped
     if (!isGenerating) {
+      setCurrentLogs('');
+      setStatus('idle');
       return;
     }
 
     const generationId = localStorage.getItem('generation_id');
-    if (!generationId) return;
+    if (!generationId) {
+      console.log('No generation ID found');
+      return;
+    }
+
+    console.log('Checking progress for generation:', generationId);
 
     const checkProgress = async () => {
       try {
-        console.log('Checking progress for generation:', generationId);
         const { data: prediction, error } = await supabase.functions.invoke('check-progress', {
           body: { predictionId: generationId }
         });
 
         if (error) {
           console.error('Error checking progress:', error);
+          setStatus('error');
+          localStorage.removeItem('generation_id');
           return;
         }
 
@@ -72,10 +79,12 @@ export const useGenerationProgress = (
           console.log('Generation succeeded:', prediction.output);
           localStorage.removeItem('generation_id');
           setStatus('success');
+          setCurrentLogs('');
         } else if (prediction.status === 'failed') {
           console.error('Generation failed:', prediction.error);
           localStorage.removeItem('generation_id');
           setStatus('error');
+          setCurrentLogs('');
         } else if (prediction.status === 'processing' && prediction.logs) {
           console.log('Generation processing:', prediction.logs);
           setCurrentLogs(prediction.logs);
@@ -83,11 +92,20 @@ export const useGenerationProgress = (
         }
       } catch (error) {
         console.error('Error checking progress:', error);
+        setStatus('error');
+        setCurrentLogs('');
+        localStorage.removeItem('generation_id');
       }
     };
 
     const interval = setInterval(checkProgress, 1000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      if (!isGenerating) {
+        setCurrentLogs('');
+        setStatus('idle');
+      }
+    };
   }, [isGenerating]);
 
   return { 
