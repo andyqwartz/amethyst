@@ -13,7 +13,7 @@ export const GenerationLoadingState = ({
 }: GenerationLoadingStateProps) => {
   console.log('GenerationLoadingState - isGenerating:', isGenerating, 'currentLogs:', currentLogs);
   
-  // If not generating, don't render anything
+  // If not generating or no logs, don't render anything
   if (!isGenerating || !currentLogs) {
     console.log('GenerationLoadingState - Not rendering due to:', !isGenerating ? 'not generating' : 'no logs');
     return null;

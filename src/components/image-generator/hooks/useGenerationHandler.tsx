@@ -1,4 +1,4 @@
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import type { GenerationSettings } from '@/types/replicate';
 
 export const useGenerationHandler = (
@@ -6,46 +6,43 @@ export const useGenerationHandler = (
   setIsGenerating: (isGenerating: boolean) => void,
   resetSettings: () => void
 ) => {
+  const { toast } = useToast();
+
   const handleGenerate = async (
     generate: (settings: GenerationSettings) => Promise<void>,
     settings: GenerationSettings,
     isGenerating: boolean
   ) => {
     if (isGenerating) {
-      console.log('Generation already in progress');
+      console.log('Generation already in progress, skipping');
+      return;
+    }
+
+    if (!settings.prompt?.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a prompt",
+        variant: "destructive",
+      });
       return;
     }
 
     try {
+      console.log('Starting generation with settings:', settings);
       setIsGenerating(true);
-      console.log('Starting generation with settings:', {
-        ...settings,
-        reference_image_url: settings.reference_image_url || 'No reference image',
-        hf_loras: settings.hf_loras || [],
-        lora_scales: settings.lora_scales || []
-      });
-      
-      await generate({
-        ...settings,
-        reference_image_url: settings.reference_image_url,
-        hf_loras: settings.hf_loras || [],
-        lora_scales: settings.lora_scales || []
-      });
-      
-      toast({
-        title: "Génération lancée",
-        description: "Les images sont en cours de génération...",
-      });
+      await generate(settings);
     } catch (error) {
-      console.error('Error in handleGenerate:', error);
+      console.error('Generation error:', error);
       toast({
-        title: "Erreur",
-        description: error instanceof Error ? error.message : "Une erreur est survenue",
-        variant: "destructive"
+        title: "Error",
+        description: error instanceof Error ? error.message : "An error occurred during generation",
+        variant: "destructive",
       });
-      resetSettings();
+      setIsGenerating(false);
     }
   };
 
-  return { handleGenerate };
+  return {
+    handleGenerate,
+  };
 };

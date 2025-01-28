@@ -34,6 +34,17 @@ export const useGenerationProgress = (
     settings
   );
 
+  // Clear state when generation stops
+  useEffect(() => {
+    if (!isGenerating) {
+      console.log('Generation stopped, clearing state');
+      setCurrentLogs('');
+      setStatus('idle');
+      setProgress(0);
+      localStorage.removeItem('generation_id');
+    }
+  }, [isGenerating]);
+
   useEffect(() => {
     if (shouldRetry && savedSettings && onRetry) {
       console.log('Resuming generation with saved settings:', savedSettings);
@@ -63,10 +74,13 @@ export const useGenerationProgress = (
         if (error) {
           console.error('Error checking progress:', error);
           toast({
-            title: "Erreur",
-            description: "Une erreur est survenue lors de la vérification de la progression",
+            title: "Error",
+            description: "Failed to check generation progress",
             variant: "destructive"
           });
+          setStatus('error');
+          setCurrentLogs('');
+          localStorage.removeItem('generation_id');
           return;
         }
 
@@ -81,17 +95,19 @@ export const useGenerationProgress = (
           console.log('Generation succeeded:', prediction.output);
           localStorage.removeItem('generation_id');
           setStatus('success');
+          setCurrentLogs('');
           toast({
-            title: "Génération terminée",
-            description: "Les images ont été générées avec succès",
+            title: "Success",
+            description: "Images generated successfully",
           });
         } else if (prediction.status === 'failed') {
           console.error('Generation failed:', prediction.error);
           localStorage.removeItem('generation_id');
           setStatus('error');
+          setCurrentLogs('');
           toast({
-            title: "Erreur",
-            description: prediction.error || "La génération a échoué",
+            title: "Error",
+            description: prediction.error || "Generation failed",
             variant: "destructive"
           });
         } else if (prediction.status === 'processing' && prediction.logs) {
@@ -102,15 +118,20 @@ export const useGenerationProgress = (
       } catch (error) {
         console.error('Error checking progress:', error);
         toast({
-          title: "Erreur",
-          description: "Une erreur est survenue lors de la vérification de la progression",
+          title: "Error",
+          description: "Failed to check generation progress",
           variant: "destructive"
         });
+        setStatus('error');
+        setCurrentLogs('');
+        localStorage.removeItem('generation_id');
       }
     };
 
     const interval = setInterval(checkProgress, 1000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+    };
   }, [isGenerating, toast]);
 
   return { 

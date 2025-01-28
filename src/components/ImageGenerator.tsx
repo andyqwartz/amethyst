@@ -28,6 +28,8 @@ export const ImageGenerator = () => {
     setReferenceImage
   } = useImageGeneratorLogic();
 
+  console.log('ImageGenerator - isGenerating:', isGenerating, 'currentLogs:', currentLogs);
+
   return (
     <ImageGeneratorContainer
       showSettings={showSettings}
