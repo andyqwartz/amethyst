@@ -16,7 +16,7 @@ interface ImageGeneratorContainerProps {
   settings: GenerationSettings;
   generatedImages: string[];
   history: { url: string; settings: GenerationSettings }[];
-  allHistory: any[];
+  allHistory: { url: string; settings: GenerationSettings }[];
   isLoading: boolean;
   progress: number;
   currentLogs?: string;
