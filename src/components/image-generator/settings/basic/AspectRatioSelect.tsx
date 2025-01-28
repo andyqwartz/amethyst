@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { HelpCircle } from 'lucide-react';
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const aspectRatios = [
   { ratio: "1:1", description: "Square format (1024x1024px) - Perfect for profile pictures and social media posts" },
@@ -25,35 +26,52 @@ interface AspectRatioSelectProps {
 
 export const AspectRatioSelect = ({ value, onChange }: AspectRatioSelectProps) => {
   return (
-    <div className="space-y-4 md:space-y-3">
-      <Label className="flex items-center text-white">
-        Format 
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger className="ml-2">
-              <HelpCircle className="h-4 w-4 text-white/50" />
-            </TooltipTrigger>
-            <TooltipContent>
-              <p className="max-w-xs text-sm text-white">Choose the dimensions for your generated image</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </Label>
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <Label className="flex items-center gap-2 text-white">
+          Format
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <HelpCircle className="h-4 w-4 text-white/50 hover:text-white/70 transition-colors" />
+              </TooltipTrigger>
+              <TooltipContent side="right" className="max-w-[200px]">
+                <p className="text-sm">Choose the dimensions for your generated image</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </Label>
+      </div>
+
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className="bg-popover border-primary/20 text-white">
+        <SelectTrigger 
+          className="w-full bg-popover/50 backdrop-blur-sm border-primary/20 text-white hover:bg-popover/70 transition-colors"
+        >
           <SelectValue placeholder="Select aspect ratio" />
         </SelectTrigger>
-        <SelectContent className="bg-popover border-primary/20 max-h-[300px]">
-          {aspectRatios.map(({ ratio, description }) => (
-            <SelectItem 
-              key={ratio} 
-              value={ratio}
-              className="flex flex-col items-start py-4"
-            >
-              <span className="font-medium text-white text-base">{ratio}</span>
-              <span className="text-xs text-white/70 mt-3">{description}</span>
-            </SelectItem>
-          ))}
+        <SelectContent className="bg-popover/95 backdrop-blur-xl border-primary/20">
+          <ScrollArea className="h-[300px] pr-4">
+            {aspectRatios.map(({ ratio, description }) => (
+              <SelectItem
+                key={ratio}
+                value={ratio}
+                className="flex flex-col items-start space-y-1.5 py-3 cursor-pointer hover:bg-primary/10 transition-colors rounded-md px-2 my-1"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="relative w-8 h-8 border border-primary/30 rounded-md overflow-hidden">
+                    <div 
+                      className="absolute inset-1 bg-primary/20 rounded"
+                      style={{
+                        aspectRatio: ratio.split(':').join('/'),
+                      }}
+                    />
+                  </div>
+                  <span className="font-medium text-white">{ratio}</span>
+                </div>
+                <span className="text-xs text-white/70 leading-relaxed">{description}</span>
+              </SelectItem>
+            ))}
+          </ScrollArea>
         </SelectContent>
       </Select>
     </div>
