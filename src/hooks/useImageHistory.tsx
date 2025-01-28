@@ -11,7 +11,6 @@ interface HistoryImage {
 
 export const useImageHistory = () => {
   const [history, setHistory] = useState<HistoryImage[]>([]);
-  const [allHistory, setAllHistory] = useState<HistoryImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const isAddingToHistory = useRef(false);
@@ -22,13 +21,12 @@ export const useImageHistory = () => {
       if (!session?.session?.user) {
         console.log('No authenticated user found');
         setHistory([]);
-        setAllHistory([]);
         setIsLoading(false);
         return;
       }
 
       console.log('Fetching history for user:', session.session.user.id);
-      
+
       const { data: images, error } = await supabase
         .from('images')
         .select('*')
@@ -63,8 +61,7 @@ export const useImageHistory = () => {
         timestamp: new Date(img.created_at).getTime()
       }));
 
-      setHistory(formattedHistory.slice(0, 4));
-      setAllHistory(formattedHistory);
+      setHistory(formattedHistory);
     } catch (error) {
       console.error('Error fetching history:', error);
       toast({
@@ -145,7 +142,6 @@ export const useImageHistory = () => {
         fetchHistory();
       } else if (event === 'SIGNED_OUT') {
         setHistory([]);
-        setAllHistory([]);
       }
     });
 
@@ -173,7 +169,7 @@ export const useImageHistory = () => {
 
   return { 
     history, 
-    allHistory,
+    allHistory: history,
     addToHistory,
     isLoading 
   };
