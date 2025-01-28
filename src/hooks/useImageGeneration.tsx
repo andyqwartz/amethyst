@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { generateImage } from '@/services/replicate';
 import type { GenerationSettings, GenerationStatus } from '@/types/replicate';
@@ -14,9 +14,8 @@ export const useImageGeneration = () => {
   const { addToHistory } = useImageHistory();
   const [predictionId, setPredictionId] = useState<string | null>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const isGeneratingRef = useRef(false);
-  const abortControllerRef = useRef<AbortController | null>(null);
   const generationInProgressRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -37,7 +36,6 @@ export const useImageGeneration = () => {
     }
     localStorage.removeItem(GENERATION_ID_KEY);
     setPredictionId(null);
-    isGeneratingRef.current = false;
     generationInProgressRef.current = false;
   };
 
@@ -45,7 +43,6 @@ export const useImageGeneration = () => {
     console.log('Generation successful, saving images:', images);
     setGeneratedImages(images);
     setStatus('success');
-    cleanupGeneration();
     
     try {
       for (const url of images) {
@@ -65,16 +62,17 @@ export const useImageGeneration = () => {
         description: "Les images ont été générées mais n'ont pas pu être sauvegardées dans l'historique",
         variant: "destructive"
       });
+    } finally {
+      cleanupGeneration();
     }
   };
 
   const generate = async (settings: GenerationSettings) => {
-    // Protection contre les appels multiples
     if (generationInProgressRef.current) {
       console.warn('Generation already in progress, skipping');
       toast({
         title: "Génération en cours",
-        description: "Une génération est déjà en cours, veuillez patienter",
+        description: "Veuillez attendre la fin de la génération en cours",
         variant: "destructive"
       });
       return;
@@ -123,8 +121,9 @@ export const useImageGeneration = () => {
 
           try {
             const pollResponse = await generateImage({ predictionId: response.predictionId });
+            console.log('Poll response:', pollResponse);
             
-            if (pollResponse.status === 'success') {
+            if (pollResponse.status === 'success' && pollResponse.output) {
               await handleGenerationSuccess(pollResponse.output, settings);
             } else if (pollResponse.status === 'error') {
               throw new Error(pollResponse.error);
