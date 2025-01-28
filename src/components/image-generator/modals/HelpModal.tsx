@@ -16,7 +16,8 @@ interface HelpModalProps {
 }
 
 export const HelpModal = ({ open, onOpenChange }: HelpModalProps) => {
-  const email = 'amethyst' + '@' + 'serendippo.me';
+  const [emailParts, domain] = ['amethyst', 'serendippo.me'];
+  const constructEmail = () => `${emailParts}@${domain}`;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -79,7 +80,7 @@ export const HelpModal = ({ open, onOpenChange }: HelpModalProps) => {
                   </p>
                   <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4 text-primary" />
-                    <span>{email}</span>
+                    <span>{constructEmail()}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Github className="h-4 w-4 text-primary" />
