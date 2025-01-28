@@ -4,7 +4,7 @@ import type { GenerationSettings } from '@/types/replicate';
 import { useToast } from "@/hooks/use-toast";
 import type { Json } from '@/integrations/supabase/types';
 
-interface ImageSettings extends Json {
+type ImageSettings = {
   hf_loras?: string[];
   lora_scales?: number[];
   disable_safety_checker?: boolean;
@@ -108,7 +108,7 @@ export const useImageHistory = () => {
             hf_loras: settings.hf_loras,
             lora_scales: settings.lora_scales,
             disable_safety_checker: settings.disable_safety_checker
-          },
+          } as Json,
           prompt: settings.prompt,
           negative_prompt: settings.negative_prompt,
           guidance_scale: settings.guidance_scale,
