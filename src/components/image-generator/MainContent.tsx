@@ -70,25 +70,27 @@ export const MainContent = ({
           />
         )}
 
-        <ImagePreview
-          images={generatedImages}
-          onTweak={onTweak}
-          onDownload={onDownload}
-          settings={settings}
-          className="mb-8"
-        />
+        {generatedImages.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold mb-4 text-white">Images générées</h3>
+            <ImagePreview
+              images={generatedImages}
+              onTweak={onTweak}
+              onDownload={onDownload}
+              settings={settings}
+            />
+          </div>
+        )}
 
         {!isLoading && history.length > 0 && (
           <div className="mt-8">
             <h3 className="text-lg font-semibold mb-4 text-white">Historique des générations</h3>
-            <div className="space-y-8">
-              <ImagePreview
-                images={history.map(h => h.url)}
-                onTweak={(settings) => onTweak(settings)}
-                onDownload={onDownload}
-                settings={settings}
-              />
-            </div>
+            <ImagePreview
+              images={history.map(h => h.url)}
+              onTweak={(settings) => onTweak(settings)}
+              onDownload={onDownload}
+              settings={settings}
+            />
           </div>
         )}
       </div>

@@ -57,6 +57,15 @@ export const ImageGeneratorContainer = ({
 }: ImageGeneratorContainerProps) => {
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
 
+  const handleDeleteClick = () => {
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    await handleDeleteHistory();
+    setShowDeleteModal(false);
+  };
+
   return (
     <div className="min-h-screen p-4 md:p-6 animate-fade-in">
       <div className="max-w-2xl mx-auto">
@@ -81,7 +90,7 @@ export const ImageGeneratorContainer = ({
           onToggleSettings={() => setShowSettings(!showSettings)}
           onTweak={handleTweak}
           onDownload={handleDownload}
-          onDeleteHistory={() => setShowDeleteModal(true)}
+          onDeleteHistory={handleDeleteClick}
         />
       </div>
 
@@ -90,7 +99,7 @@ export const ImageGeneratorContainer = ({
       <DeleteHistoryModal
         open={showDeleteModal}
         onOpenChange={setShowDeleteModal}
-        onConfirm={handleDeleteHistory}
+        onConfirm={handleConfirmDelete}
       />
 
       <GenerationLoadingState 
