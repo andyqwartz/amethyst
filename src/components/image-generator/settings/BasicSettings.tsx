@@ -48,7 +48,9 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
         guidance_scale: 7.5,
         prompt_strength: 0.8,
         output_format: "webp",
-        output_quality: 90
+        output_quality: 90,
+        hf_loras: ["stabilityai/sd-vae-ft-mse"],
+        lora_scales: [0.8]
       });
     }
   }, []);
@@ -82,23 +84,6 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
       </div>
 
       <div className="space-y-4">
-        <div>
-          <Label className="flex items-center mb-3">
-            Guidance Scale {renderTooltip("Controls how closely the output adheres to the prompt")}
-          </Label>
-          <div className="space-y-2">
-            <Slider
-              value={[settings.guidance_scale]}
-              onValueChange={([value]) => onSettingsChange({ guidance_scale: value })}
-              max={20}
-              min={1}
-              step={0.1}
-              className="[&_[role=slider]]:bg-primary"
-            />
-            <span className="text-xs text-primary/50 block mt-2">{settings.guidance_scale}</span>
-          </div>
-        </div>
-
         <div>
           <Label className="flex items-center mb-3">
             Prompt Strength {renderTooltip("Controls the influence of the prompt on the final image")}
