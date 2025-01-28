@@ -75,7 +75,7 @@ export const useImageHistory = () => {
     isAddingToHistory.current = true;
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: session } = await supabase.auth.getSession();
       
       if (!session?.user) {
         console.error('No authenticated user found');
@@ -91,7 +91,7 @@ export const useImageHistory = () => {
         .from('images')
         .insert({
           url,
-          user_id: session.user.id,
+          user_id: session.user.id,  // Explicitly set the user_id
           settings: settings,
           prompt: settings.prompt,
           negative_prompt: settings.negative_prompt,
@@ -106,7 +106,10 @@ export const useImageHistory = () => {
           reference_image_url: settings.reference_image_url
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error adding to history:', error);
+        throw error;
+      }
 
       await fetchHistory();
     } catch (error) {
