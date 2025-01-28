@@ -15,6 +15,7 @@ export const useImageGeneration = () => {
   const [predictionId, setPredictionId] = useState<string | null>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const isGeneratingRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -22,21 +23,51 @@ export const useImageGeneration = () => {
       if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current);
       }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
       localStorage.removeItem(GENERATION_ID_KEY);
+      isGeneratingRef.current = false;
     };
   }, []);
 
-  // Initialize predictionId from localStorage after initial render
-  useEffect(() => {
-    const savedPredictionId = localStorage.getItem(GENERATION_ID_KEY);
-    if (savedPredictionId) {
-      setPredictionId(savedPredictionId);
+  const cleanupGeneration = () => {
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
     }
-  }, []);
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    localStorage.removeItem(GENERATION_ID_KEY);
+    setPredictionId(null);
+    isGeneratingRef.current = false;
+  };
+
+  const handleGenerationSuccess = async (images: string[], settings: GenerationSettings) => {
+    setGeneratedImages(images);
+    setStatus('success');
+    cleanupGeneration();
+    
+    // Ensure history is updated
+    try {
+      for (const url of images) {
+        await addToHistory(url, settings);
+      }
+      console.log('Successfully added images to history:', images);
+    } catch (error) {
+      console.error('Failed to add images to history:', error);
+      toast({
+        title: "Erreur",
+        description: "Les images ont été générées mais n'ont pas pu être sauvegardées dans l'historique",
+        variant: "destructive"
+      });
+    }
+  };
 
   const generate = async (settings: GenerationSettings) => {
-    // Prevent multiple simultaneous generations
-    if (isGeneratingRef.current || status === 'loading') {
+    // Protection contre les appels multiples
+    if (isGeneratingRef.current) {
       console.warn('Generation already in progress, skipping');
       toast({
         title: "Génération en cours",
@@ -53,36 +84,10 @@ export const useImageGeneration = () => {
     console.log('Starting generation with settings:', settings);
     setStatus('loading');
     isGeneratingRef.current = true;
+    abortControllerRef.current = new AbortController();
     
     try {
-      // Clear any existing interval
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current);
-        pollIntervalRef.current = null;
-      }
-
-      if (predictionId) {
-        console.log('Checking saved prediction:', predictionId);
-        const pollResponse = await generateImage({ predictionId });
-        
-        if (pollResponse.status === 'success') {
-          setGeneratedImages(pollResponse.output);
-          setStatus('success');
-          localStorage.removeItem(GENERATION_ID_KEY);
-          setPredictionId(null);
-          
-          for (const url of pollResponse.output) {
-            await addToHistory(url, settings);
-          }
-          
-          toast({
-            title: "Images générées avec succès",
-            description: `${pollResponse.output.length} image(s) générée(s)`,
-          });
-          isGeneratingRef.current = false;
-          return;
-        }
-      }
+      cleanupGeneration();
 
       const response = await generateImage({
         input: {
@@ -108,21 +113,16 @@ export const useImageGeneration = () => {
         localStorage.setItem(GENERATION_ID_KEY, response.predictionId);
         
         pollIntervalRef.current = setInterval(async () => {
+          if (abortControllerRef.current?.signal.aborted) {
+            cleanupGeneration();
+            return;
+          }
+
           try {
             const pollResponse = await generateImage({ predictionId: response.predictionId });
             
             if (pollResponse.status === 'success') {
-              setGeneratedImages(pollResponse.output);
-              setStatus('success');
-              clearInterval(pollIntervalRef.current!);
-              pollIntervalRef.current = null;
-              localStorage.removeItem(GENERATION_ID_KEY);
-              setPredictionId(null);
-              isGeneratingRef.current = false;
-              
-              for (const url of pollResponse.output) {
-                await addToHistory(url, settings);
-              }
+              await handleGenerationSuccess(pollResponse.output, settings);
               
               toast({
                 title: "Images générées avec succès",
@@ -135,11 +135,7 @@ export const useImageGeneration = () => {
           } catch (error) {
             console.error('Error checking generation status:', error);
             setStatus('error');
-            clearInterval(pollIntervalRef.current!);
-            pollIntervalRef.current = null;
-            localStorage.removeItem(GENERATION_ID_KEY);
-            setPredictionId(null);
-            isGeneratingRef.current = false;
+            cleanupGeneration();
             throw error;
           }
         }, POLL_INTERVAL);
@@ -149,9 +145,7 @@ export const useImageGeneration = () => {
     } catch (error) {
       console.error('Generation failed:', error);
       setStatus('error');
-      localStorage.removeItem(GENERATION_ID_KEY);
-      setPredictionId(null);
-      isGeneratingRef.current = false;
+      cleanupGeneration();
       throw error;
     }
   };

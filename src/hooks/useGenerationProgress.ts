@@ -11,7 +11,6 @@ export const useGenerationProgress = (
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState<GenerationStatus>('idle');
 
-  // Use the persistence hook to save/restore state
   const { shouldRetry, savedFile, savedSettings } = useGenerationPersistence(
     isGenerating ? 'loading' : status,
     progress,
@@ -23,31 +22,41 @@ export const useGenerationProgress = (
 
   useEffect(() => {
     if (shouldRetry && savedSettings && onRetry) {
+      console.log('Reprising generation with saved settings:', savedSettings);
       onRetry(savedSettings);
     }
   }, [shouldRetry, savedSettings, onRetry]);
 
   useEffect(() => {
-    if (!isGenerating) {
-      return;
-    }
+    let progressInterval: NodeJS.Timeout | null = null;
 
-    // If we're restoring a generation in progress, start from the saved progress
-    if (progress === 0) {
+    if (isGenerating) {
+      // Démarrer à 5% pour indiquer que la génération a commencé
       setProgress(5);
+
+      progressInterval = setInterval(() => {
+        setProgress(current => {
+          if (current >= 95) {
+            if (progressInterval) {
+              clearInterval(progressInterval);
+            }
+            return current;
+          }
+          // Progression plus lente et plus naturelle
+          const increment = Math.max(0.5, (95 - current) * 0.05);
+          return Math.min(95, current + increment);
+        });
+      }, 1000);
+    } else {
+      // Réinitialiser le progrès quand la génération est terminée
+      setProgress(0);
     }
 
-    const interval = setInterval(() => {
-      setProgress(current => {
-        if (current >= 95) {
-          clearInterval(interval);
-          return current;
-        }
-        return current + (95 - current) * 0.1;
-      });
-    }, 500);
-
-    return () => clearInterval(interval);
+    return () => {
+      if (progressInterval) {
+        clearInterval(progressInterval);
+      }
+    };
   }, [isGenerating]);
 
   return { 

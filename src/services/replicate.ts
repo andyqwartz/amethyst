@@ -8,7 +8,18 @@ export async function generateImage(params: { input?: ReplicateInput; prediction
     });
 
     if (error) {
-      throw error;
+      console.error('Supabase function error:', error);
+      throw new Error(error.message || 'Failed to generate image');
+    }
+
+    if (!data) {
+      throw new Error('No data received from generation endpoint');
+    }
+
+    // Vérification supplémentaire pour les erreurs de l'API
+    if (data.error) {
+      console.error('API error:', data.error);
+      throw new Error(data.error);
     }
 
     return data;
