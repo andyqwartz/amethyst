@@ -40,9 +40,9 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
   );
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-3">
-        <Label className="flex items-center">
+    <div className="space-y-8">
+      <div className="space-y-4">
+        <Label className="flex items-center mb-4">
           Aspect Ratio {renderTooltip("Choose the dimensions for your generated image")}
         </Label>
         <Select
@@ -67,12 +67,12 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
         </Select>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-6">
         <div>
-          <Label className="flex items-center mb-3">
+          <Label className="flex items-center mb-4">
             Number of Steps {renderTooltip("Number of inference steps")}
           </Label>
-          <div className="space-y-2">
+          <div className="space-y-3">
             <Slider
               value={[settings.steps]}
               onValueChange={([value]) => onSettingsChange({ steps: value })}
@@ -81,15 +81,15 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
               step={1}
               className="[&_[role=slider]]:bg-primary"
             />
-            <span className="text-xs text-primary/50 block mt-2">{settings.steps}</span>
+            <span className="text-xs text-primary/50 block mt-3">{settings.steps}</span>
           </div>
         </div>
 
         <div>
-          <Label className="flex items-center mb-3">
+          <Label className="flex items-center mb-4">
             Guidance Scale {renderTooltip("Controls how closely the output adheres to the prompt")}
           </Label>
-          <div className="space-y-2">
+          <div className="space-y-3">
             <Slider
               value={[settings.guidanceScale]}
               onValueChange={([value]) => onSettingsChange({ guidanceScale: value })}
@@ -98,15 +98,15 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
               step={0.1}
               className="[&_[role=slider]]:bg-primary"
             />
-            <span className="text-xs text-primary/50 block mt-2">{settings.guidanceScale}</span>
+            <span className="text-xs text-primary/50 block mt-3">{settings.guidanceScale}</span>
           </div>
         </div>
 
         <div>
-          <Label className="flex items-center mb-3">
+          <Label className="flex items-center mb-4">
             Prompt Strength {renderTooltip("Prompt strength when using image to image")}
           </Label>
-          <div className="space-y-2">
+          <div className="space-y-3">
             <Slider
               value={[settings.promptStrength]}
               onValueChange={([value]) => onSettingsChange({ promptStrength: value })}
@@ -115,7 +115,7 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
               step={0.1}
               className="[&_[role=slider]]:bg-primary"
             />
-            <span className="text-xs text-primary/50 block mt-2">{settings.promptStrength}</span>
+            <span className="text-xs text-primary/50 block mt-3">{settings.promptStrength}</span>
           </div>
         </div>
       </div>
