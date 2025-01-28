@@ -46,13 +46,28 @@ serve(async (req) => {
       )
     }
 
-    // Prepare the input with the reference image if present
+    // Prepare the input with the reference image and LoRA settings
     const input = {
-      ...body.input,
-      image: body.input.reference_image_url || undefined,
-      mode: body.input.reference_image_url ? "img2img" : "txt2img",
+      prompt: body.input.prompt,
+      negative_prompt: body.input.negative_prompt || "",
+      guidance_scale: body.input.guidance_scale || 3.5,
+      num_inference_steps: body.input.num_inference_steps || 28,
+      num_outputs: body.input.num_outputs || 1,
+      aspect_ratio: body.input.aspect_ratio || "1:1",
+      output_format: body.input.output_format || "webp",
+      output_quality: body.input.output_quality || 80,
+      prompt_strength: body.input.prompt_strength || 0.8,
       hf_loras: body.input.hf_loras || [],
-      lora_scales: body.input.lora_scales || []
+      lora_scales: body.input.lora_scales || [],
+      disable_safety_checker: true
+    }
+
+    // Add image if present for img2img mode
+    if (body.input.reference_image_url) {
+      input.image = body.input.reference_image_url
+      input.mode = "img2img"
+    } else {
+      input.mode = "txt2img"
     }
 
     console.log("Generating image with input:", {
