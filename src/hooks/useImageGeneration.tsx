@@ -16,45 +16,48 @@ export const useImageGeneration = () => {
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const isGeneratingRef = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const generationInProgressRef = useRef(false);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current);
-      }
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-      localStorage.removeItem(GENERATION_ID_KEY);
-      isGeneratingRef.current = false;
+      cleanupGeneration();
     };
   }, []);
 
   const cleanupGeneration = () => {
+    console.log('Cleaning up generation...');
     if (pollIntervalRef.current) {
       clearInterval(pollIntervalRef.current);
       pollIntervalRef.current = null;
     }
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
+      abortControllerRef.current = null;
     }
     localStorage.removeItem(GENERATION_ID_KEY);
     setPredictionId(null);
     isGeneratingRef.current = false;
+    generationInProgressRef.current = false;
   };
 
   const handleGenerationSuccess = async (images: string[], settings: GenerationSettings) => {
+    console.log('Generation successful, saving images:', images);
     setGeneratedImages(images);
     setStatus('success');
     cleanupGeneration();
     
-    // Ensure history is updated
     try {
       for (const url of images) {
         await addToHistory(url, settings);
       }
-      console.log('Successfully added images to history:', images);
+      console.log('Successfully added images to history');
+      
+      toast({
+        title: "Images générées avec succès",
+        description: `${images.length} image(s) générée(s)`,
+        className: "animate-fade-in"
+      });
     } catch (error) {
       console.error('Failed to add images to history:', error);
       toast({
@@ -67,7 +70,7 @@ export const useImageGeneration = () => {
 
   const generate = async (settings: GenerationSettings) => {
     // Protection contre les appels multiples
-    if (isGeneratingRef.current) {
+    if (generationInProgressRef.current) {
       console.warn('Generation already in progress, skipping');
       toast({
         title: "Génération en cours",
@@ -83,7 +86,7 @@ export const useImageGeneration = () => {
 
     console.log('Starting generation with settings:', settings);
     setStatus('loading');
-    isGeneratingRef.current = true;
+    generationInProgressRef.current = true;
     abortControllerRef.current = new AbortController();
     
     try {
@@ -123,12 +126,6 @@ export const useImageGeneration = () => {
             
             if (pollResponse.status === 'success') {
               await handleGenerationSuccess(pollResponse.output, settings);
-              
-              toast({
-                title: "Images générées avec succès",
-                description: `${pollResponse.output.length} image(s) générée(s)`,
-                className: "animate-fade-in"
-              });
             } else if (pollResponse.status === 'error') {
               throw new Error(pollResponse.error);
             }
