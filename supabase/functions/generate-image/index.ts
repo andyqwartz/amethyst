@@ -73,12 +73,13 @@ serve(async (req) => {
         
         const imageBuffer = await imageResponse.arrayBuffer()
         const base64Image = btoa(String.fromCharCode(...new Uint8Array(imageBuffer)))
-        input.image = `data:${imageResponse.headers.get('content-type')};base64,${base64Image}`
+        const contentType = imageResponse.headers.get('content-type') || 'image/png'
+        input.image = `data:${contentType};base64,${base64Image}`
         console.log("Successfully converted image to base64")
       } catch (error) {
         console.error("Error processing reference image:", error)
         return new Response(
-          JSON.stringify({ error: "Failed to process reference image" }),
+          JSON.stringify({ error: "Failed to process reference image", details: error.message }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
         )
       }
