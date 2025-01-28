@@ -11,8 +11,8 @@ const DEFAULT_SETTINGS: GenerationSettings = {
   output_format: "webp",
   output_quality: 80,
   prompt_strength: 0.8,
-  hf_loras: [],
-  lora_scales: [],
+  hf_loras: ['AndyVampiro/joa'],
+  lora_scales: [0.8],
   disable_safety_checker: true
 };
 
