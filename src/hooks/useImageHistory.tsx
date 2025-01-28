@@ -14,29 +14,41 @@ export const useImageHistory = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const isAddingToHistory = useRef(false);
+  const lastAddedUrl = useRef<string | null>(null);
+  const lastAddedTimestamp = useRef<number>(0);
   const { fetchUserImages, insertImage } = useSupabaseQueries();
 
   const formatHistory = (images: any[]) => {
-    return images.map(img => ({
-      url: img.url,
-      settings: {
-        prompt: img.prompt || '',
-        negative_prompt: img.negative_prompt || '',
-        guidance_scale: img.guidance_scale || 7.5,
-        num_inference_steps: img.steps || 30,
-        seed: img.seed,
-        num_outputs: img.num_outputs || 1,
-        aspect_ratio: img.aspect_ratio || "1:1",
-        output_format: img.output_format || "webp",
-        output_quality: img.output_quality || 80,
-        prompt_strength: img.prompt_strength || 0.8,
-        hf_loras: img.settings?.hf_loras || [],
-        lora_scales: img.settings?.lora_scales || [],
-        disable_safety_checker: false,
-        reference_image_url: img.reference_image_url || null
-      } as GenerationSettings,
-      timestamp: new Date(img.created_at).getTime()
-    }));
+    // Filtrer les doublons basés sur l'URL et le timestamp
+    const seen = new Set();
+    return images
+      .map(img => ({
+        url: img.url,
+        settings: {
+          prompt: img.prompt || '',
+          negative_prompt: img.negative_prompt || '',
+          guidance_scale: img.guidance_scale || 7.5,
+          num_inference_steps: img.steps || 30,
+          seed: img.seed,
+          num_outputs: img.num_outputs || 1,
+          aspect_ratio: img.aspect_ratio || "1:1",
+          output_format: img.output_format || "webp",
+          output_quality: img.output_quality || 80,
+          prompt_strength: img.prompt_strength || 0.8,
+          hf_loras: img.settings?.hf_loras || [],
+          lora_scales: img.settings?.lora_scales || [],
+          disable_safety_checker: false,
+          reference_image_url: img.reference_image_url || null
+        } as GenerationSettings,
+        timestamp: new Date(img.created_at).getTime()
+      }))
+      .filter(item => {
+        const key = `${item.url}-${item.timestamp}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
+      .sort((a, b) => b.timestamp - a.timestamp);
   };
 
   const fetchHistory = useCallback(async () => {
@@ -64,8 +76,20 @@ export const useImageHistory = () => {
   }, [toast, fetchUserImages]);
 
   const addToHistory = async (url: string, settings: GenerationSettings) => {
-    if (isAddingToHistory.current) return;
+    if (isAddingToHistory.current || url === lastAddedUrl.current) {
+      console.log('Skipping duplicate addition to history');
+      return;
+    }
+
+    const now = Date.now();
+    if (now - lastAddedTimestamp.current < 5000) { // 5 secondes minimum entre les ajouts
+      console.log('Skipping addition to history - too soon after last addition');
+      return;
+    }
+
     isAddingToHistory.current = true;
+    lastAddedUrl.current = url;
+    lastAddedTimestamp.current = now;
 
     try {
       const { data: session } = await supabase.auth.getSession();

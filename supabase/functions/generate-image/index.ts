@@ -9,7 +9,6 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -26,7 +25,6 @@ serve(async (req) => {
 
     const body = await req.json()
 
-    // If it's a status check request
     if (body.predictionId) {
       console.log("Checking status for prediction:", body.predictionId)
       const prediction = await replicate.predictions.get(body.predictionId)
@@ -36,7 +34,6 @@ serve(async (req) => {
       })
     }
 
-    // If it's a generation request
     if (!body.input?.prompt) {
       return new Response(
         JSON.stringify({ 
@@ -47,6 +44,12 @@ serve(async (req) => {
         }
       )
     }
+
+    // Format LoRA inputs correctly
+    const formattedLoras = body.input.hf_loras?.map((lora: string, index: number) => ({
+      model: lora,
+      scale: body.input.lora_scales?.[index] || 1.0
+    })) || [];
 
     // Prepare the input according to the model's schema
     const input = {
@@ -59,12 +62,10 @@ serve(async (req) => {
       output_format: body.input.output_format || "webp",
       output_quality: body.input.output_quality || 80,
       prompt_strength: body.input.prompt_strength || 0.8,
-      hf_loras: body.input.hf_loras || [],
-      lora_scales: body.input.lora_scales || [],
+      loras: formattedLoras,
       disable_safety_checker: body.input.disable_safety_checker || false
     }
 
-    // If there's a reference image, include it
     if (body.input.image) {
       console.log("Reference image detected")
       input.image = body.input.image
@@ -72,7 +73,8 @@ serve(async (req) => {
 
     console.log("Starting generation with input:", {
       ...input,
-      image: input.image ? "Image present" : "No image"
+      image: input.image ? "Image present" : "No image",
+      loras: formattedLoras
     })
 
     try {
