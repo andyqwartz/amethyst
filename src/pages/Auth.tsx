@@ -74,19 +74,40 @@ export const Auth = () => {
 
   const handleGithubAuth = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      setLoading(true);
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`
+          redirectTo: window.location.origin + '/auth/callback',
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
         }
       });
-      if (error) throw error;
+
+      if (error) {
+        toast({
+          title: "Erreur de connexion GitHub",
+          description: "Impossible de se connecter avec GitHub. Veuillez réessayer.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Si data.url existe, redirigez l'utilisateur
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+
     } catch (error: any) {
       toast({
         title: "Erreur",
-        description: error.message,
+        description: "Une erreur est survenue lors de la connexion avec GitHub",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
