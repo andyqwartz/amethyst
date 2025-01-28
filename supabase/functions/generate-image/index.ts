@@ -4,9 +4,10 @@ import Replicate from "https://esm.sh/replicate@0.25.2"
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+}
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -88,21 +89,39 @@ serve(async (req) => {
       image: input.image ? "Base64 image present" : "No reference image"
     })
     
-    const prediction = await replicate.predictions.create({
-      version: "2389224e115448d9a77c07d7d45672b3f0aa45acacf1c5bcf51857ac295e3aec",
-      input: input
-    })
+    try {
+      const prediction = await replicate.predictions.create({
+        version: "2389224e115448d9a77c07d7d45672b3f0aa45acacf1c5bcf51857ac295e3aec",
+        input: input
+      })
 
-    console.log("Generation started:", prediction)
-    return new Response(JSON.stringify(prediction), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    })
+      console.log("Generation started:", prediction)
+      return new Response(JSON.stringify(prediction), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      })
+    } catch (error) {
+      console.error("Error creating prediction:", error)
+      return new Response(
+        JSON.stringify({ 
+          error: "Failed to create prediction", 
+          details: error.message 
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500,
+        }
+      )
+    }
   } catch (error) {
     console.error("Error in generate-image function:", error)
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500,
-    })
+    return new Response(
+      JSON.stringify({ 
+        error: "An unexpected error occurred", 
+        details: error.message 
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      }
+    )
   }
 })
