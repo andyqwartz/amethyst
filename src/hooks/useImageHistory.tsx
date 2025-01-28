@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { GenerationSettings } from '@/types/replicate';
 import { useToast } from "@/hooks/use-toast";
@@ -14,7 +14,6 @@ export const useImageHistory = () => {
   const [allHistory, setAllHistory] = useState<HistoryImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
-  const isAddingToHistory = useRef(false);
 
   const fetchHistory = useCallback(async () => {
     try {
@@ -78,13 +77,6 @@ export const useImageHistory = () => {
   }, [toast]);
 
   const addToHistory = async (url: string, settings: GenerationSettings) => {
-    if (isAddingToHistory.current) {
-      console.log('Already adding to history, skipping duplicate call');
-      return;
-    }
-
-    isAddingToHistory.current = true;
-
     try {
       const { data: session } = await supabase.auth.getSession();
       
@@ -99,6 +91,7 @@ export const useImageHistory = () => {
       }
 
       console.log('Adding image to history for user:', session.session.user.id);
+      console.log('Image settings:', settings);
 
       const { error } = await supabase
         .from('images')
@@ -124,6 +117,7 @@ export const useImageHistory = () => {
         throw error;
       }
 
+      console.log('Successfully added image to history');
       await fetchHistory();
     } catch (error) {
       console.error('Error adding to history:', error);
@@ -132,8 +126,6 @@ export const useImageHistory = () => {
         description: "Unable to save image to history",
         variant: "destructive"
       });
-    } finally {
-      isAddingToHistory.current = false;
     }
   };
 
