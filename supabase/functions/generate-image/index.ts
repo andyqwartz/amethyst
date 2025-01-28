@@ -8,7 +8,6 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -50,12 +49,18 @@ serve(async (req) => {
     // Prepare the input with the reference image if present
     const input = {
       ...body.input,
-      image: body.input.reference_image_url || undefined
+      image: body.input.reference_image_url || undefined,
+      mode: body.input.reference_image_url ? "img2img" : "txt2img",
+      hf_loras: body.input.hf_loras || [],
+      lora_scales: body.input.lora_scales || []
     }
 
     console.log("Generating image with input:", {
       ...input,
-      image: input.image ? "Image URL present" : "No image"
+      image: input.image ? "Image URL present" : "No image",
+      mode: input.mode,
+      hf_loras: input.hf_loras,
+      lora_scales: input.lora_scales
     })
     
     const prediction = await replicate.predictions.create({

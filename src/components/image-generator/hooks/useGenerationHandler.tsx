@@ -1,4 +1,4 @@
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import type { GenerationSettings } from '@/types/replicate';
 
 export const useGenerationHandler = (
@@ -20,12 +20,16 @@ export const useGenerationHandler = (
       setIsGenerating(true);
       console.log('Starting generation with settings:', {
         ...settings,
-        reference_image_url: settings.reference_image_url || 'No reference image'
+        reference_image_url: settings.reference_image_url || 'No reference image',
+        hf_loras: settings.hf_loras || [],
+        lora_scales: settings.lora_scales || []
       });
       
       await generate({
         ...settings,
-        reference_image_url: settings.reference_image_url
+        reference_image_url: settings.reference_image_url,
+        hf_loras: settings.hf_loras || [],
+        lora_scales: settings.lora_scales || []
       });
       
       toast({

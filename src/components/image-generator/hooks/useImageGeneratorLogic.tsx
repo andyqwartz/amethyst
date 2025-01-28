@@ -6,7 +6,7 @@ import { useImageHistory } from '@/hooks/useImageHistory';
 import { useImageGeneratorState } from './useImageGeneratorState';
 import { useImageUpload } from './useImageUpload';
 import { useGenerationHandler } from './useGenerationHandler';
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import type { GenerationSettings } from '@/types/replicate';
 
 export const useImageGeneratorLogic = () => {
@@ -80,7 +80,9 @@ export const useImageGeneratorLogic = () => {
     if (!isGenerating) {
       const settingsWithImage = {
         ...settingsToUse,
-        reference_image_url: referenceImage
+        reference_image_url: referenceImage,
+        hf_loras: settingsToUse.hf_loras || [],
+        lora_scales: settingsToUse.lora_scales || []
       };
       handleGenerateBase(generate, settingsWithImage, isGenerating);
     }
