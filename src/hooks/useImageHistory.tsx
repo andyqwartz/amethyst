@@ -11,7 +11,6 @@ interface HistoryImage {
 
 export const useImageHistory = () => {
   const [history, setHistory] = useState<HistoryImage[]>([]);
-  const [allHistory, setAllHistory] = useState<HistoryImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const isAddingToHistory = useRef(false);
@@ -22,13 +21,12 @@ export const useImageHistory = () => {
       if (!session?.session?.user) {
         console.log('No authenticated user found');
         setHistory([]);
-        setAllHistory([]);
         setIsLoading(false);
         return;
       }
 
       console.log('Fetching history for user:', session.session.user.id);
-      
+
       const { data: images, error } = await supabase
         .from('images')
         .select('*')
@@ -63,8 +61,7 @@ export const useImageHistory = () => {
         timestamp: new Date(img.created_at).getTime()
       }));
 
-      setHistory(formattedHistory.slice(0, 4));
-      setAllHistory(formattedHistory);
+      setHistory(formattedHistory);
     } catch (error) {
       console.error('Error fetching history:', error);
       toast({
@@ -137,34 +134,37 @@ export const useImageHistory = () => {
     }
   };
 
+  // Set up real-time subscription for updates
   useEffect(() => {
     fetchHistory();
 
+    // Listen for auth state changes
     const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_IN') {
         fetchHistory();
       } else if (event === 'SIGNED_OUT') {
         setHistory([]);
-        setAllHistory([]);
       }
     });
 
+    // Set up real-time subscription for the images table
     const channel = supabase
       .channel('images_changes')
       .on(
         'postgres_changes',
         { 
-          event: '*',
+          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
           schema: 'public',
           table: 'images'
         },
         (payload) => {
           console.log('Real-time update received:', payload);
-          fetchHistory();
+          fetchHistory(); // Refresh the history when any change occurs
         }
       )
       .subscribe();
 
+    // Cleanup subscriptions
     return () => {
       authSubscription.unsubscribe();
       supabase.removeChannel(channel);
@@ -173,7 +173,7 @@ export const useImageHistory = () => {
 
   return { 
     history, 
-    allHistory,
+    allHistory: history, // Return all history for both dashboard and modal
     addToHistory,
     isLoading 
   };
