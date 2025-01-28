@@ -82,7 +82,6 @@ export const ImageGenerator = () => {
       settings={settings}
       generatedImages={generatedImages}
       history={history}
-      allHistory={history}
       isLoading={isLoading}
       progress={progress}
       currentLogs={currentLogs}
