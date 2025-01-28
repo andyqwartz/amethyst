@@ -32,11 +32,6 @@ export const useImageHistory = () => {
       
       if (!session?.session?.user) {
         console.error('No authenticated user found');
-        toast({
-          title: "Authentication Error",
-          description: "Please log in to view your image history",
-          variant: "destructive"
-        });
         setHistory([]);
         return;
       }
@@ -45,6 +40,7 @@ export const useImageHistory = () => {
       const { data: images, error } = await supabase
         .from('images')
         .select('*')
+        .eq('user_id', session.session.user.id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -139,12 +135,13 @@ export const useImageHistory = () => {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session?.user) {
+        console.error('No authenticated user found');
         toast({
           title: "Authentication Error",
           description: "Please log in to save images",
           variant: "destructive"
         });
-        throw new Error('User not authenticated');
+        return;
       }
 
       console.log('Adding image to history:', { url, settings });
@@ -164,7 +161,9 @@ export const useImageHistory = () => {
           aspect_ratio: settings.aspect_ratio,
           output_format: settings.output_format,
           output_quality: settings.output_quality,
-          prompt_strength: settings.prompt_strength
+          prompt_strength: settings.prompt_strength,
+          hf_loras: settings.hf_loras,
+          lora_scales: settings.lora_scales
         });
 
       if (error) {
@@ -173,7 +172,7 @@ export const useImageHistory = () => {
       }
 
       // Refresh history after adding new image
-      fetchHistory();
+      await fetchHistory();
     } catch (error) {
       console.error('Error adding image to history:', error);
       toast({
