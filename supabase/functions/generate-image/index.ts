@@ -9,6 +9,7 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -25,6 +26,7 @@ serve(async (req) => {
 
     const body = await req.json()
 
+    // If it's a status check request
     if (body.predictionId) {
       console.log("Checking status for prediction:", body.predictionId)
       const prediction = await replicate.predictions.get(body.predictionId)
@@ -34,6 +36,7 @@ serve(async (req) => {
       })
     }
 
+    // If it's a generation request
     if (!body.input?.prompt) {
       return new Response(
         JSON.stringify({ 
@@ -45,15 +48,7 @@ serve(async (req) => {
       )
     }
 
-    // Toujours formater les LoRAs, même sans image de référence
-    const formattedLoras = (body.input.hf_loras || []).map((lora: string, index: number) => ({
-      model: lora,
-      scale: body.input.lora_scales?.[index] || 1.0
-    })).filter((lora: any) => lora.model && lora.model.trim());
-
-    console.log("Formatted LoRAs:", formattedLoras);
-
-    // Préparer l'input selon le schéma du modèle
+    // Prepare the input according to the model's schema
     const input = {
       prompt: body.input.prompt,
       negative_prompt: body.input.negative_prompt || "",
@@ -64,11 +59,12 @@ serve(async (req) => {
       output_format: body.input.output_format || "webp",
       output_quality: body.input.output_quality || 80,
       prompt_strength: body.input.prompt_strength || 0.8,
-      loras: formattedLoras,
+      hf_loras: body.input.hf_loras || [],
+      lora_scales: body.input.lora_scales || [],
       disable_safety_checker: body.input.disable_safety_checker || false
     }
 
-    // Ajouter l'image de référence si elle existe
+    // If there's a reference image, include it
     if (body.input.image) {
       console.log("Reference image detected")
       input.image = body.input.image
@@ -76,8 +72,7 @@ serve(async (req) => {
 
     console.log("Starting generation with input:", {
       ...input,
-      image: input.image ? "Image present" : "No image",
-      loras: formattedLoras
+      image: input.image ? "Image present" : "No image"
     })
 
     try {

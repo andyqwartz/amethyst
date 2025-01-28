@@ -16,25 +16,19 @@ export const ImageGenerator = () => {
     settings,
     generatedImages,
     history,
+    allHistory,
     isLoading,
     progress,
     currentLogs,
     handleImageUpload,
     handleImageClick,
-    handleGenerate: baseHandleGenerate,
+    handleGenerate,
     handleTweak,
     handleDownload,
     updateSettings,
     setReferenceImage,
     handleRemoveReferenceImage
   } = useImageGeneratorLogic();
-
-  const handleGenerate = async () => {
-    if (showSettings) {
-      setShowSettings(false);
-    }
-    await baseHandleGenerate();
-  };
 
   const handleDeleteHistory = async () => {
     try {
@@ -82,6 +76,7 @@ export const ImageGenerator = () => {
       settings={settings}
       generatedImages={generatedImages}
       history={history}
+      allHistory={allHistory}
       isLoading={isLoading}
       progress={progress}
       currentLogs={currentLogs}

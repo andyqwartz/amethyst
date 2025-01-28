@@ -1,10 +1,11 @@
 import React from 'react';
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Trash2 } from 'lucide-react';
 import { ReferenceImageUpload } from './ReferenceImageUpload';
 import { GenerationControls } from './GenerationControls';
 import { AdvancedSettings } from './AdvancedSettings';
-import { ImageSection } from './content/ImageSection';
-import { DeleteHistoryButton } from './content/DeleteHistoryButton';
+import { ImagePreview } from './ImagePreview';
 import type { GenerationSettings } from '@/types/replicate';
 
 interface MainContentProps {
@@ -44,9 +45,6 @@ export const MainContent = ({
   onDownload,
   onDeleteHistory
 }: MainContentProps) => {
-  // Combine all images into a single array and remove duplicates
-  const allImages = Array.from(new Set([...generatedImages, ...history.map(h => h.url)]));
-
   return (
     <Card className="border-none glass-card shadow-xl relative">
       <div className="p-6 space-y-8">
@@ -72,17 +70,42 @@ export const MainContent = ({
           />
         )}
 
-        {!isLoading && allImages.length > 0 && (
-          <ImageSection
-            title="Images générées"
-            images={allImages}
-            onTweak={onTweak}
-            onDownload={onDownload}
-            settings={settings}
-          />
+        {generatedImages.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold mb-4 text-white">Images générées</h3>
+            <ImagePreview
+              images={generatedImages}
+              onTweak={onTweak}
+              onDownload={onDownload}
+              settings={settings}
+            />
+          </div>
         )}
 
-        <DeleteHistoryButton onDelete={onDeleteHistory} />
+        {!isLoading && history.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold mb-4 text-white">Historique des générations</h3>
+            <ImagePreview
+              images={history.map(h => h.url)}
+              onTweak={(settings) => onTweak(settings)}
+              onDownload={onDownload}
+              settings={settings}
+            />
+          </div>
+        )}
+
+        <div className="group h-24 flex items-center justify-center mt-8">
+          <Button
+            variant="outline"
+            size="icon"
+            className="w-12 h-12 rounded-full bg-[#D6BCFA] hover:bg-[#C4B5FD] border-none text-white 
+                     transition-all duration-300 hover:scale-110 shadow-lg backdrop-blur-sm
+                     opacity-0 group-hover:opacity-100"
+            onClick={onDeleteHistory}
+          >
+            <Trash2 className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
     </Card>
   );
