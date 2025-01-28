@@ -19,7 +19,6 @@ interface ImageGeneratorContainerProps {
   history: { url: string }[];
   allHistory: any[];
   isLoading: boolean;
-  progress: number;
   currentLogs?: string;
   handleImageUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleImageClick: () => void;
@@ -44,7 +43,6 @@ export const ImageGeneratorContainer: React.FC<ImageGeneratorContainerProps> = (
   history,
   allHistory,
   isLoading,
-  progress,
   currentLogs,
   handleImageUpload,
   handleImageClick,
@@ -96,8 +94,7 @@ export const ImageGeneratorContainer: React.FC<ImageGeneratorContainerProps> = (
       />
 
       <GenerationLoadingState 
-        isGenerating={isGenerating} 
-        progress={progress}
+        isGenerating={isGenerating}
         currentLogs={currentLogs}
       />
     </div>
