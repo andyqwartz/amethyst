@@ -4,7 +4,7 @@ import { generateImage } from '@/services/replicate';
 import type { GenerationSettings, GenerationStatus } from '@/types/replicate';
 import { useImageHistory } from './useImageHistory';
 
-const POLL_INTERVAL = 2000; // 2 secondes
+const POLL_INTERVAL = 2000;
 const GENERATION_ID_KEY = 'generation_id';
 
 export const useImageGeneration = () => {
@@ -12,9 +12,15 @@ export const useImageGeneration = () => {
   const [status, setStatus] = useState<GenerationStatus>('idle');
   const [generatedImages, setGeneratedImages] = useState<string[]>([]);
   const { addToHistory } = useImageHistory();
-  const [predictionId, setPredictionId] = useState<string | null>(
-    localStorage.getItem(GENERATION_ID_KEY)
-  );
+  const [predictionId, setPredictionId] = useState<string | null>(null);
+
+  // Initialize predictionId from localStorage after initial render
+  React.useEffect(() => {
+    const savedPredictionId = localStorage.getItem(GENERATION_ID_KEY);
+    if (savedPredictionId) {
+      setPredictionId(savedPredictionId);
+    }
+  }, []);
 
   const generate = async (settings: GenerationSettings) => {
     if (status === 'loading') {
@@ -29,10 +35,9 @@ export const useImageGeneration = () => {
     setStatus('loading');
     
     try {
-      const savedPredictionId = localStorage.getItem(GENERATION_ID_KEY);
-      if (savedPredictionId) {
-        console.log('Checking saved prediction:', savedPredictionId);
-        const pollResponse = await generateImage({ predictionId: savedPredictionId });
+      if (predictionId) {
+        console.log('Checking saved prediction:', predictionId);
+        const pollResponse = await generateImage({ predictionId });
         
         if (pollResponse.status === 'success') {
           setGeneratedImages(pollResponse.output);
