@@ -1,6 +1,5 @@
 import React from 'react';
 import { GuidanceScale } from './settings/parameters/GuidanceScale';
-import { Steps } from './settings/parameters/Steps';
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -18,14 +17,10 @@ export const ParameterInputs = ({ settings, onSettingsChange }: ParameterInputsP
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4">
         <GuidanceScale
           value={settings.guidanceScale}
           onChange={(value) => onSettingsChange({ guidanceScale: value })}
-        />
-        <Steps
-          value={settings.steps}
-          onChange={(value) => onSettingsChange({ steps: value })}
         />
       </div>
 
