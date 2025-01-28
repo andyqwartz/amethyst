@@ -24,9 +24,9 @@ export const useImageGeneratorLogic = () => {
   } = useImageGeneratorState();
 
   const { settings, updateSettings, resetSettings } = useGenerationSettings();
-  const { status, generatedImages, generate } = useImageGeneration();
-  const { progress, status: persistedStatus, savedFile, savedSettings, currentLogs } = useGenerationProgress(
-    status === 'loading',
+  const { status: generationStatus, generatedImages, generate } = useImageGeneration();
+  const { progress, setProgress, status, savedFile, savedSettings, currentLogs } = useGenerationProgress(
+    generationStatus === 'loading',
     referenceImage,
     settings,
     (savedSettings) => {
@@ -42,7 +42,7 @@ export const useImageGeneratorLogic = () => {
 
   const { handleImageUpload, handleImageClick } = useImageUpload(setReferenceImage);
   const { handleGenerate: handleGenerateBase } = useGenerationHandler(
-    status,
+    generationStatus,
     setIsGenerating,
     resetSettings,
     toast
