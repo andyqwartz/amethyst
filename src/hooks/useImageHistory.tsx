@@ -55,7 +55,8 @@ export const useImageHistory = () => {
           prompt_strength: img.prompt_strength || 0.8,
           hf_loras: img.settings?.hf_loras || [],
           lora_scales: img.settings?.lora_scales || [],
-          disable_safety_checker: false
+          disable_safety_checker: false,
+          reference_image_url: img.reference_image_url || null
         } as GenerationSettings,
         timestamp: new Date(img.created_at).getTime()
       }));
@@ -133,7 +134,7 @@ export const useImageHistory = () => {
     }
   };
 
-  // Fetch history when component mounts and when auth state changes
+  // Initial fetch and auth state change handling
   useEffect(() => {
     fetchHistory();
 
@@ -145,8 +146,21 @@ export const useImageHistory = () => {
       }
     });
 
+    // Set up realtime subscription for images table
+    const channel = supabase
+      .channel('images_changes')
+      .on('postgres_changes', 
+        { event: 'INSERT', schema: 'public', table: 'images' },
+        (payload) => {
+          console.log('Realtime update received:', payload);
+          fetchHistory();
+        }
+      )
+      .subscribe();
+
     return () => {
       subscription.unsubscribe();
+      supabase.removeChannel(channel);
     };
   }, []);
 
