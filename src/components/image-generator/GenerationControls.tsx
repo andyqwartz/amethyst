@@ -33,7 +33,6 @@ export const GenerationControls = ({
 
     console.log('Starting generation with settings:', settings);
     onGenerate();
-    onToggleSettings(); // Close advanced settings after generation
   };
 
   return (
