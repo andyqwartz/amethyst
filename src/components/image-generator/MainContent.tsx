@@ -95,18 +95,16 @@ export const MainContent = ({
         )}
       </div>
 
-      {history.length > 0 && (
-        <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50">
-          <Button
-            variant="outline"
-            size="icon"
-            className="w-12 h-12 rounded-full bg-[#D6BCFA] hover:bg-[#C4B5FD] border-none text-white transition-all duration-300 hover:scale-110 shadow-lg backdrop-blur-sm"
-            onClick={onDeleteHistory}
-          >
-            <Trash2 className="h-5 w-5" />
-          </Button>
-        </div>
-      )}
+      <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50">
+        <Button
+          variant="outline"
+          size="icon"
+          className="w-12 h-12 rounded-full bg-[#D6BCFA] hover:bg-[#C4B5FD] border-none text-white transition-all duration-300 hover:scale-110 shadow-lg backdrop-blur-sm"
+          onClick={onDeleteHistory}
+        >
+          <Trash2 className="h-5 w-5" />
+        </Button>
+      </div>
     </Card>
   );
 };
