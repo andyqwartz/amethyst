@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { GenerationSettings } from '@/types/replicate';
 import { useToast } from "@/hooks/use-toast";
+import type { Json } from '@/integrations/supabase/types';
 
 export const useImageHistory = () => {
   const [history, setHistory] = useState<{
@@ -52,8 +53,12 @@ export const useImageHistory = () => {
           output_format: img.output_format || "webp",
           output_quality: img.output_quality || 80,
           prompt_strength: img.prompt_strength || 0.8,
-          hf_loras: Array.isArray(img.settings?.hf_loras) ? img.settings.hf_loras : [],
-          lora_scales: Array.isArray(img.settings?.lora_scales) ? img.settings.lora_scales : [],
+          hf_loras: typeof img.settings === 'object' && Array.isArray((img.settings as any)?.hf_loras) 
+            ? (img.settings as any).hf_loras 
+            : [],
+          lora_scales: typeof img.settings === 'object' && Array.isArray((img.settings as any)?.lora_scales) 
+            ? (img.settings as any).lora_scales 
+            : [],
           disable_safety_checker: false,
           reference_image_url: img.reference_image_url || null
         } as GenerationSettings,
@@ -96,12 +101,18 @@ export const useImageHistory = () => {
 
       console.log('Adding image to history:', { url, settings });
 
+      const settingsJson: Json = {
+        ...settings,
+        hf_loras: settings.hf_loras || [],
+        lora_scales: settings.lora_scales || []
+      };
+
       const { error } = await supabase
         .from('images')
         .insert({
           url,
           user_id: session.session.user.id,
-          settings: settings as unknown as Json,
+          settings: settingsJson,
           prompt: settings.prompt,
           negative_prompt: settings.negative_prompt,
           guidance_scale: settings.guidance_scale,
