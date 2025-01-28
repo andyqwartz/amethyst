@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 }
 
-const MODEL_VERSION = "stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b";
+const MODEL_VERSION = "lucataco/flux-dev-multi-lora:2389224e115448d9a77c07d7d45672b3f0aa45acacf1c5bcf51857ac295e3aec";
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -91,8 +91,14 @@ serve(async (req) => {
           num_inference_steps: input.num_inference_steps,
           num_outputs: input.num_outputs || 1,
           seed: input.seed,
-          width: 1024,
-          height: 1024
+          image: input.image,
+          hf_loras: input.hf_loras || [],
+          lora_scales: input.lora_scales || [],
+          aspect_ratio: input.aspect_ratio || "1:1",
+          output_format: input.output_format || "webp",
+          output_quality: input.output_quality || 80,
+          prompt_strength: input.prompt_strength || 0.8,
+          disable_safety_checker: input.disable_safety_checker || false
         }
       })
 
