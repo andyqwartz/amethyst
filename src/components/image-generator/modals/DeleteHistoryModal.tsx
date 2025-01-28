@@ -26,7 +26,7 @@ export const DeleteHistoryModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-[#1a1a1a]/95 border-[#7E69AB]/20 backdrop-blur-lg">
+      <DialogContent className="sm:max-w-md bg-[#1a1a1a]/95 border-[#7E69AB]/30 backdrop-blur-lg">
         <DialogHeader>
           <DialogTitle className="text-white">Delete History</DialogTitle>
           <DialogDescription className="text-gray-300">
@@ -43,7 +43,7 @@ export const DeleteHistoryModal = ({
           </Button>
           <Button
             onClick={handleConfirm}
-            className="bg-[#7E69AB] hover:bg-[#7E69AB]/80 text-white border-none transition-all duration-300"
+            className="bg-[#7E69AB] hover:bg-[#7E69AB]/90 text-white border-none transition-all duration-300"
           >
             Delete History
           </Button>
