@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 }
 
-const MODEL_VERSION = "lucataco/sdxl:c86579ac5193b3d184651424d6c766f9b699c05b5d8360e3f6c6c5c6e01013c5";
+const MODEL_VERSION = "lucataco/flux-dev-multi-lora:2389224e115448d9a77c07d7d45672b3f0aa45acacf1c5bcf51857ac295e3aec";
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
