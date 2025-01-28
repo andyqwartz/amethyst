@@ -124,7 +124,7 @@ const reducer = (state: State, action: Action): State => {
 }
 
 const listeners = new Set<(state: State) => void>()
-let memoryState: State = { toasts: [] }
+const memoryState: State = { toasts: [] }
 
 function dispatch(action: Action) {
   memoryState = reducer(memoryState, action)
