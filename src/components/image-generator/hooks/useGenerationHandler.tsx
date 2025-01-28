@@ -32,17 +32,18 @@ export const useGenerationHandler = (
       return;
     }
 
-    setIsProcessing(true);
-    setIsGenerating(true);
-    
     try {
+      setIsProcessing(true);
+      setIsGenerating(true);
       await generate(settings);
     } catch (error) {
+      console.error('Generation error:', error);
       toast({
         title: "Erreur",
-        description: error.message,
+        description: error.message || "Une erreur est survenue lors de la génération",
         variant: "destructive"
       });
+      setIsGenerating(false);
     } finally {
       setIsProcessing(false);
     }
@@ -54,7 +55,9 @@ export const useGenerationHandler = (
       localStorage.removeItem('generation_status');
       localStorage.removeItem('generation_progress');
       localStorage.removeItem('generation_timestamp');
-      resetSettings();
+      if (status === 'success') {
+        resetSettings();
+      }
     }
   }, [status, setIsGenerating, resetSettings]);
 
