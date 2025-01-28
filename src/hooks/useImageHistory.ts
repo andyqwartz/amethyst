@@ -17,7 +17,6 @@ export const useImageHistory = () => {
   const fetchHistory = useCallback(async () => {
     try {
       setIsLoading(true);
-      console.log('Fetching history...');
       
       const { data: session } = await supabase.auth.getSession();
       if (!session?.session?.user) {
@@ -34,11 +33,8 @@ export const useImageHistory = () => {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching images:', error);
         throw error;
       }
-
-      console.log('Fetched images:', images);
 
       const formattedHistory = images.map(img => ({
         url: img.url,
@@ -53,12 +49,8 @@ export const useImageHistory = () => {
           output_format: img.output_format || "webp",
           output_quality: img.output_quality || 80,
           prompt_strength: img.prompt_strength || 0.8,
-          hf_loras: typeof img.settings === 'object' && Array.isArray((img.settings as any)?.hf_loras) 
-            ? (img.settings as any).hf_loras 
-            : [],
-          lora_scales: typeof img.settings === 'object' && Array.isArray((img.settings as any)?.lora_scales) 
-            ? (img.settings as any).lora_scales 
-            : [],
+          hf_loras: Array.isArray(img.settings?.hf_loras) ? img.settings.hf_loras : [],
+          lora_scales: Array.isArray(img.settings?.lora_scales) ? img.settings.lora_scales : [],
           disable_safety_checker: false,
           reference_image_url: img.reference_image_url || null
         } as GenerationSettings,
@@ -90,7 +82,6 @@ export const useImageHistory = () => {
       const { data: session } = await supabase.auth.getSession();
       
       if (!session?.session?.user) {
-        console.error('No authenticated user found');
         toast({
           title: "Erreur d'authentification",
           description: "Veuillez vous connecter pour sauvegarder les images",
@@ -99,10 +90,7 @@ export const useImageHistory = () => {
         return;
       }
 
-      console.log('Adding image to history:', { url, settings });
-
       const settingsJson: Json = {
-        ...settings,
         hf_loras: settings.hf_loras || [],
         lora_scales: settings.lora_scales || []
       };
@@ -126,10 +114,7 @@ export const useImageHistory = () => {
           reference_image_url: settings.reference_image_url
         });
 
-      if (error) {
-        console.error('Error adding to history:', error);
-        throw error;
-      }
+      if (error) throw error;
 
       await fetchHistory();
       
@@ -137,7 +122,7 @@ export const useImageHistory = () => {
         title: "Image sauvegardée",
         description: "L'image a été ajoutée à votre historique",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding to history:', error);
       toast({
         title: "Erreur",
@@ -161,8 +146,7 @@ export const useImageHistory = () => {
           schema: 'public',
           table: 'images'
         },
-        (payload) => {
-          console.log('Real-time update received:', payload);
+        () => {
           fetchHistory();
         }
       )
