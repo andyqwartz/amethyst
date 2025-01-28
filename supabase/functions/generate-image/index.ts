@@ -45,13 +45,15 @@ serve(async (req) => {
       )
     }
 
-    // Format LoRA inputs correctly
-    const formattedLoras = body.input.hf_loras?.map((lora: string, index: number) => ({
+    // Toujours formater les LoRAs, même sans image de référence
+    const formattedLoras = (body.input.hf_loras || []).map((lora: string, index: number) => ({
       model: lora,
       scale: body.input.lora_scales?.[index] || 1.0
-    })) || [];
+    })).filter((lora: any) => lora.model && lora.model.trim());
 
-    // Prepare the input according to the model's schema
+    console.log("Formatted LoRAs:", formattedLoras);
+
+    // Préparer l'input selon le schéma du modèle
     const input = {
       prompt: body.input.prompt,
       negative_prompt: body.input.negative_prompt || "",
@@ -66,6 +68,7 @@ serve(async (req) => {
       disable_safety_checker: body.input.disable_safety_checker || false
     }
 
+    // Ajouter l'image de référence si elle existe
     if (body.input.image) {
       console.log("Reference image detected")
       input.image = body.input.image
