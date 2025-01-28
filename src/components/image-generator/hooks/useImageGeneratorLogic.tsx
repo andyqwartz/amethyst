@@ -25,7 +25,14 @@ export const useImageGeneratorLogic = () => {
 
   const { settings, updateSettings, resetSettings } = useGenerationSettings();
   const { status: generationStatus, generatedImages, generate } = useImageGeneration();
-  const { progress, setProgress, status, savedFile, savedSettings, currentLogs } = useGenerationProgress(
+  const { 
+    progress, 
+    setProgress,
+    status,
+    savedFile,
+    savedSettings,
+    currentLogs 
+  } = useGenerationProgress(
     generationStatus === 'loading',
     referenceImage,
     settings,

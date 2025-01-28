@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useGenerationPersistence } from './useGenerationPersistence';
 import type { GenerationStatus, GenerationSettings } from '@/types/replicate';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from "@/hooks/use-toast";
 
-interface GenerationProgressProps {
+export interface GenerationProgressProps {
   isGenerating: boolean;
   currentLogs: string;
+  progress: number;
+  setProgress: (progress: number) => void;
+  status: GenerationStatus;
+  savedFile: string | null;
+  savedSettings: GenerationSettings | null;
 }
 
 export const useGenerationProgress = (
@@ -16,7 +19,17 @@ export const useGenerationProgress = (
   onRetry?: (settings: GenerationSettings) => void
 ): GenerationProgressProps => {
   const [currentLogs, setCurrentLogs] = useState<string>('');
-  const { toast } = useToast();
+  const [progress, setProgress] = useState(0);
+  const [status, setStatus] = useState<GenerationStatus>('idle');
+
+  const { savedFile, savedSettings } = useGenerationPersistence(
+    status,
+    progress,
+    setStatus,
+    setProgress,
+    referenceImage || null,
+    settings
+  );
 
   // Reset states when generation stops
   useEffect(() => {
@@ -57,17 +70,15 @@ export const useGenerationProgress = (
         if (prediction.status === 'succeeded') {
           console.log('Generation succeeded:', prediction.output);
           localStorage.removeItem('generation_id');
+          setStatus('success');
         } else if (prediction.status === 'failed') {
           console.error('Generation failed:', prediction.error);
           localStorage.removeItem('generation_id');
-          toast({
-            title: "Erreur de génération",
-            description: prediction.error || "La génération a échoué",
-            variant: "destructive"
-          });
+          setStatus('error');
         } else if (prediction.status === 'processing' && prediction.logs) {
           console.log('Generation processing:', prediction.logs);
           setCurrentLogs(prediction.logs);
+          setStatus('loading');
         }
       } catch (error) {
         console.error('Error checking progress:', error);
@@ -76,10 +87,15 @@ export const useGenerationProgress = (
 
     const interval = setInterval(checkProgress, 1000);
     return () => clearInterval(interval);
-  }, [isGenerating, toast]);
+  }, [isGenerating]);
 
   return { 
     isGenerating,
-    currentLogs
+    currentLogs,
+    progress,
+    setProgress,
+    status,
+    savedFile,
+    savedSettings
   };
 };
