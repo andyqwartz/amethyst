@@ -31,7 +31,7 @@ interface ImageGeneratorContainerProps {
   setReferenceImage: (image: string | null) => void;
 }
 
-export const ImageGeneratorContainer: React.FC<ImageGeneratorContainerProps> = ({
+export const ImageGeneratorContainer = ({
   showSettings,
   setShowSettings,
   showHelp,
@@ -54,52 +54,47 @@ export const ImageGeneratorContainer: React.FC<ImageGeneratorContainerProps> = (
   handleDownload,
   updateSettings,
   setReferenceImage
-}) => {
-  return (
-    <div className="min-h-screen p-4 md:p-6 animate-fade-in">
-      <div className="max-w-2xl mx-auto">
-        <Header
-          onHistoryClick={() => setShowHistory(true)}
-          onSettingsClick={() => setShowSettings(!showSettings)}
-          onHelpClick={() => setShowHelp(true)}
-        />
-
-        <MainContent
-          referenceImage={referenceImage}
-          showSettings={showSettings}
-          settings={settings}
-          isGenerating={isGenerating}
-          generatedImages={generatedImages}
-          history={history}
-          isLoading={isLoading}
-          onImageUpload={handleImageUpload}
-          onImageClick={handleImageClick}
-          onRemoveImage={() => setReferenceImage(null)}
-          onSettingsChange={updateSettings}
-          onGenerate={handleGenerate}
-          onToggleSettings={() => setShowSettings(!showSettings)}
-          onTweak={handleTweak}
-          onDownload={handleDownload}
-        />
-      </div>
-
-      <HelpModal
-        open={showHelp}
-        onOpenChange={setShowHelp}
+}: ImageGeneratorContainerProps) => (
+  <div className="min-h-screen p-4 md:p-6 animate-fade-in">
+    <div className="max-w-2xl mx-auto">
+      <Header
+        onHistoryClick={() => setShowHistory(true)}
+        onSettingsClick={() => setShowSettings(!showSettings)}
+        onHelpClick={() => setShowHelp(true)}
       />
 
-      <HistoryModal
-        open={showHistory}
-        onOpenChange={setShowHistory}
-        images={allHistory.map(h => ({ url: h.url, settings: h.settings }))}
-        onDownload={handleDownload}
-        onTweak={handleTweak}
-      />
-
-      <GenerationLoadingState 
+      <MainContent
+        referenceImage={referenceImage}
+        showSettings={showSettings}
+        settings={settings}
         isGenerating={isGenerating}
-        currentLogs={currentLogs}
+        generatedImages={generatedImages}
+        history={history}
+        isLoading={isLoading}
+        onImageUpload={handleImageUpload}
+        onImageClick={handleImageClick}
+        onRemoveImage={() => setReferenceImage(null)}
+        onSettingsChange={updateSettings}
+        onGenerate={handleGenerate}
+        onToggleSettings={() => setShowSettings(!showSettings)}
+        onTweak={handleTweak}
+        onDownload={handleDownload}
       />
     </div>
-  );
-};
+
+    <HelpModal open={showHelp} onOpenChange={setShowHelp} />
+    
+    <HistoryModal
+      open={showHistory}
+      onOpenChange={setShowHistory}
+      images={allHistory.map(h => ({ url: h.url, settings: h.settings }))}
+      onDownload={handleDownload}
+      onTweak={handleTweak}
+    />
+
+    <GenerationLoadingState 
+      isGenerating={isGenerating}
+      currentLogs={currentLogs}
+    />
+  </div>
+);
