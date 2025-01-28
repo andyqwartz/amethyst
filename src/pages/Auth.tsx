@@ -78,11 +78,7 @@ export const Auth = () => {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
         options: {
-          redirectTo: window.location.origin + '/auth/callback',
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          },
+          redirectTo: 'https://hyplbzvyvbcjzpioemay.supabase.co/auth/v1/callback',
         }
       });
 
@@ -95,7 +91,6 @@ export const Auth = () => {
         return;
       }
 
-      // Si data.url existe, redirigez l'utilisateur
       if (data?.url) {
         window.location.href = data.url;
       }
