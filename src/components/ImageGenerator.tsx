@@ -21,13 +21,20 @@ export const ImageGenerator = () => {
     currentLogs,
     handleImageUpload,
     handleImageClick,
-    handleGenerate,
+    handleGenerate: baseHandleGenerate,
     handleTweak,
     handleDownload,
     updateSettings,
     setReferenceImage,
     handleRemoveReferenceImage
   } = useImageGeneratorLogic();
+
+  const handleGenerate = async () => {
+    if (showSettings) {
+      setShowSettings(false);
+    }
+    await baseHandleGenerate();
+  };
 
   const handleDeleteHistory = async () => {
     try {
