@@ -19,7 +19,9 @@ export const useImageGeneratorLogic = () => {
     isGenerating,
     setIsGenerating,
     referenceImage,
-    setReferenceImage
+    setReferenceImage,
+    handleRemoveReferenceImage,
+    toast
   } = useImageGeneratorState();
 
   const { settings, updateSettings, resetSettings } = useGenerationSettings();
@@ -87,6 +89,7 @@ export const useImageGeneratorLogic = () => {
     handleTweak,
     handleDownload: (imageUrl: string) => handleDownload(imageUrl, settings.output_format),
     updateSettings,
-    setReferenceImage
+    setReferenceImage,
+    handleRemoveReferenceImage
   };
 };
