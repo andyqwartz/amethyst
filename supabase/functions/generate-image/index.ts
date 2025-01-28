@@ -48,12 +48,6 @@ serve(async (req) => {
       )
     }
 
-    // Préparer les LoRAs pour l'API
-    const loras = body.input.hf_loras?.map((lora: string, index: number) => ({
-      lora,
-      scale: body.input.lora_scales?.[index] || 1.0
-    })) || [];
-
     // Prepare the input according to the model's schema
     const input = {
       prompt: body.input.prompt,
@@ -65,7 +59,8 @@ serve(async (req) => {
       output_format: body.input.output_format || "webp",
       output_quality: body.input.output_quality || 80,
       prompt_strength: body.input.prompt_strength || 0.8,
-      loras: loras,
+      hf_loras: body.input.hf_loras || [],
+      lora_scales: body.input.lora_scales || [],
       disable_safety_checker: body.input.disable_safety_checker || false
     }
 
