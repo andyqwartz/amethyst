@@ -19,8 +19,8 @@ export const useImageHistory = () => {
   const { fetchUserImages, insertImage } = useSupabaseQueries();
 
   const formatHistory = (images: any[]) => {
-    // Filtrer les doublons basés sur l'URL et le timestamp
-    const seen = new Set();
+    // Create a Set to track unique URLs
+    const seen = new Set<string>();
     return images
       .map(img => ({
         url: img.url,
@@ -43,9 +43,8 @@ export const useImageHistory = () => {
         timestamp: new Date(img.created_at).getTime()
       }))
       .filter(item => {
-        const key = `${item.url}-${item.timestamp}`;
-        if (seen.has(key)) return false;
-        seen.add(key);
+        if (seen.has(item.url)) return false;
+        seen.add(item.url);
         return true;
       })
       .sort((a, b) => b.timestamp - a.timestamp);
@@ -62,7 +61,8 @@ export const useImageHistory = () => {
       }
 
       const images = await fetchUserImages(session.session.user.id);
-      setHistory(formatHistory(images));
+      const formattedHistory = formatHistory(images);
+      setHistory(formattedHistory);
     } catch (error) {
       console.error('Error fetching history:', error);
       toast({
@@ -76,14 +76,22 @@ export const useImageHistory = () => {
   }, [toast, fetchUserImages]);
 
   const addToHistory = async (url: string, settings: GenerationSettings) => {
-    if (isAddingToHistory.current || url === lastAddedUrl.current) {
-      console.log('Skipping duplicate addition to history');
+    // Vérifier si l'URL existe déjà dans l'historique
+    if (history.some(item => item.url === url)) {
+      console.log('Skipping duplicate URL:', url);
       return;
     }
 
+    // Vérifier si on est en train d'ajouter une image
+    if (isAddingToHistory.current) {
+      console.log('Already adding to history, skipping');
+      return;
+    }
+
+    // Vérifier le délai minimum entre les ajouts (5 secondes)
     const now = Date.now();
-    if (now - lastAddedTimestamp.current < 5000) { // 5 secondes minimum entre les ajouts
-      console.log('Skipping addition to history - too soon after last addition');
+    if (now - lastAddedTimestamp.current < 5000) {
+      console.log('Too soon after last addition, skipping');
       return;
     }
 
