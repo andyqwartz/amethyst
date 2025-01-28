@@ -79,12 +79,13 @@ export const MainContent = ({
 
         {!isLoading && history.length > 0 && (
           <div className="mt-8">
-            <h3 className="text-lg font-semibold mb-4">Generation History</h3>
+            <h3 className="text-lg font-semibold mb-4 text-white">Historique des générations</h3>
             <ImagePreview
               images={history.map(h => h.url)}
-              onTweak={onTweak}
+              onTweak={(settings) => onTweak(settings)}
               onDownload={onDownload}
               settings={settings}
+              className="mb-16"
             />
           </div>
         )}

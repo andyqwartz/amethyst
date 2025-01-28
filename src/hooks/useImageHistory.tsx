@@ -17,6 +17,9 @@ export const useImageHistory = () => {
 
   const fetchHistory = useCallback(async () => {
     try {
+      setIsLoading(true);
+      console.log('Fetching history...');
+      
       const { data: session } = await supabase.auth.getSession();
       if (!session?.session?.user) {
         console.log('No authenticated user found');
@@ -24,8 +27,6 @@ export const useImageHistory = () => {
         setIsLoading(false);
         return;
       }
-
-      console.log('Fetching history for user:', session.session.user.id);
 
       const { data: images, error } = await supabase
         .from('images')
@@ -65,8 +66,8 @@ export const useImageHistory = () => {
     } catch (error) {
       console.error('Error fetching history:', error);
       toast({
-        title: "Error",
-        description: "Unable to load image history",
+        title: "Erreur",
+        description: "Impossible de charger l'historique des images",
         variant: "destructive"
       });
     } finally {
@@ -88,14 +89,14 @@ export const useImageHistory = () => {
       if (!session?.session?.user) {
         console.error('No authenticated user found');
         toast({
-          title: "Authentication Error",
-          description: "Please log in to save images",
+          title: "Erreur d'authentification",
+          description: "Veuillez vous connecter pour sauvegarder les images",
           variant: "destructive"
         });
         return;
       }
 
-      console.log('Adding image to history for user:', session.session.user.id);
+      console.log('Adding image to history:', { url, settings });
 
       const { error } = await supabase
         .from('images')
@@ -122,11 +123,16 @@ export const useImageHistory = () => {
       }
 
       await fetchHistory();
+      
+      toast({
+        title: "Image sauvegardée",
+        description: "L'image a été ajoutée à votre historique",
+      });
     } catch (error) {
       console.error('Error adding to history:', error);
       toast({
-        title: "Error",
-        description: "Unable to save image to history",
+        title: "Erreur",
+        description: "Impossible de sauvegarder l'image dans l'historique",
         variant: "destructive"
       });
     } finally {
@@ -134,46 +140,33 @@ export const useImageHistory = () => {
     }
   };
 
-  // Set up real-time subscription for updates
   useEffect(() => {
     fetchHistory();
 
-    // Listen for auth state changes
-    const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_IN') {
-        fetchHistory();
-      } else if (event === 'SIGNED_OUT') {
-        setHistory([]);
-      }
-    });
-
-    // Set up real-time subscription for the images table
     const channel = supabase
       .channel('images_changes')
       .on(
         'postgres_changes',
         { 
-          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+          event: '*',
           schema: 'public',
           table: 'images'
         },
         (payload) => {
           console.log('Real-time update received:', payload);
-          fetchHistory(); // Refresh the history when any change occurs
+          fetchHistory();
         }
       )
       .subscribe();
 
-    // Cleanup subscriptions
     return () => {
-      authSubscription.unsubscribe();
       supabase.removeChannel(channel);
     };
   }, [fetchHistory]);
 
   return { 
     history, 
-    allHistory: history, // Return all history for both dashboard and modal
+    allHistory: history,
     addToHistory,
     isLoading 
   };
