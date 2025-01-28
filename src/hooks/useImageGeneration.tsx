@@ -4,9 +4,6 @@ import { generateImage } from '@/services/replicate';
 import type { GenerationSettings, GenerationStatus } from '@/types/replicate';
 import { useImageHistory } from './useImageHistory';
 
-const POLL_INTERVAL = 2000;
-const GENERATION_ID_KEY = 'generation_id';
-
 export const useImageGeneration = () => {
   const { toast } = useToast();
   const [status, setStatus] = useState<GenerationStatus>('idle');
@@ -17,7 +14,6 @@ export const useImageGeneration = () => {
   const generationInProgressRef = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       cleanupGeneration();
@@ -57,11 +53,6 @@ export const useImageGeneration = () => {
       });
     } catch (error) {
       console.error('Failed to add images to history:', error);
-      toast({
-        title: "Erreur",
-        description: "Les images ont été générées mais n'ont pas pu être sauvegardées dans l'historique",
-        variant: "destructive"
-      });
     } finally {
       cleanupGeneration();
     }
@@ -70,11 +61,6 @@ export const useImageGeneration = () => {
   const generate = async (settings: GenerationSettings) => {
     if (generationInProgressRef.current) {
       console.warn('Generation already in progress, skipping');
-      toast({
-        title: "Génération en cours",
-        description: "Veuillez attendre la fin de la génération en cours",
-        variant: "destructive"
-      });
       return;
     }
 
@@ -88,8 +74,6 @@ export const useImageGeneration = () => {
     abortControllerRef.current = new AbortController();
     
     try {
-      cleanupGeneration();
-
       const response = await generateImage({
         input: {
           prompt: settings.prompt,
@@ -111,7 +95,7 @@ export const useImageGeneration = () => {
       if (response.status === 'started') {
         console.log('Generation started with prediction ID:', response.predictionId);
         setPredictionId(response.predictionId);
-        localStorage.setItem(GENERATION_ID_KEY, response.predictionId);
+        localStorage.setItem('generation_id', response.predictionId);
         
         pollIntervalRef.current = setInterval(async () => {
           if (abortControllerRef.current?.signal.aborted) {
@@ -134,7 +118,7 @@ export const useImageGeneration = () => {
             cleanupGeneration();
             throw error;
           }
-        }, POLL_INTERVAL);
+        }, 2000);
       } else {
         throw new Error('Failed to start generation');
       }

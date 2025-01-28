@@ -21,7 +21,7 @@ export const useGenerationProgress = (
     settings
   );
 
-  // Reset progress when generation stops
+  // Reset states when generation stops
   useEffect(() => {
     if (!isGenerating) {
       setProgress(0);
@@ -43,27 +43,53 @@ export const useGenerationProgress = (
     }
   }, [shouldRetry, savedSettings, onRetry, hasNotifiedRetry]);
 
-  // Update progress based on generation status
+  // Update progress based on real generation status
   useEffect(() => {
     if (!isGenerating) return;
 
-    const interval = setInterval(() => {
-      setProgress(current => {
-        // If we're at 100%, clear the interval
-        if (current >= 100) {
-          clearInterval(interval);
-          return 100;
+    const generationId = localStorage.getItem('generation_id');
+    if (!generationId) return;
+
+    const checkProgress = async () => {
+      try {
+        const response = await fetch(`/api/check-progress?id=${generationId}`);
+        const data = await response.json();
+        
+        if (data.status === 'succeeded') {
+          setProgress(100);
+          setStatus('success');
+        } else if (data.status === 'failed') {
+          setProgress(0);
+          setStatus('error');
+        } else if (data.status === 'processing') {
+          // Calculate progress based on logs
+          const logProgress = calculateProgressFromLogs(data.logs);
+          setProgress(logProgress);
         }
+      } catch (error) {
+        console.error('Error checking progress:', error);
+      }
+    };
 
-        // Calculate the next progress value based on current progress
-        const remaining = 100 - current;
-        const increment = Math.max(0.5, remaining * 0.05);
-        return Math.min(99, current + increment);
-      });
-    }, 1000);
-
+    const interval = setInterval(checkProgress, 1000);
     return () => clearInterval(interval);
   }, [isGenerating]);
+
+  const calculateProgressFromLogs = (logs: string): number => {
+    if (!logs) return 5;
+
+    if (logs.includes('Finalizing generation')) {
+      return 95;
+    } else if (logs.includes('Processing image')) {
+      return 75;
+    } else if (logs.includes('Starting generation')) {
+      return 25;
+    } else if (logs.includes('Initializing')) {
+      return 10;
+    }
+
+    return 5;
+  };
 
   return { 
     progress, 

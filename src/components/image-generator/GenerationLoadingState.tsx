@@ -9,8 +9,8 @@ interface GenerationLoadingStateProps {
 
 const messages = [
   "Initialisation...",
-  "Analyse des paramètres...",
-  "Génération en cours...",
+  "Démarrage de la génération...",
+  "Traitement de l'image...",
   "Finalisation..."
 ];
 
@@ -21,7 +21,6 @@ export const GenerationLoadingState = ({
   const [currentMessage, setCurrentMessage] = useState(messages[0]);
   const [shouldShow, setShouldShow] = useState(false);
 
-  // Gérer l'affichage de l'animation
   useEffect(() => {
     if (isGenerating) {
       setShouldShow(true);
@@ -34,15 +33,19 @@ export const GenerationLoadingState = ({
     }
   }, [isGenerating]);
 
-  // Mettre à jour les messages en fonction de la progression réelle
   useEffect(() => {
     if (!isGenerating) return;
 
-    const messageIndex = Math.min(
-      Math.floor((progress / 100) * messages.length),
-      messages.length - 1
-    );
-    setCurrentMessage(messages[messageIndex]);
+    // Update message based on real progress
+    if (progress >= 95) {
+      setCurrentMessage(messages[3]);
+    } else if (progress >= 75) {
+      setCurrentMessage(messages[2]);
+    } else if (progress >= 25) {
+      setCurrentMessage(messages[1]);
+    } else {
+      setCurrentMessage(messages[0]);
+    }
   }, [isGenerating, progress]);
 
   if (!shouldShow) return null;
