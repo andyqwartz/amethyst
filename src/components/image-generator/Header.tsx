@@ -1,15 +1,13 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { History, HelpCircle, Sparkles } from 'lucide-react';
+import { HelpCircle, Sparkles } from 'lucide-react';
 
 interface HeaderProps {
-  onHistoryClick: () => void;
   onSettingsClick: () => void;
   onHelpClick: () => void;
 }
 
 export const Header = ({
-  onHistoryClick,
   onSettingsClick,
   onHelpClick
 }: HeaderProps) => {
@@ -28,15 +26,6 @@ export const Header = ({
       </div>
       
       <div className="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onHistoryClick}
-          className="relative group hover:bg-primary/10 transition-all duration-300 hover-scale"
-        >
-          <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 blur transition-all duration-300 rounded-lg"></div>
-          <History className="h-5 w-5 text-primary relative z-10" />
-        </Button>
         <Button 
           variant="ghost" 
           size="icon"
