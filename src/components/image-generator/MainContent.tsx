@@ -1,5 +1,7 @@
 import React from 'react';
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Trash2 } from 'lucide-react';
 import { ReferenceImageUpload } from './ReferenceImageUpload';
 import { GenerationControls } from './GenerationControls';
 import { AdvancedSettings } from './AdvancedSettings';
@@ -12,7 +14,7 @@ interface MainContentProps {
   settings: GenerationSettings;
   isGenerating: boolean;
   generatedImages: string[];
-  history: { url: string }[];
+  history: { url: string; settings: GenerationSettings }[];
   isLoading: boolean;
   onImageUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onImageClick: () => void;
@@ -22,6 +24,7 @@ interface MainContentProps {
   onToggleSettings: () => void;
   onTweak: (settings: GenerationSettings) => void;
   onDownload: (imageUrl: string) => void;
+  onDeleteHistory: () => void;
 }
 
 export const MainContent = ({
@@ -40,10 +43,8 @@ export const MainContent = ({
   onToggleSettings,
   onTweak,
   onDownload,
+  onDeleteHistory
 }: MainContentProps) => {
-  console.log('MainContent - showSettings:', showSettings);
-  console.log('MainContent - settings:', settings);
-
   return (
     <Card className="border-none glass-card shadow-xl">
       <div className="p-6 space-y-8">
@@ -78,13 +79,26 @@ export const MainContent = ({
 
         {!isLoading && history.length > 0 && (
           <div className="mt-8">
-            <h3 className="text-lg font-semibold mb-4">Dernières générations</h3>
+            <h3 className="text-lg font-semibold mb-4">Generation History</h3>
             <ImagePreview
               images={history.map(h => h.url)}
               onTweak={onTweak}
               onDownload={onDownload}
               settings={settings}
             />
+          </div>
+        )}
+
+        {history.length > 0 && (
+          <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2">
+            <Button
+              variant="outline"
+              size="icon"
+              className="w-12 h-12 rounded-full bg-primary hover:bg-primary-hover border-2 border-accent transition-all duration-300 hover:scale-110"
+              onClick={onDeleteHistory}
+            >
+              <Trash2 className="h-5 w-5" />
+            </Button>
           </div>
         )}
       </div>
