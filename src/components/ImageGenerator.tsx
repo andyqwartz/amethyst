@@ -16,7 +16,6 @@ export const ImageGenerator = () => {
     settings,
     generatedImages,
     history,
-    allHistory,
     isLoading,
     progress,
     currentLogs,
@@ -76,7 +75,7 @@ export const ImageGenerator = () => {
       settings={settings}
       generatedImages={generatedImages}
       history={history}
-      allHistory={allHistory}
+      allHistory={history}
       isLoading={isLoading}
       progress={progress}
       currentLogs={currentLogs}

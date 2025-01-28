@@ -16,7 +16,6 @@ export const useImageHistory = () => {
   const fetchHistory = useCallback(async () => {
     try {
       setIsLoading(true);
-      console.log('Fetching history...');
       
       const { data: session } = await supabase.auth.getSession();
       if (!session?.session?.user) {
@@ -32,12 +31,7 @@ export const useImageHistory = () => {
         .eq('user_id', session.session.user.id)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching images:', error);
-        throw error;
-      }
-
-      console.log('Fetched images:', images);
+      if (error) throw error;
 
       const formattedHistory = images.map(img => ({
         url: img.url,
@@ -94,14 +88,15 @@ export const useImageHistory = () => {
         return;
       }
 
-      console.log('Adding image to history:', { url, settings });
-
       const { error } = await supabase
         .from('images')
         .insert({
           url,
           user_id: session.session.user.id,
-          settings,
+          settings: {
+            hf_loras: settings.hf_loras || [],
+            lora_scales: settings.lora_scales || []
+          },
           prompt: settings.prompt,
           negative_prompt: settings.negative_prompt,
           guidance_scale: settings.guidance_scale,
@@ -115,10 +110,7 @@ export const useImageHistory = () => {
           reference_image_url: settings.reference_image_url
         });
 
-      if (error) {
-        console.error('Error adding to history:', error);
-        throw error;
-      }
+      if (error) throw error;
 
       await fetchHistory();
       
@@ -150,8 +142,7 @@ export const useImageHistory = () => {
           schema: 'public',
           table: 'images'
         },
-        (payload) => {
-          console.log('Real-time update received:', payload);
+        () => {
           fetchHistory();
         }
       )
@@ -163,8 +154,7 @@ export const useImageHistory = () => {
   }, [fetchHistory]);
 
   return { 
-    history, 
-    allHistory: history,
+    history,
     addToHistory,
     isLoading 
   };
