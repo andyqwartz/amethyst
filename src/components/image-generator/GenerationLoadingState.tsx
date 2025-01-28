@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Loader } from 'lucide-react';
+import { Loader, Clock, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface GenerationLoadingStateProps {
@@ -15,6 +15,8 @@ export const GenerationLoadingState = ({
 }: GenerationLoadingStateProps) => {
   const [shouldShow, setShouldShow] = useState(false);
   const [currentMessage, setCurrentMessage] = useState('');
+  const [generationStartTime] = useState(Date.now());
+  const [showLongWaitMessage, setShowLongWaitMessage] = useState(false);
 
   useEffect(() => {
     if (isGenerating) {
@@ -22,6 +24,7 @@ export const GenerationLoadingState = ({
     } else {
       const timeout = setTimeout(() => {
         setShouldShow(false);
+        setShowLongWaitMessage(false);
       }, 300);
       return () => clearTimeout(timeout);
     }
@@ -31,8 +34,49 @@ export const GenerationLoadingState = ({
     if (!currentLogs) return;
     const lines = currentLogs.split('\n').filter(Boolean);
     const lastLine = lines[lines.length - 1] || '';
-    setCurrentMessage(lastLine);
+    
+    // Determine message based on logs content
+    if (lastLine.toLowerCase().includes('queued')) {
+      setCurrentMessage('En attente dans la file...');
+    } else if (lastLine.toLowerCase().includes('processing')) {
+      setCurrentMessage('Génération en cours...');
+    } else {
+      setCurrentMessage(lastLine || 'Initialisation...');
+    }
   }, [currentLogs]);
+
+  // Check for long generation time
+  useEffect(() => {
+    if (!isGenerating) return;
+
+    const longWaitTimeout = setTimeout(() => {
+      setShowLongWaitMessage(true);
+    }, 20000); // 20 seconds
+
+    return () => clearTimeout(longWaitTimeout);
+  }, [isGenerating]);
+
+  const getStatusIcon = () => {
+    if (currentMessage.toLowerCase().includes('attente')) {
+      return <Clock className="w-12 h-12 text-primary animate-pulse" />;
+    }
+    return (
+      <Loader 
+        className={cn(
+          "w-12 h-12 text-primary",
+          isGenerating ? "animate-spin" : ""
+        )}
+        style={{ filter: 'drop-shadow(0 0 8px rgba(155, 135, 245, 0.5))' }}
+      />
+    );
+  };
+
+  const getProgressAnimation = () => {
+    if (currentMessage.toLowerCase().includes('attente')) {
+      return 'transition-all duration-1000 ease-in-out';
+    }
+    return 'transition-all duration-300 ease-out';
+  };
 
   if (!shouldShow) return null;
 
@@ -47,24 +91,30 @@ export const GenerationLoadingState = ({
             <div className="absolute inset-6 bg-primary/20 rounded-full animate-pulse" style={{ animationDelay: '0.6s' }} />
             
             <div className="absolute inset-0 flex items-center justify-center">
-              <Loader 
-                className={cn(
-                  "w-12 h-12 text-primary",
-                  isGenerating ? "animate-spin" : ""
-                )}
-                style={{ filter: 'drop-shadow(0 0 8px rgba(155, 135, 245, 0.5))' }}
-              />
+              {getStatusIcon()}
             </div>
           </div>
 
-          <p className="text-center text-lg text-foreground/90 font-light">
-            {currentMessage || 'Initialisation...'}
-          </p>
+          <div className="space-y-2 text-center">
+            <p className="text-lg text-foreground/90 font-light">
+              {currentMessage}
+            </p>
+            
+            {showLongWaitMessage && (
+              <div className="flex items-center justify-center gap-2 text-sm text-yellow-500">
+                <AlertCircle className="w-4 h-4" />
+                <span>La génération prend plus de temps que prévu...</span>
+              </div>
+            )}
+          </div>
 
           <div className="w-full space-y-2">
             <div className="h-1.5 w-full bg-primary/10 rounded-full overflow-hidden">
               <div 
-                className="h-full bg-gradient-to-r from-primary/60 to-primary transition-all duration-300 ease-out rounded-full"
+                className={cn(
+                  "h-full bg-gradient-to-r from-primary/60 to-primary rounded-full",
+                  getProgressAnimation()
+                )}
                 style={{ 
                   width: `${progress}%`,
                   boxShadow: '0 0 10px rgba(155, 135, 245, 0.3)'
