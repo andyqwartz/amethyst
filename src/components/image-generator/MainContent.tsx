@@ -71,7 +71,6 @@ export const MainContent = ({
           onTweak={onTweak}
           onDownload={onDownload}
           settings={settings}
-          className="mt-8"
         />
 
         {!isLoading && history.length > 0 && (
