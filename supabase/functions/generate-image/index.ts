@@ -47,29 +47,20 @@ serve(async (req) => {
       )
     }
 
-    console.log("Generating image with input:", {
+    // Prepare the input with the reference image if present
+    const input = {
       ...body.input,
-      image: body.input.image ? "Image URL present" : "No image"
+      image: body.input.reference_image_url || undefined
+    }
+
+    console.log("Generating image with input:", {
+      ...input,
+      image: input.image ? "Image URL present" : "No image"
     })
     
     const prediction = await replicate.predictions.create({
       version: "2389224e115448d9a77c07d7d45672b3f0aa45acacf1c5bcf51857ac295e3aec",
-      input: {
-        prompt: body.input.prompt,
-        negative_prompt: body.input.negative_prompt,
-        guidance_scale: body.input.guidance_scale,
-        num_inference_steps: body.input.num_inference_steps,
-        seed: body.input.seed,
-        num_outputs: body.input.num_outputs,
-        aspect_ratio: body.input.aspect_ratio,
-        output_format: body.input.output_format,
-        output_quality: body.input.output_quality,
-        prompt_strength: body.input.prompt_strength,
-        hf_loras: body.input.hf_loras || [],
-        lora_scales: body.input.lora_scales || [],
-        disable_safety_checker: body.input.disable_safety_checker,
-        image: body.input.image // Now properly passing the image URL
-      }
+      input: input
     })
 
     console.log("Generation response:", prediction)

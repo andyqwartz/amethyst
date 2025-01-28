@@ -19,13 +19,13 @@ export async function generateImage(params: { input?: ReplicateInput; prediction
     // Log the response for debugging
     console.log('Generation API response:', data);
 
-    // Vérification supplémentaire pour les erreurs de l'API
+    // Additional check for API errors
     if (data.error) {
       console.error('API error:', data.error);
       throw new Error(data.error);
     }
 
-    // Si c'est un status check, on retourne directement la réponse
+    // If it's a status check, return the response directly
     if (params.predictionId) {
       return {
         status: data.status,
@@ -34,7 +34,7 @@ export async function generateImage(params: { input?: ReplicateInput; prediction
       };
     }
 
-    // Si c'est une nouvelle génération, on retourne l'ID de prédiction
+    // If it's a new generation, return the prediction ID
     return {
       status: 'started',
       predictionId: data.id
