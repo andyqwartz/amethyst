@@ -17,15 +17,11 @@ export const useGenerationHandler = (
     // Prevent multiple generations
     if (isGenerating || isProcessing) {
       console.log('Generation already in progress, skipping');
-      toast({
-        title: "Génération en cours",
-        description: "Veuillez attendre la fin de la génération en cours",
-        variant: "destructive"
-      });
       return;
     }
 
-    if (!settings.prompt.trim()) {
+    // Ne vérifier le prompt vide que si une génération est réellement tentée
+    if (settings.prompt && !settings.prompt.trim()) {
       toast({
         title: "Erreur",
         description: "Le prompt ne peut pas être vide",
