@@ -153,12 +153,12 @@ export const Auth = () => {
 
         <div className="space-y-4">
           <Button 
-            className="w-full" 
+            className="w-full font-['Orbitron'] tracking-wider" 
             onClick={() => handleAuth('login')}
             disabled={loading}
           >
             <Mail className="mr-2 h-4 w-4" />
-            Se connecter avec Email
+            ENTRER DANS LE PORTAIL AMETHYST_
           </Button>
           <Button 
             className="w-full" 
