@@ -1,15 +1,25 @@
 import { useState, useEffect } from 'react';
 import { useGenerationPersistence } from './useGenerationPersistence';
-import { GenerationStatus } from '@/types/replicate';
+import { GenerationStatus, GenerationSettings } from '@/types/replicate';
+
+export interface GenerationProgressProps {
+  progress: number;
+  setProgress: (progress: number) => void;
+  status: GenerationStatus;
+  savedFile: string | null;
+  savedSettings: GenerationSettings | null;
+  currentLogs?: string;
+}
 
 export const useGenerationProgress = (
   isGenerating: boolean, 
   referenceImage?: string | null,
   settings?: GenerationSettings,
   onRetry?: (settings: GenerationSettings) => void
-) => {
+): GenerationProgressProps => {
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState<GenerationStatus>('idle');
+  const [currentLogs, setCurrentLogs] = useState<string>();
 
   // Use the persistence hook to save/restore state
   const { shouldRetry, savedFile, savedSettings } = useGenerationPersistence(
@@ -57,6 +67,7 @@ export const useGenerationProgress = (
     setProgress,
     status,
     savedFile,
-    savedSettings
+    savedSettings,
+    currentLogs
   };
 };

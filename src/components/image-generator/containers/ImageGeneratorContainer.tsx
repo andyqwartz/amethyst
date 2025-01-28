@@ -4,6 +4,7 @@ import { Header } from '../Header';
 import { HelpModal } from '../modals/HelpModal';
 import { HistoryModal } from '../modals/HistoryModal';
 import { GenerationLoadingState } from '../GenerationLoadingState';
+import type { GenerationSettings } from '@/types/replicate';
 
 interface ImageGeneratorContainerProps {
   showSettings: boolean;
@@ -14,18 +15,19 @@ interface ImageGeneratorContainerProps {
   setShowHistory: (show: boolean) => void;
   isGenerating: boolean;
   referenceImage: string | null;
-  settings: any;
+  settings: GenerationSettings;
   generatedImages: string[];
   history: { url: string }[];
   allHistory: any[];
   isLoading: boolean;
+  progress: number;
   currentLogs?: string;
   handleImageUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleImageClick: () => void;
   handleGenerate: () => void;
-  handleTweak: (settings: any) => void;
+  handleTweak: (settings: GenerationSettings) => void;
   handleDownload: (imageUrl: string) => void;
-  updateSettings: (settings: any) => void;
+  updateSettings: (settings: Partial<GenerationSettings>) => void;
   setReferenceImage: (image: string | null) => void;
 }
 
@@ -43,6 +45,7 @@ export const ImageGeneratorContainer: React.FC<ImageGeneratorContainerProps> = (
   history,
   allHistory,
   isLoading,
+  progress,
   currentLogs,
   handleImageUpload,
   handleImageClick,
