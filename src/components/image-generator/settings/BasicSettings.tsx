@@ -46,8 +46,8 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
           Aspect Ratio {renderTooltip("Choose the dimensions for your generated image")}
         </Label>
         <Select
-          value={settings.aspect_ratio}
-          onValueChange={(value) => onSettingsChange({ aspect_ratio: value })}
+          value={settings.aspectRatio}
+          onValueChange={(value) => onSettingsChange({ aspectRatio: value })}
         >
           <SelectTrigger className="bg-popover border-primary/20">
             <SelectValue placeholder="Select aspect ratio" />
@@ -74,14 +74,14 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
           </Label>
           <div className="space-y-2">
             <Slider
-              value={[settings.num_inference_steps]}
-              onValueChange={([value]) => onSettingsChange({ num_inference_steps: value })}
+              value={[settings.steps]}
+              onValueChange={([value]) => onSettingsChange({ steps: value })}
               max={50}
               min={1}
               step={1}
               className="[&_[role=slider]]:bg-primary"
             />
-            <span className="text-xs text-primary/50 block mt-2">{settings.num_inference_steps}</span>
+            <span className="text-xs text-primary/50 block mt-2">{settings.steps}</span>
           </div>
         </div>
 
@@ -91,14 +91,14 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
           </Label>
           <div className="space-y-2">
             <Slider
-              value={[settings.guidance_scale]}
-              onValueChange={([value]) => onSettingsChange({ guidance_scale: value })}
+              value={[settings.guidanceScale]}
+              onValueChange={([value]) => onSettingsChange({ guidanceScale: value })}
               max={10}
               min={0}
               step={0.1}
               className="[&_[role=slider]]:bg-primary"
             />
-            <span className="text-xs text-primary/50 block mt-2">{settings.guidance_scale}</span>
+            <span className="text-xs text-primary/50 block mt-2">{settings.guidanceScale}</span>
           </div>
         </div>
 
@@ -108,14 +108,14 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
           </Label>
           <div className="space-y-2">
             <Slider
-              value={[settings.prompt_strength]}
-              onValueChange={([value]) => onSettingsChange({ prompt_strength: value })}
+              value={[settings.promptStrength]}
+              onValueChange={([value]) => onSettingsChange({ promptStrength: value })}
               max={1}
               min={0}
               step={0.1}
               className="[&_[role=slider]]:bg-primary"
             />
-            <span className="text-xs text-primary/50 block mt-2">{settings.prompt_strength}</span>
+            <span className="text-xs text-primary/50 block mt-2">{settings.promptStrength}</span>
           </div>
         </div>
       </div>

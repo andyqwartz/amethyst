@@ -17,10 +17,12 @@ export const useImageGeneration = () => {
   );
 
   const generate = async (settings: GenerationSettings) => {
+    // Vérifier si une génération est déjà en cours
     if (status === 'loading') {
       throw new Error('Une génération est déjà en cours');
     }
 
+    // Vérifier si le prompt est vide
     if (!settings.prompt.trim()) {
       throw new Error('Le prompt ne peut pas être vide');
     }
@@ -29,6 +31,7 @@ export const useImageGeneration = () => {
     setStatus('loading');
     
     try {
+      // Si on a un ID de prédiction sauvegardé, on vérifie son état
       const savedPredictionId = localStorage.getItem(GENERATION_ID_KEY);
       if (savedPredictionId) {
         console.log('Checking saved prediction:', savedPredictionId);
@@ -52,20 +55,21 @@ export const useImageGeneration = () => {
         }
       }
 
+      // Sinon, on démarre une nouvelle génération
       const response = await generateImage({
         input: {
           prompt: settings.prompt,
-          negative_prompt: settings.negative_prompt,
-          guidance_scale: settings.guidance_scale,
-          num_inference_steps: settings.num_inference_steps,
-          num_outputs: settings.num_outputs,
-          aspect_ratio: settings.aspect_ratio,
-          output_format: settings.output_format,
-          output_quality: settings.output_quality,
-          prompt_strength: settings.prompt_strength,
-          hf_loras: settings.hf_loras,
-          lora_scales: settings.lora_scales,
-          disable_safety_checker: settings.disable_safety_checker,
+          negative_prompt: settings.negativePrompt,
+          guidance_scale: settings.guidanceScale,
+          num_inference_steps: settings.steps,
+          num_outputs: settings.numOutputs,
+          aspect_ratio: settings.aspectRatio,
+          output_format: settings.outputFormat,
+          output_quality: settings.outputQuality,
+          prompt_strength: settings.promptStrength,
+          hf_loras: settings.hfLoras,
+          lora_scales: settings.loraScales,
+          disable_safety_checker: settings.disableSafetyChecker,
           seed: settings.seed
         }
       });

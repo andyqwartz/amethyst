@@ -47,8 +47,8 @@ export const OutputSettings = ({ settings, onSettingsChange }: OutputSettingsPro
           Output Format {renderTooltip("Format of the output images")}
         </Label>
         <Select
-          value={settings.output_format}
-          onValueChange={(value) => onSettingsChange({ output_format: value as 'webp' | 'jpg' | 'png' })}
+          value={settings.outputFormat}
+          onValueChange={(value) => onSettingsChange({ outputFormat: value as 'webp' | 'jpg' | 'png' })}
         >
           <SelectTrigger className="bg-popover border-primary/20">
             <SelectValue placeholder="Select format" />
@@ -66,14 +66,14 @@ export const OutputSettings = ({ settings, onSettingsChange }: OutputSettingsPro
           Output Quality {renderTooltip("Quality when saving the output images (0-100)")}
         </Label>
         <Slider
-          value={[settings.output_quality]}
-          onValueChange={([value]) => onSettingsChange({ output_quality: value })}
+          value={[settings.outputQuality]}
+          onValueChange={([value]) => onSettingsChange({ outputQuality: value })}
           max={100}
           min={0}
           step={1}
           className="[&_[role=slider]]:bg-primary"
         />
-        <span className="text-xs text-primary/50">{settings.output_quality}</span>
+        <span className="text-xs text-primary/50">{settings.outputQuality}</span>
       </div>
 
       <div className="space-y-2">
@@ -82,11 +82,11 @@ export const OutputSettings = ({ settings, onSettingsChange }: OutputSettingsPro
         </Label>
         <div className="flex items-center space-x-2">
           <Switch
-            checked={!settings.disable_safety_checker}
-            onCheckedChange={(checked) => onSettingsChange({ disable_safety_checker: !checked })}
+            checked={!settings.disableSafetyChecker}
+            onCheckedChange={(checked) => onSettingsChange({ disableSafetyChecker: !checked })}
           />
           <span className="text-sm text-primary/70">
-            {settings.disable_safety_checker ? 'Disabled' : 'Enabled'}
+            {settings.disableSafetyChecker ? 'Disabled' : 'Enabled'}
           </span>
         </div>
       </div>

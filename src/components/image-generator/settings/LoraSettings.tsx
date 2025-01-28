@@ -26,38 +26,38 @@ export const LoraSettings = ({ settings, onSettingsChange }: LoraSettingsProps) 
 
   useEffect(() => {
     const uniqueLoras = Array.from(new Set([
-      ...settings.hf_loras.filter(lora => lora && lora.trim()),
+      ...settings.hfLoras.filter(lora => lora && lora.trim()),
       ...loraHistory.filter(lora => lora && lora.trim())
     ]));
     localStorage.setItem('lora_history', JSON.stringify(uniqueLoras));
     setLoraHistory(uniqueLoras);
-  }, [settings.hf_loras]);
+  }, [settings.hfLoras]);
 
   const addLoraField = () => {
     onSettingsChange({
-      hf_loras: [...settings.hf_loras, DEFAULT_LORAS[0]],
-      lora_scales: [...settings.lora_scales, 0.8],
+      hfLoras: [...settings.hfLoras, DEFAULT_LORAS[0]],
+      loraScales: [...settings.loraScales, 0.8],
     });
   };
 
   const removeLoraField = (index: number) => {
     onSettingsChange({
-      hf_loras: settings.hf_loras.filter((_, i) => i !== index),
-      lora_scales: settings.lora_scales.filter((_, i) => i !== index),
+      hfLoras: settings.hfLoras.filter((_, i) => i !== index),
+      loraScales: settings.loraScales.filter((_, i) => i !== index),
     });
   };
 
   const updateLoraField = (index: number, value: string, isScale: boolean = false) => {
     if (isScale) {
-      const newScales = [...settings.lora_scales];
+      const newScales = [...settings.loraScales];
       newScales[index] = parseFloat(value);
-      onSettingsChange({ lora_scales: newScales });
+      onSettingsChange({ loraScales: newScales });
     } else {
       if (!value || !value.trim()) return;
       
-      const newLoras = [...settings.hf_loras];
+      const newLoras = [...settings.hfLoras];
       newLoras[index] = value.trim();
-      onSettingsChange({ hf_loras: newLoras });
+      onSettingsChange({ hfLoras: newLoras });
     }
   };
 
@@ -88,11 +88,11 @@ export const LoraSettings = ({ settings, onSettingsChange }: LoraSettingsProps) 
         </Button>
       </div>
 
-      {settings.hf_loras.map((lora, index) => (
+      {settings.hfLoras.map((lora, index) => (
         <LoraField
           key={index}
           lora={lora || DEFAULT_LORAS[0]}
-          scale={settings.lora_scales[index]}
+          scale={settings.loraScales[index]}
           loraHistory={loraHistory}
           onLoraChange={(value) => updateLoraField(index, value)}
           onScaleChange={(value) => updateLoraField(index, value.toString(), true)}
