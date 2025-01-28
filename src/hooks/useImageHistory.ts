@@ -2,9 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { GenerationSettings } from '@/types/replicate';
 import { useToast } from "@/hooks/use-toast";
-import type { Json } from '@/integrations/supabase/types';
 
-// Define a type for the settings stored in the database
 type ImageSettings = {
   hf_loras: string[];
   lora_scales: number[];
@@ -19,6 +17,7 @@ export const useImageHistory = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const isAddingToHistory = useRef(false);
+  const lastAddedUrl = useRef<string | null>(null);
 
   const fetchHistory = useCallback(async () => {
     try {
@@ -38,9 +37,7 @@ export const useImageHistory = () => {
         .eq('user_id', session.session.user.id)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       const formattedHistory = images.map(img => {
         const imgSettings = img.settings as ImageSettings | null;
@@ -80,12 +77,13 @@ export const useImageHistory = () => {
   }, [toast]);
 
   const addToHistory = async (url: string, settings: GenerationSettings) => {
-    if (isAddingToHistory.current) {
-      console.log('Already adding to history, skipping duplicate call');
+    if (isAddingToHistory.current || url === lastAddedUrl.current) {
+      console.log('Skipping duplicate addition to history');
       return;
     }
 
     isAddingToHistory.current = true;
+    lastAddedUrl.current = url;
 
     try {
       const { data: session } = await supabase.auth.getSession();
@@ -107,7 +105,7 @@ export const useImageHistory = () => {
           settings: {
             hf_loras: settings.hf_loras || [],
             lora_scales: settings.lora_scales || []
-          } as Json,
+          },
           prompt: settings.prompt,
           negative_prompt: settings.negative_prompt,
           guidance_scale: settings.guidance_scale,
