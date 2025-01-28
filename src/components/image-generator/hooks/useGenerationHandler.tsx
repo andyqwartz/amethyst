@@ -39,6 +39,7 @@ export const useGenerationHandler = (
         variant: "destructive",
       });
       setIsGenerating(false);
+      throw error; // Propager l'erreur pour la gestion en amont
     }
   };
 

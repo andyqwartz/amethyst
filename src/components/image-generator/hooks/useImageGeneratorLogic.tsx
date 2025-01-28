@@ -33,7 +33,7 @@ export const useImageGeneratorLogic = () => {
     generationStatus === 'loading',
     settings
   );
-  const { history, allHistory, isLoading } = useImageHistory();
+  const { history, allHistory, isLoading, addToHistory } = useImageHistory();
 
   const { handleImageUpload, handleImageClick } = useImageUpload(setReferenceImage);
   const { handleGenerate: handleGenerateBase } = useGenerationHandler(
@@ -58,15 +58,42 @@ export const useImageGeneratorLogic = () => {
     }
   }, [referenceImage]);
 
-  const handleGenerate = (settingsToUse = settings) => {
-    if (!isGenerating) {
-      const settingsWithImage = {
-        ...settingsToUse,
-        reference_image_url: referenceImage,
-        hf_loras: settingsToUse.hf_loras || [],
-        lora_scales: settingsToUse.lora_scales || []
-      };
-      handleGenerateBase(generate, settingsWithImage, isGenerating);
+  // Effet pour gérer la fin de la génération et l'ajout à l'historique
+  useEffect(() => {
+    if (generationStatus === 'success' && generatedImages.length > 0) {
+      console.log('Generation completed successfully, adding to history:', generatedImages);
+      generatedImages.forEach(async (url) => {
+        try {
+          await addToHistory(url, settings);
+        } catch (error) {
+          console.error('Failed to add image to history:', error);
+        }
+      });
+      setIsGenerating(false);
+    } else if (generationStatus === 'error') {
+      console.log('Generation failed');
+      setIsGenerating(false);
+    }
+  }, [generationStatus, generatedImages]);
+
+  const handleGenerate = async () => {
+    if (isGenerating) {
+      console.log('Generation already in progress, skipping');
+      return;
+    }
+
+    const settingsWithImage = {
+      ...settings,
+      reference_image_url: referenceImage,
+      hf_loras: settings.hf_loras || [],
+      lora_scales: settings.lora_scales || []
+    };
+
+    try {
+      await handleGenerateBase(generate, settingsWithImage, isGenerating);
+    } catch (error) {
+      console.error('Generation failed:', error);
+      setIsGenerating(false);
     }
   };
 
