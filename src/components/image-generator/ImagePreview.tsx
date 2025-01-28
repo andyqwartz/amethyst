@@ -23,13 +23,13 @@ export const ImagePreview = ({
   }
 
   return (
-    <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in ${className}`}>
+    <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${className}`}>
       {images.map((imageUrl, index) => (
-        <div key={index} className="relative group hover-scale">
+        <div key={index} className="relative group">
           <img
             src={imageUrl}
-            alt={`Image générée ${index + 1}`}
-            className="w-full h-auto rounded-lg shadow-lg"
+            alt={`Generated image ${index + 1}`}
+            className="w-full h-auto rounded-lg shadow-lg transition-transform duration-300 hover:scale-105"
             loading="lazy"
           />
           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
@@ -37,18 +37,18 @@ export const ImagePreview = ({
               variant="secondary"
               size="icon"
               onClick={() => onDownload(imageUrl)}
-              className="bg-white/90 hover:bg-white shadow-lg"
+              className="rounded-full bg-primary hover:bg-primary/90 shadow-lg"
             >
-              <Download className="h-4 w-4" />
+              <Download className="h-4 w-4 text-white" />
             </Button>
             {settings && onTweak && (
               <Button
                 variant="secondary"
                 size="icon"
                 onClick={() => onTweak(settings)}
-                className="bg-white/90 hover:bg-white shadow-lg"
+                className="rounded-full bg-primary hover:bg-primary/90 shadow-lg"
               >
-                <Settings className="h-4 w-4" />
+                <Settings className="h-4 w-4 text-white" />
               </Button>
             )}
           </div>
