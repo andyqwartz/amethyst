@@ -1,27 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useToast } from "@/hooks/use-toast";
 import type { GenerationSettings } from '@/types/replicate';
 
 export const useGenerationHandler = (
-  status: string,
+  generationStatus: string,
   setIsGenerating: (isGenerating: boolean) => void,
   resetSettings: () => void,
-  toast: any
+  toast: ReturnType<typeof useToast>['toast']
 ) => {
-  const [isProcessing, setIsProcessing] = useState(false);
-
   const handleGenerate = async (
     generate: (settings: GenerationSettings) => Promise<void>,
     settings: GenerationSettings,
     isGenerating: boolean
   ) => {
-    // Prevent multiple generations
-    if (isGenerating || isProcessing) {
-      console.log('Generation already in progress, skipping');
+    if (isGenerating) {
+      console.log('Generation already in progress');
       return;
     }
 
-    // Vérifier le prompt uniquement lors d'une tentative de génération
-    if (!settings.prompt?.trim()) {
+    if (!settings.prompt.trim()) {
       toast({
         title: "Erreur",
         description: "Le prompt ne peut pas être vide",
@@ -31,28 +27,26 @@ export const useGenerationHandler = (
     }
 
     try {
-      setIsProcessing(true);
       setIsGenerating(true);
+      console.log('Starting generation with settings:', settings);
       await generate(settings);
+      
+      toast({
+        title: "Génération réussie",
+        description: "Les images ont été générées avec succès"
+      });
     } catch (error) {
       console.error('Generation error:', error);
-      // Ne pas afficher de toast ici car l'erreur sera déjà gérée ailleurs
-      setIsProcessing(false);
+      toast({
+        title: "Erreur de génération",
+        description: error.message || "Une erreur est survenue lors de la génération",
+        variant: "destructive"
+      });
+      resetSettings();
+    } finally {
       setIsGenerating(false);
     }
   };
-
-  // Reset states when generation completes or fails
-  useEffect(() => {
-    if (status === 'success' || status === 'error') {
-      setIsGenerating(false);
-      setIsProcessing(false);
-      localStorage.removeItem('generation_status');
-      localStorage.removeItem('generation_progress');
-      localStorage.removeItem('generation_timestamp');
-      resetSettings();
-    }
-  }, [status, setIsGenerating, resetSettings]);
 
   return { handleGenerate };
 };

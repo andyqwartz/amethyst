@@ -50,7 +50,7 @@ serve(async (req) => {
     console.log("Generating image with input:", body.input)
     
     const prediction = await replicate.predictions.create({
-      version: "a738942df15c8c788b076ddd052256ba7923aade687b12109ccc64b2c3483aa1",
+      version: "2389224e115448d9a77c07d7d45672b3f0aa45acacf1c5bcf51857ac295e3aec",
       input: {
         prompt: body.input.prompt,
         negative_prompt: body.input.negative_prompt,
@@ -65,7 +65,7 @@ serve(async (req) => {
         hf_loras: body.input.hf_loras || [],
         lora_scales: body.input.lora_scales || [],
         disable_safety_checker: body.input.disable_safety_checker,
-        image: body.input.image
+        image: body.input.image // Ajout de l'image de référence
       }
     })
 
