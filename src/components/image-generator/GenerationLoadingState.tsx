@@ -21,10 +21,21 @@ export const GenerationLoadingState = ({
   const [currentMessage, setCurrentMessage] = useState(messages[0]);
 
   useEffect(() => {
-    if (!isGenerating) return;
+    if (!isGenerating) {
+      setCurrentMessage(messages[0]);
+      return;
+    }
     
-    const messageIndex = Math.floor((progress / 100) * messages.length);
-    setCurrentMessage(messages[Math.min(messageIndex, messages.length - 1)]);
+    // Calculate message index based on progress thresholds
+    if (progress <= 25) {
+      setCurrentMessage(messages[0]);
+    } else if (progress <= 50) {
+      setCurrentMessage(messages[1]);
+    } else if (progress <= 75) {
+      setCurrentMessage(messages[2]);
+    } else {
+      setCurrentMessage(messages[3]);
+    }
   }, [isGenerating, progress]);
 
   if (!isGenerating) return null;
