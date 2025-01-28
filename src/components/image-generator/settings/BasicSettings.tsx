@@ -72,10 +72,10 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
               <SelectItem 
                 key={ratio} 
                 value={ratio}
-                className="flex flex-col items-start py-3"
+                className="flex flex-col items-start py-4"
               >
-                <span className="font-medium text-white">{ratio}</span>
-                <span className="text-xs text-white/70 mt-1">{description}</span>
+                <span className="font-medium text-white text-base">{ratio}</span>
+                <span className="text-xs text-white/70 mt-3">{description}</span>
               </SelectItem>
             ))}
           </SelectContent>
