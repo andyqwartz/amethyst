@@ -12,17 +12,6 @@ export const useImageUpload = (setReferenceImage: (image: string | null) => void
         const fileExt = file.name.split('.').pop();
         const filePath = `${crypto.randomUUID()}.${fileExt}`;
 
-        // Check if user is authenticated
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          toast({
-            title: "Erreur d'authentification",
-            description: "Vous devez être connecté pour uploader une image",
-            variant: "destructive"
-          });
-          return;
-        }
-
         // Upload to Supabase Storage
         const { data, error } = await supabase.storage
           .from('reference-images')
