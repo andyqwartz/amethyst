@@ -20,8 +20,8 @@ export const useGenerationHandler = (
       return;
     }
 
-    // Ne vérifier le prompt vide que si une génération est réellement tentée
-    if (settings.prompt && !settings.prompt.trim()) {
+    // Vérifier le prompt uniquement lors d'une tentative de génération
+    if (!settings.prompt?.trim()) {
       toast({
         title: "Erreur",
         description: "Le prompt ne peut pas être vide",
@@ -36,12 +36,7 @@ export const useGenerationHandler = (
       await generate(settings);
     } catch (error) {
       console.error('Generation error:', error);
-      toast({
-        title: "Erreur",
-        description: error.message,
-        variant: "destructive"
-      });
-      // Make sure to reset states on error
+      // Ne pas afficher de toast ici car l'erreur sera déjà gérée ailleurs
       setIsProcessing(false);
       setIsGenerating(false);
     }
