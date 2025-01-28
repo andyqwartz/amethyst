@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { GenerationSettings } from '@/types/replicate';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useGenerationHandler = (
   status: string,
@@ -28,6 +29,19 @@ export const useGenerationHandler = (
         title: "Erreur",
         description: "Le prompt ne peut pas être vide",
         variant: "destructive"
+      });
+      return;
+    }
+
+    // Vérifier si la clé API Replicate est configurée
+    const { data: secrets } = await supabase.functions.listSecrets();
+    const hasReplicateKey = secrets?.some(secret => secret.name === 'REPLICATE_API_KEY');
+
+    if (!hasReplicateKey) {
+      toast({
+        title: "Configuration requise",
+        description: "Veuillez configurer votre clé API Replicate pour générer des images",
+        className: "bg-primary/10 text-primary border-primary/20 rounded-xl",
       });
       return;
     }
