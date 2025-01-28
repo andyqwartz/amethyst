@@ -41,6 +41,9 @@ export const MainContent = ({
   onTweak,
   onDownload,
 }: MainContentProps) => {
+  console.log('MainContent - showSettings:', showSettings);
+  console.log('MainContent - settings:', settings);
+
   return (
     <Card className="border-none glass-card shadow-xl">
       <div className="p-6 space-y-8">
@@ -71,7 +74,6 @@ export const MainContent = ({
           onTweak={onTweak}
           onDownload={onDownload}
           settings={settings}
-          className="mt-8"
         />
 
         {!isLoading && history.length > 0 && (

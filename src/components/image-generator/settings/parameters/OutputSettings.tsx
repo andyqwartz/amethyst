@@ -5,19 +5,15 @@ import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/comp
 import { HelpCircle } from 'lucide-react';
 
 interface OutputSettingsProps {
-  numOutputs: number;
   aspectRatio: string;
   outputFormat: "webp" | "jpg" | "png";
-  onNumOutputsChange: (value: number) => void;
   onAspectRatioChange: (value: string) => void;
   onOutputFormatChange: (value: "webp" | "jpg" | "png") => void;
 }
 
 export const OutputSettings = ({
-  numOutputs,
   aspectRatio,
   outputFormat,
-  onNumOutputsChange,
   onAspectRatioChange,
   onOutputFormatChange
 }: OutputSettingsProps) => {
@@ -27,36 +23,6 @@ export const OutputSettings = ({
 
   return (
     <div className="space-y-4">
-      <div className="space-y-2">
-        <Label className="flex items-center gap-2">
-          Nombre d'images
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <HelpCircle className="h-4 w-4 text-muted-foreground" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Nombre d'images à générer (1-4)</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </Label>
-        <Select
-          value={numOutputs.toString()}
-          onValueChange={(value) => onNumOutputsChange(parseInt(value))}
-        >
-          <SelectTrigger className="bg-popover border-primary/20">
-            <SelectValue placeholder="Sélectionner le nombre d'images" />
-          </SelectTrigger>
-          <SelectContent className="bg-popover border-primary/20">
-            <SelectItem value="1">1 image</SelectItem>
-            <SelectItem value="2">2 images</SelectItem>
-            <SelectItem value="3">3 images</SelectItem>
-            <SelectItem value="4">4 images</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
       <div className="space-y-2">
         <Label className="flex items-center gap-2">
           Format de sortie
@@ -73,7 +39,7 @@ export const OutputSettings = ({
         </Label>
         <Select
           value={outputFormat}
-          onValueChange={(value) => onOutputFormatChange(value as "webp" | "jpg" | "png")}
+          onValueChange={onOutputFormatChange}
         >
           <SelectTrigger className="bg-popover border-primary/20">
             <SelectValue placeholder="Sélectionner le format" />

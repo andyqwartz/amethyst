@@ -40,8 +40,8 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
   );
 
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
+    <div className="space-y-6">
+      <div className="space-y-3">
         <Label className="flex items-center">
           Aspect Ratio {renderTooltip("Choose the dimensions for your generated image")}
         </Label>
@@ -67,49 +67,57 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
         </Select>
       </div>
 
-      <div className="space-y-2">
-        <Label className="flex items-center">
-          Number of Steps {renderTooltip("Number of inference steps")}
-        </Label>
-        <Slider
-          value={[settings.steps]}
-          onValueChange={([value]) => onSettingsChange({ steps: value })}
-          max={50}
-          min={1}
-          step={1}
-          className="[&_[role=slider]]:bg-primary"
-        />
-        <span className="text-xs text-primary/50">{settings.steps}</span>
-      </div>
+      <div className="space-y-4">
+        <div>
+          <Label className="flex items-center mb-3">
+            Number of Steps {renderTooltip("Number of inference steps")}
+          </Label>
+          <div className="space-y-2">
+            <Slider
+              value={[settings.steps]}
+              onValueChange={([value]) => onSettingsChange({ steps: value })}
+              max={50}
+              min={1}
+              step={1}
+              className="[&_[role=slider]]:bg-primary"
+            />
+            <span className="text-xs text-primary/50 block mt-2">{settings.steps}</span>
+          </div>
+        </div>
 
-      <div className="space-y-2">
-        <Label className="flex items-center">
-          Guidance Scale {renderTooltip("Controls how closely the output adheres to the prompt")}
-        </Label>
-        <Slider
-          value={[settings.guidanceScale]}
-          onValueChange={([value]) => onSettingsChange({ guidanceScale: value })}
-          max={10}
-          min={0}
-          step={0.1}
-          className="[&_[role=slider]]:bg-primary"
-        />
-        <span className="text-xs text-primary/50">{settings.guidanceScale}</span>
-      </div>
+        <div>
+          <Label className="flex items-center mb-3">
+            Guidance Scale {renderTooltip("Controls how closely the output adheres to the prompt")}
+          </Label>
+          <div className="space-y-2">
+            <Slider
+              value={[settings.guidanceScale]}
+              onValueChange={([value]) => onSettingsChange({ guidanceScale: value })}
+              max={10}
+              min={0}
+              step={0.1}
+              className="[&_[role=slider]]:bg-primary"
+            />
+            <span className="text-xs text-primary/50 block mt-2">{settings.guidanceScale}</span>
+          </div>
+        </div>
 
-      <div className="space-y-2">
-        <Label className="flex items-center">
-          Prompt Strength {renderTooltip("Prompt strength when using image to image")}
-        </Label>
-        <Slider
-          value={[settings.promptStrength]}
-          onValueChange={([value]) => onSettingsChange({ promptStrength: value })}
-          max={1}
-          min={0}
-          step={0.1}
-          className="[&_[role=slider]]:bg-primary"
-        />
-        <span className="text-xs text-primary/50">{settings.promptStrength}</span>
+        <div>
+          <Label className="flex items-center mb-3">
+            Prompt Strength {renderTooltip("Prompt strength when using image to image")}
+          </Label>
+          <div className="space-y-2">
+            <Slider
+              value={[settings.promptStrength]}
+              onValueChange={([value]) => onSettingsChange({ promptStrength: value })}
+              max={1}
+              min={0}
+              step={0.1}
+              className="[&_[role=slider]]:bg-primary"
+            />
+            <span className="text-xs text-primary/50 block mt-2">{settings.promptStrength}</span>
+          </div>
+        </div>
       </div>
     </div>
   );
