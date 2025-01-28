@@ -31,9 +31,9 @@ export const HelpModal = ({ open, onOpenChange }: HelpModalProps) => {
             </DialogDescription>
           </DialogHeader>
           
-          <div className="flex-grow min-h-0">
-            <ScrollArea className="h-full glass-card rounded-lg">
-              <div className="space-y-8 p-8">
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <ScrollArea className="h-full pr-4">
+              <div className="space-y-8">
                 <section>
                   <h3 className="text-xl font-semibold mb-4 text-primary">Guide d'utilisation</h3>
                   <ul className="list-disc pl-5 space-y-3 text-muted-foreground">
