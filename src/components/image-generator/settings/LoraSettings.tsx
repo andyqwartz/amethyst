@@ -7,8 +7,8 @@ import { LoraField } from './lora/LoraField';
 import type { GenerationSettings } from '@/types/replicate';
 
 const DEFAULT_LORAS = [
-  'AndyVampiro/joa',
   'stabilityai/sd-vae-ft-mse',
+  'AndyVampiro/joa',
   'AndyVampiro/andy',
   'AndyVampiro/ilenana',
   'AndyVampiro/fog'
