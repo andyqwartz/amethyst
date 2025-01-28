@@ -13,7 +13,7 @@ const DEFAULT_SETTINGS: GenerationSettings = {
   prompt_strength: 0.8,
   hf_loras: [],
   lora_scales: [],
-  disable_safety_checker: false
+  disable_safety_checker: true
 };
 
 export const useGenerationSettings = () => {
