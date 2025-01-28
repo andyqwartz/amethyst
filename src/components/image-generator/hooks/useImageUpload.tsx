@@ -1,17 +1,33 @@
 import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useImageUpload = (setReferenceImage: (image: string | null) => void) => {
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e: ProgressEvent<FileReader>) => {
-        const result = e.target?.result;
-        if (typeof result === 'string') {
-          setReferenceImage(result);
+      try {
+        const fileExt = file.name.split('.').pop();
+        const filePath = `${crypto.randomUUID()}.${fileExt}`;
+
+        // Upload to Supabase Storage
+        const { data, error } = await supabase.storage
+          .from('reference-images')
+          .upload(filePath, file);
+
+        if (error) {
+          console.error('Error uploading file:', error);
+          return;
         }
-      };
-      reader.readAsDataURL(file);
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('reference-images')
+          .getPublicUrl(filePath);
+
+        setReferenceImage(publicUrl);
+      } catch (error) {
+        console.error('Error in handleImageUpload:', error);
+      }
     }
   };
 
