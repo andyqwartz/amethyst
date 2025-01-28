@@ -2,6 +2,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { generateImage } from '@/services/replicate';
 import type { GenerationSettings } from '@/types/replicate';
 import { useImageHistory } from '../useImageHistory';
+import { useGenerationState } from './useGenerationState';
 
 export const useGenerationProcess = (
   generationState: ReturnType<typeof useGenerationState>
