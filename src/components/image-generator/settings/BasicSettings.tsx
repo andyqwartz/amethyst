@@ -52,16 +52,16 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
           <SelectTrigger className="bg-popover border-primary/20">
             <SelectValue placeholder="Select aspect ratio" />
           </SelectTrigger>
-          <SelectContent className="bg-popover border-primary/20 max-h-[300px] w-[300px] sm:w-[350px]">
+          <SelectContent className="bg-popover border-primary/20 max-h-[300px] w-[320px] sm:w-[400px]">
             {aspectRatios.map(({ ratio, description }) => (
               <SelectItem 
                 key={ratio} 
                 value={ratio}
-                className="flex flex-col items-start py-2"
+                className="flex flex-col items-start py-3"
               >
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1.5 w-full pr-2">
                   <span className="font-medium text-sm">{ratio}</span>
-                  <span className="text-xs leading-snug text-primary/70 break-normal whitespace-normal">{description}</span>
+                  <span className="text-xs leading-relaxed text-primary/70 break-normal whitespace-normal">{description}</span>
                 </div>
               </SelectItem>
             ))}
