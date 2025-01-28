@@ -11,8 +11,6 @@ export const ImageGenerator = () => {
     setShowSettings,
     showHelp,
     setShowHelp,
-    showHistory,
-    setShowHistory,
     isGenerating,
     referenceImage,
     settings,
@@ -73,8 +71,6 @@ export const ImageGenerator = () => {
       setShowSettings={setShowSettings}
       showHelp={showHelp}
       setShowHelp={setShowHelp}
-      showHistory={showHistory}
-      setShowHistory={setShowHistory}
       isGenerating={isGenerating}
       referenceImage={referenceImage}
       settings={settings}

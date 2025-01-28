@@ -11,8 +11,6 @@ interface ImageGeneratorContainerProps {
   setShowSettings: (show: boolean) => void;
   showHelp: boolean;
   setShowHelp: (show: boolean) => void;
-  showHistory: boolean;
-  setShowHistory: (show: boolean) => void;
   isGenerating: boolean;
   referenceImage: string | null;
   settings: GenerationSettings;
@@ -37,8 +35,6 @@ export const ImageGeneratorContainer = ({
   setShowSettings,
   showHelp,
   setShowHelp,
-  showHistory,
-  setShowHistory,
   isGenerating,
   referenceImage,
   settings,
