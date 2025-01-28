@@ -4,6 +4,8 @@ import { generateImage } from '@/services/replicate';
 import type { GenerationSettings, GenerationStatus } from '@/types/replicate';
 import { useImageHistory } from './useImageHistory';
 
+const GENERATION_ID_KEY = 'generation_id';
+
 export const useImageGeneration = () => {
   const { toast } = useToast();
   const [status, setStatus] = useState<GenerationStatus>('idle');
@@ -95,7 +97,7 @@ export const useImageGeneration = () => {
       if (response.status === 'started') {
         console.log('Generation started with prediction ID:', response.predictionId);
         setPredictionId(response.predictionId);
-        localStorage.setItem('generation_id', response.predictionId);
+        localStorage.setItem(GENERATION_ID_KEY, response.predictionId);
         
         pollIntervalRef.current = setInterval(async () => {
           if (abortControllerRef.current?.signal.aborted) {
