@@ -13,7 +13,14 @@ export const GenerationButtons = ({
   onGenerate, 
   isGenerating 
 }: GenerationButtonsProps) => {
-  console.log('GenerationButtons - isGenerating:', isGenerating);
+  const handleGenerateClick = () => {
+    if (!isGenerating) {
+      console.log('GenerationButtons - Triggering generation');
+      onGenerate();
+    } else {
+      console.log('GenerationButtons - Generation already in progress');
+    }
+  };
   
   return (
     <div className="flex flex-col gap-3 px-4">
@@ -28,7 +35,7 @@ export const GenerationButtons = ({
       </Button>
 
       <Button
-        onClick={onGenerate}
+        onClick={handleGenerateClick}
         disabled={isGenerating}
         className="w-full bg-primary hover:bg-primary-hover text-primary-foreground rounded-full transition-all duration-200"
       >

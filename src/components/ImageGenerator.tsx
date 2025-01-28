@@ -53,7 +53,8 @@ export const ImageGenerator = () => {
         title: "Succès",
         description: "Historique supprimé avec succès",
       });
-
+      
+      // Reload the page to refresh the history
       window.location.reload();
     } catch (error) {
       console.error('Error deleting history:', error);
