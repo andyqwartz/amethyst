@@ -28,6 +28,19 @@ export const useImageHistory = () => {
 
   const fetchHistory = async () => {
     try {
+      const { data: session } = await supabase.auth.getSession();
+      
+      if (!session?.session?.user) {
+        console.error('No authenticated user found');
+        toast({
+          title: "Authentication Error",
+          description: "Please log in to view your image history",
+          variant: "destructive"
+        });
+        setHistory([]);
+        return;
+      }
+
       console.log('Fetching image history...');
       const { data: images, error } = await supabase
         .from('images')
@@ -65,8 +78,8 @@ export const useImageHistory = () => {
     } catch (error) {
       console.error('Error fetching image history:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de charger l'historique des images",
+        title: "Error",
+        description: "Unable to load image history",
         variant: "destructive"
       });
     } finally {
@@ -76,6 +89,14 @@ export const useImageHistory = () => {
 
   useEffect(() => {
     fetchHistory();
+
+    const authListener = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_IN') {
+        fetchHistory();
+      } else if (event === 'SIGNED_OUT') {
+        setHistory([]);
+      }
+    });
 
     const channel = supabase
       .channel('images_changes')
@@ -108,25 +129,32 @@ export const useImageHistory = () => {
       .subscribe();
 
     return () => {
+      authListener.data.subscription.unsubscribe();
       supabase.removeChannel(channel);
     };
   }, []);
 
   const addToHistory = async (url: string, settings: GenerationSettings) => {
     try {
-      console.log('Adding image to history:', { url, settings });
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
       
-      if (!user) {
+      if (!session?.user) {
+        toast({
+          title: "Authentication Error",
+          description: "Please log in to save images",
+          variant: "destructive"
+        });
         throw new Error('User not authenticated');
       }
 
+      console.log('Adding image to history:', { url, settings });
+      
       const { error } = await supabase
         .from('images')
         .insert({
           url,
           settings: settings as unknown as Json,
-          user_id: user.id,
+          user_id: session.user.id,
           prompt: settings.prompt,
           negative_prompt: settings.negative_prompt,
           guidance_scale: settings.guidance_scale,
@@ -149,8 +177,8 @@ export const useImageHistory = () => {
     } catch (error) {
       console.error('Error adding image to history:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible d'ajouter l'image à l'historique",
+        title: "Error",
+        description: "Unable to save image to history",
         variant: "destructive"
       });
     }
