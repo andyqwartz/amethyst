@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { MainContent } from './image-generator/MainContent';
 import { Header } from './image-generator/Header';
 import { HelpModal } from './image-generator/modals/HelpModal';
@@ -8,28 +8,32 @@ import { useImageGeneration } from '@/hooks/useImageGeneration';
 import { useGenerationSettings } from '@/hooks/useGenerationSettings';
 import { useGenerationProgress } from '@/hooks/useGenerationProgress';
 import { useImageHistory } from '@/hooks/useImageHistory';
-import { useToast } from './ui/use-toast';
-import type { GenerationSettings } from '@/types/replicate';
-
-const REFERENCE_IMAGE_KEY = 'reference_image';
+import { useImageGeneratorState } from './image-generator/hooks/useImageGeneratorState';
+import { useImageUpload } from './image-generator/hooks/useImageUpload';
+import { useGenerationHandler } from './image-generator/hooks/useGenerationHandler';
 
 export const ImageGenerator = () => {
-  const { toast } = useToast();
-  const [showSettings, setShowSettings] = useState(false);
-  const [showHelp, setShowHelp] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [referenceImage, setReferenceImage] = useState<string | null>(() => {
-    return localStorage.getItem(REFERENCE_IMAGE_KEY);
-  });
-  
+  const {
+    showSettings,
+    setShowSettings,
+    showHelp,
+    setShowHelp,
+    showHistory,
+    setShowHistory,
+    isGenerating,
+    setIsGenerating,
+    referenceImage,
+    setReferenceImage,
+    toast
+  } = useImageGeneratorState();
+
   const { settings, updateSettings, resetSettings } = useGenerationSettings();
   const { status, generatedImages, generate } = useImageGeneration();
   const { progress, status: persistedStatus, savedFile, savedSettings } = useGenerationProgress(
     status === 'loading',
     referenceImage,
     settings,
-    (savedSettings: GenerationSettings) => {
+    (savedSettings) => {
       toast({
         title: "Reprise de la génération",
         description: "La génération précédente a été interrompue, reprise en cours..."
@@ -39,18 +43,18 @@ export const ImageGenerator = () => {
   );
   const { history, allHistory, isLoading } = useImageHistory();
 
+  const { handleImageUpload, handleImageClick } = useImageUpload(setReferenceImage);
+  const { handleGenerate: handleGenerateBase } = useGenerationHandler(
+    status,
+    setIsGenerating,
+    resetSettings,
+    toast
+  );
+
   useEffect(() => {
     localStorage.clear();
     resetSettings();
   }, []);
-
-  useEffect(() => {
-    if (referenceImage) {
-      localStorage.setItem(REFERENCE_IMAGE_KEY, referenceImage);
-    } else {
-      localStorage.removeItem(REFERENCE_IMAGE_KEY);
-    }
-  }, [referenceImage]);
 
   useEffect(() => {
     if (savedFile && !referenceImage) {
@@ -58,65 +62,11 @@ export const ImageGenerator = () => {
     }
   }, [savedFile]);
 
-  const handleGenerate = async (settingsToUse = settings) => {
-    if (isGenerating) {
-      toast({
-        title: "Génération en cours",
-        description: "Veuillez attendre la fin de la génération en cours",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setIsGenerating(true);
-    try {
-      await generate(settingsToUse);
-    } catch (error) {
-      toast({
-        title: "Erreur",
-        description: error.message,
-        variant: "destructive"
-      });
-    }
+  const handleGenerate = (settingsToUse = settings) => {
+    handleGenerateBase(generate, settingsToUse, isGenerating);
   };
 
-  useEffect(() => {
-    if (status === 'success' || status === 'error') {
-      setIsGenerating(false);
-      localStorage.removeItem('generation_status');
-      localStorage.removeItem('generation_progress');
-      localStorage.removeItem('generation_timestamp');
-      resetSettings();
-    }
-  }, [status]);
-
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e: ProgressEvent<FileReader>) => {
-        const result = e.target?.result;
-        if (typeof result === 'string') {
-          setReferenceImage(result);
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleImageClick = () => {
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/*';
-    fileInput.onchange = (e) => {
-      if (e.target instanceof HTMLInputElement) {
-        handleImageUpload({ target: e.target } as React.ChangeEvent<HTMLInputElement>);
-      }
-    };
-    fileInput.click();
-  };
-
-  const handleTweak = (imageSettings: GenerationSettings) => {
+  const handleTweak = (imageSettings: typeof settings) => {
     updateSettings(imageSettings);
     setShowSettings(true);
   };

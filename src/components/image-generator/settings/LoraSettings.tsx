@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { HelpCircle, Plus, Minus } from 'lucide-react';
+import { HelpCircle, Plus } from 'lucide-react';
+import { LoraField } from './lora/LoraField';
 import type { GenerationSettings } from '@/types/replicate';
 
 const DEFAULT_LORAS = [
@@ -62,24 +61,21 @@ export const LoraSettings = ({ settings, onSettingsChange }: LoraSettingsProps) 
     }
   };
 
-  const renderTooltip = (description: string) => (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger className="ml-2">
-          <HelpCircle className="h-4 w-4 text-primary/50" />
-        </TooltipTrigger>
-        <TooltipContent>
-          <p className="max-w-xs text-sm">{description}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  );
-
   return (
     <div className="space-y-4 p-4 md:p-6 bg-card/95 backdrop-blur-xl rounded-xl border border-primary/10 shadow-xl w-full overflow-x-hidden">
       <div className="flex items-center justify-between">
         <Label className="flex items-center">
-          LoRA Weights {renderTooltip("Huggingface path or URL to the LoRA weights")}
+          LoRA Weights
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger className="ml-2">
+                <HelpCircle className="h-4 w-4 text-primary/50" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="max-w-xs text-sm">Huggingface path or URL to the LoRA weights</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </Label>
         <Button
           onClick={addLoraField}
@@ -93,57 +89,15 @@ export const LoraSettings = ({ settings, onSettingsChange }: LoraSettingsProps) 
       </div>
 
       {settings.hfLoras.map((lora, index) => (
-        <div key={index} className="flex items-center gap-2 md:gap-4">
-          <Select
-            value={lora || DEFAULT_LORAS[0]}
-            onValueChange={(value) => updateLoraField(index, value)}
-          >
-            <SelectTrigger className="bg-card border-primary/20 flex-1 min-w-0 whitespace-normal break-words">
-              <SelectValue className="text-wrap" />
-            </SelectTrigger>
-            <SelectContent className="bg-card border-primary/20 max-w-[90vw] md:max-w-[40vw]">
-              {loraHistory.filter(item => item && item.trim()).map((historyLora) => (
-                <SelectItem 
-                  key={historyLora} 
-                  value={historyLora}
-                  className="whitespace-normal break-words pr-6"
-                >
-                  {historyLora}
-                </SelectItem>
-              ))}
-              <div className="px-2 py-2">
-                <Input
-                  value={lora}
-                  onChange={(e) => {
-                    const value = e.target.value.trim();
-                    if (value) {
-                      updateLoraField(index, value);
-                    }
-                  }}
-                  placeholder="Custom HuggingFace path or URL"
-                  className="bg-card border-primary/20"
-                />
-              </div>
-            </SelectContent>
-          </Select>
-          <Input
-            type="number"
-            value={settings.loraScales[index]}
-            onChange={(e) => updateLoraField(index, e.target.value, true)}
-            className="bg-card border-primary/20 w-16 md:w-24 shrink-0"
-            step={0.1}
-            min={0}
-            max={1}
-          />
-          <Button
-            onClick={() => removeLoraField(index)}
-            variant="ghost"
-            size="icon"
-            className="text-primary hover:bg-primary/10 shrink-0"
-          >
-            <Minus className="h-4 w-4" />
-          </Button>
-        </div>
+        <LoraField
+          key={index}
+          lora={lora || DEFAULT_LORAS[0]}
+          scale={settings.loraScales[index]}
+          loraHistory={loraHistory}
+          onLoraChange={(value) => updateLoraField(index, value)}
+          onScaleChange={(value) => updateLoraField(index, value.toString(), true)}
+          onRemove={() => removeLoraField(index)}
+        />
       ))}
     </div>
   );
