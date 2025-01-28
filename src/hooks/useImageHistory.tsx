@@ -134,11 +134,9 @@ export const useImageHistory = () => {
     }
   };
 
-  // Set up real-time subscription for updates
   useEffect(() => {
     fetchHistory();
 
-    // Listen for auth state changes
     const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_IN') {
         fetchHistory();
@@ -147,24 +145,22 @@ export const useImageHistory = () => {
       }
     });
 
-    // Set up real-time subscription for the images table
     const channel = supabase
       .channel('images_changes')
       .on(
         'postgres_changes',
         { 
-          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+          event: '*',
           schema: 'public',
           table: 'images'
         },
         (payload) => {
           console.log('Real-time update received:', payload);
-          fetchHistory(); // Refresh the history when any change occurs
+          fetchHistory();
         }
       )
       .subscribe();
 
-    // Cleanup subscriptions
     return () => {
       authSubscription.unsubscribe();
       supabase.removeChannel(channel);
@@ -173,7 +169,7 @@ export const useImageHistory = () => {
 
   return { 
     history, 
-    allHistory: history, // Return all history for both dashboard and modal
+    allHistory: history,
     addToHistory,
     isLoading 
   };
