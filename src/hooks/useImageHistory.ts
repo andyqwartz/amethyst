@@ -4,10 +4,11 @@ import type { GenerationSettings } from '@/types/replicate';
 import { useToast } from "@/hooks/use-toast";
 import type { Json } from '@/integrations/supabase/types';
 
-interface ImageSettings extends Json {
-  hf_loras?: string[];
-  lora_scales?: number[];
-}
+// Define a type for the settings stored in the database
+type ImageSettings = {
+  hf_loras: string[];
+  lora_scales: number[];
+};
 
 export const useImageHistory = () => {
   const [history, setHistory] = useState<{
@@ -42,7 +43,7 @@ export const useImageHistory = () => {
       }
 
       const formattedHistory = images.map(img => {
-        const imgSettings = img.settings as ImageSettings;
+        const imgSettings = img.settings as ImageSettings | null;
         return {
           url: img.url,
           settings: {
@@ -56,8 +57,8 @@ export const useImageHistory = () => {
             output_format: img.output_format || "webp",
             output_quality: img.output_quality || 80,
             prompt_strength: img.prompt_strength || 0.8,
-            hf_loras: Array.isArray(imgSettings?.hf_loras) ? imgSettings.hf_loras : [],
-            lora_scales: Array.isArray(imgSettings?.lora_scales) ? imgSettings.lora_scales : [],
+            hf_loras: imgSettings?.hf_loras || [],
+            lora_scales: imgSettings?.lora_scales || [],
             disable_safety_checker: false,
             reference_image_url: img.reference_image_url || null
           } as GenerationSettings,
@@ -98,17 +99,15 @@ export const useImageHistory = () => {
         return;
       }
 
-      const settingsJson: ImageSettings = {
-        hf_loras: settings.hf_loras || [],
-        lora_scales: settings.lora_scales || []
-      };
-
       const { error } = await supabase
         .from('images')
         .insert({
           url,
           user_id: session.session.user.id,
-          settings: settingsJson,
+          settings: {
+            hf_loras: settings.hf_loras || [],
+            lora_scales: settings.lora_scales || []
+          } as Json,
           prompt: settings.prompt,
           negative_prompt: settings.negative_prompt,
           guidance_scale: settings.guidance_scale,
