@@ -40,9 +40,9 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
   );
 
   return (
-    <div className="space-y-8">
-      <div className="space-y-4">
-        <Label className="flex items-center mb-4">
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label className="flex items-center">
           Aspect Ratio {renderTooltip("Choose the dimensions for your generated image")}
         </Label>
         <Select
@@ -57,11 +57,11 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
               <SelectItem 
                 key={ratio} 
                 value={ratio}
-                className="flex flex-col items-start py-2"
+                className="flex flex-col items-start py-1.5"
               >
-                <div className="flex flex-col gap-1.5">
-                  <span className="font-medium text-sm">{ratio}</span>
-                  <span className="text-[11px] leading-tight text-primary/70">{description}</span>
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-medium text-xs">{ratio}</span>
+                  <span className="text-[10px] leading-tight text-primary/70">{description}</span>
                 </div>
               </SelectItem>
             ))}
@@ -69,8 +69,8 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
         </Select>
       </div>
 
-      <div className="space-y-8">
-        <div className="space-y-6">
+      <div className="space-y-6">
+        <div className="space-y-4">
           <Label className="flex items-center">
             Number of Steps {renderTooltip("Number of inference steps")}
           </Label>
@@ -87,7 +87,7 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           <Label className="flex items-center">
             Guidance Scale {renderTooltip("Controls how closely the output adheres to the prompt")}
           </Label>
@@ -104,7 +104,7 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           <Label className="flex items-center">
             Prompt Strength {renderTooltip("Prompt strength when using image to image")}
           </Label>
