@@ -20,21 +20,34 @@ export const Auth = () => {
 
   const handleAuth = async (type: 'login' | 'signup') => {
     try {
+      if (!email || !password) {
+        toast({
+          title: "Erreur",
+          description: "Veuillez remplir tous les champs",
+          variant: "destructive",
+        });
+        return;
+      }
+
       setLoading(true);
       
       const { data, error } = type === 'login' 
         ? await supabase.auth.signInWithPassword({ 
             email, 
             password,
-            options: {
-              persistSession: rememberMe
-            }
           })
         : await supabase.auth.signUp({ email, password });
 
       if (error) throw error;
 
       if (data.user) {
+        if (!rememberMe) {
+          await supabase.auth.setSession({
+            access_token: data.session?.access_token || '',
+            refresh_token: data.session?.refresh_token || '',
+          });
+        }
+
         toast({
           title: type === 'login' ? "Connexion réussie" : "Inscription réussie",
           description: "Vous allez être redirigé...",
