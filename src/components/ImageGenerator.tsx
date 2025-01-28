@@ -18,6 +18,7 @@ export const ImageGenerator = () => {
     allHistory,
     isLoading,
     progress,
+    currentLogs,
     handleImageUpload,
     handleImageClick,
     handleGenerate,
@@ -43,6 +44,7 @@ export const ImageGenerator = () => {
       allHistory={allHistory}
       isLoading={isLoading}
       progress={progress}
+      currentLogs={currentLogs}
       handleImageUpload={handleImageUpload}
       handleImageClick={handleImageClick}
       handleGenerate={handleGenerate}

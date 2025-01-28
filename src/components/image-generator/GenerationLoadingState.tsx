@@ -5,21 +5,16 @@ import { cn } from '@/lib/utils';
 interface GenerationLoadingStateProps {
   isGenerating: boolean;
   progress: number;
+  currentLogs?: string;
 }
-
-const messages = [
-  "Initialisation...",
-  "Démarrage de la génération...",
-  "Traitement de l'image...",
-  "Finalisation..."
-];
 
 export const GenerationLoadingState = ({ 
   isGenerating,
-  progress 
+  progress,
+  currentLogs = ''
 }: GenerationLoadingStateProps) => {
-  const [currentMessage, setCurrentMessage] = useState(messages[0]);
   const [shouldShow, setShouldShow] = useState(false);
+  const [currentMessage, setCurrentMessage] = useState('');
 
   useEffect(() => {
     if (isGenerating) {
@@ -27,26 +22,17 @@ export const GenerationLoadingState = ({
     } else {
       const timeout = setTimeout(() => {
         setShouldShow(false);
-        setCurrentMessage(messages[0]);
       }, 300);
       return () => clearTimeout(timeout);
     }
   }, [isGenerating]);
 
   useEffect(() => {
-    if (!isGenerating) return;
-
-    // Update message based on real progress
-    if (progress >= 95) {
-      setCurrentMessage(messages[3]);
-    } else if (progress >= 75) {
-      setCurrentMessage(messages[2]);
-    } else if (progress >= 25) {
-      setCurrentMessage(messages[1]);
-    } else {
-      setCurrentMessage(messages[0]);
-    }
-  }, [isGenerating, progress]);
+    if (!currentLogs) return;
+    const lines = currentLogs.split('\n').filter(Boolean);
+    const lastLine = lines[lines.length - 1] || '';
+    setCurrentMessage(lastLine);
+  }, [currentLogs]);
 
   if (!shouldShow) return null;
 
@@ -72,7 +58,7 @@ export const GenerationLoadingState = ({
           </div>
 
           <p className="text-center text-lg text-foreground/90 font-light">
-            {currentMessage}
+            {currentMessage || 'Initialisation...'}
           </p>
 
           <div className="w-full space-y-2">
@@ -90,6 +76,16 @@ export const GenerationLoadingState = ({
               <span className="font-medium">{Math.round(progress)}%</span>
             </div>
           </div>
+
+          {currentLogs && (
+            <div className="w-full mt-4 p-2 bg-black/10 rounded-lg max-h-32 overflow-y-auto text-xs font-mono">
+              {currentLogs.split('\n').map((line, index) => (
+                <div key={index} className="text-foreground/70">
+                  {line}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

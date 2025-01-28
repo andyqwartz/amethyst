@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useGenerationPersistence } from './useGenerationPersistence';
-import { GenerationStatus, GenerationSettings } from '@/types/replicate';
+import type { GenerationStatus, GenerationSettings } from '@/types/replicate';
+import { supabase } from '@/integrations/supabase/client';
+
+const GENERATION_STATUS_KEY = 'generation_status';
+const GENERATION_PROGRESS_KEY = 'generation_progress';
+const GENERATION_ID_KEY = 'generation_id';
 
 export const useGenerationProgress = (
   isGenerating: boolean, 
@@ -11,6 +16,7 @@ export const useGenerationProgress = (
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState<GenerationStatus>('idle');
   const [hasNotifiedRetry, setHasNotifiedRetry] = useState(false);
+  const [currentLogs, setCurrentLogs] = useState<string>('');
 
   const { shouldRetry, savedFile, savedSettings } = useGenerationPersistence(
     isGenerating ? 'loading' : status,
@@ -27,9 +33,9 @@ export const useGenerationProgress = (
       setProgress(0);
       setStatus('idle');
       setHasNotifiedRetry(false);
-      localStorage.removeItem('generation_status');
-      localStorage.removeItem('generation_progress');
-      localStorage.removeItem('generation_timestamp');
+      setCurrentLogs('');
+      localStorage.removeItem(GENERATION_STATUS_KEY);
+      localStorage.removeItem(GENERATION_PROGRESS_KEY);
       return;
     }
   }, [isGenerating]);
@@ -43,29 +49,66 @@ export const useGenerationProgress = (
     }
   }, [shouldRetry, savedSettings, onRetry, hasNotifiedRetry]);
 
+  const calculateProgressFromLogs = (logs: string): number => {
+    if (!logs) return 0;
+
+    const lines = logs.split('\n').filter(Boolean);
+    const lastLine = lines[lines.length - 1]?.toLowerCase() || '';
+
+    if (lastLine.includes('finalizing') || lastLine.includes('saving')) {
+      return 95;
+    } else if (lastLine.includes('processing output')) {
+      return 85;
+    } else if (lastLine.includes('step') && lastLine.includes('/')) {
+      // Extract step numbers, e.g., "Step 20/30"
+      const match = lastLine.match(/step (\d+)\/(\d+)/i);
+      if (match) {
+        const [, current, total] = match;
+        return Math.min(80, (Number(current) / Number(total)) * 80);
+      }
+    } else if (lastLine.includes('starting')) {
+      return 10;
+    } else if (lastLine.includes('preparing')) {
+      return 5;
+    }
+
+    return progress; // Keep current progress if no relevant log found
+  };
+
   // Update progress based on real generation status
   useEffect(() => {
     if (!isGenerating) return;
 
-    const generationId = localStorage.getItem('generation_id');
+    const generationId = localStorage.getItem(GENERATION_ID_KEY);
     if (!generationId) return;
 
     const checkProgress = async () => {
       try {
-        const response = await fetch(`/api/check-progress?id=${generationId}`);
-        const data = await response.json();
-        
-        if (data.status === 'succeeded') {
+        const { data: prediction, error } = await supabase.functions.invoke('check-progress', {
+          body: { predictionId: generationId }
+        });
+
+        if (error) throw error;
+
+        if (prediction.status === 'succeeded') {
           setProgress(100);
           setStatus('success');
-        } else if (data.status === 'failed') {
+          localStorage.removeItem(GENERATION_ID_KEY);
+        } else if (prediction.status === 'failed') {
           setProgress(0);
           setStatus('error');
-        } else if (data.status === 'processing') {
-          // Calculate progress based on logs
-          const logProgress = calculateProgressFromLogs(data.logs);
-          setProgress(logProgress);
+          localStorage.removeItem(GENERATION_ID_KEY);
+        } else if (prediction.status === 'processing' && prediction.logs) {
+          setCurrentLogs(prediction.logs);
+          const calculatedProgress = calculateProgressFromLogs(prediction.logs);
+          setProgress(calculatedProgress);
         }
+
+        console.log('Generation progress:', {
+          status: prediction.status,
+          progress: progress,
+          logs: prediction.logs
+        });
       } catch (error) {
         console.error('Error checking progress:', error);
       }
@@ -73,29 +116,14 @@ export const useGenerationProgress = (
 
     const interval = setInterval(checkProgress, 1000);
     return () => clearInterval(interval);
-  }, [isGenerating]);
-
-  const calculateProgressFromLogs = (logs: string): number => {
-    if (!logs) return 5;
-
-    if (logs.includes('Finalizing generation')) {
-      return 95;
-    } else if (logs.includes('Processing image')) {
-      return 75;
-    } else if (logs.includes('Starting generation')) {
-      return 25;
-    } else if (logs.includes('Initializing')) {
-      return 10;
-    }
-
-    return 5;
-  };
+  }, [isGenerating, progress]);
 
   return { 
     progress, 
     setProgress,
     status,
     savedFile,
-    savedSettings
+    savedSettings,
+    currentLogs
   };
 };
