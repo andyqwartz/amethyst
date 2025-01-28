@@ -1,130 +1,99 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import Replicate from "https://esm.sh/replicate@0.25.2"
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
+import { corsHeaders } from "../_shared/cors.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-}
-
-const MODEL_VERSION = "lucataco/flux-dev-multi-lora:2389224e115448d9a77c07d7d45672b3f0aa45acacf1c5bcf51857ac295e3aec";
+const REPLICATE_API_TOKEN = Deno.env.get('REPLICATE_API_TOKEN');
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY');
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    const REPLICATE_API_KEY = Deno.env.get('REPLICATE_API_KEY')
-    if (!REPLICATE_API_KEY) {
-      throw new Error('REPLICATE_API_KEY is not set')
+    const supabase = createClient(
+      SUPABASE_URL!,
+      SUPABASE_ANON_KEY!
+    );
+
+    const { data: { user } } = await supabase.auth.getUser(
+      req.headers.get('Authorization')?.split(' ')[1] ?? ''
+    );
+
+    if (!user) {
+      throw new Error('Not authenticated');
     }
 
-    const replicate = new Replicate({
-      auth: REPLICATE_API_KEY,
-    })
+    const {
+      prompt,
+      negativePrompt,
+      guidanceScale,
+      steps,
+      seed,
+      numOutputs,
+      aspectRatio,
+      outputFormat,
+      outputQuality,
+      promptStrength,
+      hfLoras,
+      loraScales,
+      disableSafetyChecker,
+      image
+    } = await req.json();
 
-    const { input, predictionId } = await req.json()
-    console.log("Request received:", { input, predictionId })
+    console.log('Received parameters:', {
+      prompt,
+      guidanceScale,
+      steps,
+      numOutputs,
+      aspectRatio,
+      hfLoras,
+      loraScales
+    });
 
-    if (predictionId) {
-      console.log("Checking status for prediction:", predictionId)
-      try {
-        const prediction = await replicate.predictions.get(predictionId)
-        console.log("Status check response:", prediction)
-        
-        if (prediction.status === 'succeeded') {
-          return new Response(JSON.stringify({ 
-            status: 'success',
-            output: prediction.output,
-            settings: input,
-            predictionId 
-          }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          })
-        } else if (prediction.status === 'failed') {
-          return new Response(JSON.stringify({ 
-            status: 'error',
-            error: prediction.error,
-            predictionId 
-          }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          })
-        }
-        
-        return new Response(JSON.stringify({ 
-          status: 'processing',
-          predictionId 
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        })
-      } catch (error) {
-        console.error("Error checking prediction status:", error)
-        return new Response(JSON.stringify({ 
-          status: 'error',
-          error: error.message,
-          predictionId
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 500
-        })
-      }
-    }
-
-    if (!input?.prompt) {
-      return new Response(JSON.stringify({ 
-        error: "Missing required field: prompt" 
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400
-      })
-    }
-
-    console.log("Starting new generation with input:", input)
-    
-    try {
-      const prediction = await replicate.predictions.create({
-        version: MODEL_VERSION,
+    const response = await fetch("https://api.replicate.com/v1/predictions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Token ${REPLICATE_API_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        version: "2389224e115448d9a77c07d7d45672b3f0aa45acacf1c5bcf51857ac295e3aec",
         input: {
-          prompt: input.prompt,
-          negative_prompt: input.negative_prompt,
-          guidance_scale: input.guidance_scale,
-          num_inference_steps: input.num_inference_steps,
-          num_outputs: input.num_outputs || 1,
-          seed: input.seed,
-          image: input.image,
-          hf_loras: input.hf_loras || [],
-          lora_scales: input.lora_scales || [],
-          aspect_ratio: input.aspect_ratio || "1:1",
-          output_format: input.output_format || "webp",
-          output_quality: input.output_quality || 80,
-          prompt_strength: input.prompt_strength || 0.8,
-          disable_safety_checker: input.disable_safety_checker || false
-        }
-      })
+          prompt,
+          image,
+          num_inference_steps: steps,
+          guidance_scale: guidanceScale,
+          num_outputs: numOutputs,
+          aspect_ratio: aspectRatio,
+          output_format: outputFormat,
+          output_quality: outputQuality,
+          prompt_strength: promptStrength,
+          hf_loras: hfLoras,
+          lora_scales: loraScales,
+          disable_safety_checker: disableSafetyChecker
+        },
+      }),
+    });
 
-      console.log("Generation started, prediction:", prediction)
-      
-      return new Response(JSON.stringify({ 
-        status: 'started',
-        predictionId: prediction.id 
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
-    } catch (error) {
-      console.error("Error starting generation:", error)
-      return new Response(JSON.stringify({ 
-        status: 'error',
-        error: error.message 
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500
-      })
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('Replicate API error:', error);
+      throw new Error(`Replicate API error: ${JSON.stringify(error)}`);
     }
+
+    const prediction = await response.json();
+    console.log('Prediction created:', prediction);
+
+    return new Response(JSON.stringify(prediction), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (error) {
-    console.error("Error in generate-image function:", error)
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500
-    })
+    console.error('Error:', error);
+    return new Response(JSON.stringify({ status: 'error', error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
-})
+});
