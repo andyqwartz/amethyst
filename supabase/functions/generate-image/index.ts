@@ -1,99 +1,84 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
-import { corsHeaders } from "../_shared/cors.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import Replicate from "https://esm.sh/replicate@0.25.2"
 
-const REPLICATE_API_TOKEN = Deno.env.get('REPLICATE_API_TOKEN');
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
-const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY');
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+};
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const supabase = createClient(
-      SUPABASE_URL!,
-      SUPABASE_ANON_KEY!
-    );
-
-    const { data: { user } } = await supabase.auth.getUser(
-      req.headers.get('Authorization')?.split(' ')[1] ?? ''
-    );
-
-    if (!user) {
-      throw new Error('Not authenticated');
+    const REPLICATE_API_KEY = Deno.env.get('REPLICATE_API_KEY')
+    if (!REPLICATE_API_KEY) {
+      throw new Error('REPLICATE_API_KEY is not set')
     }
 
-    const {
-      prompt,
-      negativePrompt,
-      guidanceScale,
-      steps,
-      seed,
-      numOutputs,
-      aspectRatio,
-      outputFormat,
-      outputQuality,
-      promptStrength,
-      hfLoras,
-      loraScales,
-      disableSafetyChecker,
-      image
-    } = await req.json();
+    const replicate = new Replicate({
+      auth: REPLICATE_API_KEY,
+    })
 
-    console.log('Received parameters:', {
-      prompt,
-      guidanceScale,
-      steps,
-      numOutputs,
-      aspectRatio,
-      hfLoras,
-      loraScales
-    });
+    const body = await req.json()
 
-    const response = await fetch("https://api.replicate.com/v1/predictions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Token ${REPLICATE_API_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        version: "2389224e115448d9a77c07d7d45672b3f0aa45acacf1c5bcf51857ac295e3aec",
-        input: {
-          prompt,
-          image,
-          num_inference_steps: steps,
-          guidance_scale: guidanceScale,
-          num_outputs: numOutputs,
-          aspect_ratio: aspectRatio,
-          output_format: outputFormat,
-          output_quality: outputQuality,
-          prompt_strength: promptStrength,
-          hf_loras: hfLoras,
-          lora_scales: loraScales,
-          disable_safety_checker: disableSafetyChecker
-        },
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      console.error('Replicate API error:', error);
-      throw new Error(`Replicate API error: ${JSON.stringify(error)}`);
+    // If it's a status check request
+    if (body.predictionId) {
+      console.log("Checking status for prediction:", body.predictionId)
+      const prediction = await replicate.predictions.get(body.predictionId)
+      console.log("Status check response:", prediction)
+      return new Response(JSON.stringify(prediction), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
     }
 
-    const prediction = await response.json();
-    console.log('Prediction created:', prediction);
+    // If it's a generation request
+    if (!body.input?.prompt) {
+      return new Response(
+        JSON.stringify({ 
+          error: "Missing required field: prompt is required" 
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        }
+      )
+    }
 
+    console.log("Generating image with input:", body.input)
+    
+    const prediction = await replicate.predictions.create({
+      version: "2389224e115448d9a77c07d7d45672b3f0aa45acacf1c5bcf51857ac295e3aec",
+      input: {
+        prompt: body.input.prompt,
+        negative_prompt: body.input.negativePrompt,
+        guidance_scale: body.input.guidanceScale,
+        num_inference_steps: body.input.steps,
+        seed: body.input.seed,
+        num_outputs: body.input.numOutputs,
+        aspect_ratio: body.input.aspectRatio,
+        output_format: body.input.outputFormat,
+        output_quality: body.input.outputQuality,
+        prompt_strength: body.input.promptStrength,
+        hf_loras: body.input.hfLoras || [],
+        lora_scales: body.input.loraScales || [],
+        disable_safety_checker: body.input.disableSafetyChecker,
+        image: body.input.image
+      }
+    })
+
+    console.log("Generation response:", prediction)
     return new Response(JSON.stringify(prediction), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 200,
+    })
   } catch (error) {
-    console.error('Error:', error);
-    return new Response(JSON.stringify({ status: 'error', error: error.message }), {
+    console.error("Error in generate-image function:", error)
+    return new Response(JSON.stringify({ error: error.message }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    })
   }
-});
+})
