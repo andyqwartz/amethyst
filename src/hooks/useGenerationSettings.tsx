@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { GenerationSettings } from '@/types/replicate';
 
 const DEFAULT_SETTINGS: GenerationSettings = {

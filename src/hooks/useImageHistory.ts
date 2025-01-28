@@ -2,29 +2,17 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { GenerationSettings } from '@/types/replicate';
 import type { Json } from '@/integrations/supabase/types';
-import { useToast } from "@/hooks/use-toast";
 
-interface HistoryImage {
+interface ImageHistoryItem {
   url: string;
   settings: GenerationSettings;
   timestamp: number;
 }
 
-interface ImageRecord {
-  url: string;
-  settings: Json;
-  created_at: string;
-  prompt: string;
-  seed?: number;
-  guidance_scale?: number;
-  steps?: number;
-  negative_prompt?: string;
-}
-
 export const useImageHistory = () => {
-  const [history, setHistory] = useState<HistoryImage[]>([]);
+  const [history, setHistory] = useState<ImageHistoryItem[]>([]);
+  const [allHistory, setAllHistory] = useState<ImageHistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
 
   const fetchHistory = async () => {
     try {
@@ -35,7 +23,7 @@ export const useImageHistory = () => {
 
       if (error) throw error;
 
-      const formattedHistory = images.map(img => ({
+      const historyItems = images.map(img => ({
         url: img.url,
         settings: {
           prompt: img.prompt || '',
@@ -55,58 +43,53 @@ export const useImageHistory = () => {
         timestamp: new Date(img.created_at).getTime()
       }));
 
-      setHistory(formattedHistory);
+      setHistory(historyItems.slice(0, 4));
+      setAllHistory(historyItems);
+      setIsLoading(false);
     } catch (error) {
-      console.error('Error fetching image history:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger l'historique des images",
-        variant: "destructive"
-      });
-    } finally {
+      console.error('Error fetching history:', error);
       setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchHistory();
-
-    const channel = supabase
-      .channel('images_changes')
-      .on('postgres_changes', 
-        { event: 'INSERT', schema: 'public', table: 'images' },
-        (payload) => {
-          const newImage = payload.new as ImageRecord;
-          setHistory(prev => [{
-            url: newImage.url,
-            settings: {
-              prompt: newImage.prompt || '',
-              negative_prompt: newImage.negative_prompt || '',
-              guidance_scale: newImage.guidance_scale || 7.5,
-              num_inference_steps: newImage.steps || 30,
-              seed: newImage.seed,
-              num_outputs: 1,
-              aspect_ratio: "1:1",
-              output_format: "webp",
-              output_quality: 80,
-              prompt_strength: 0.8,
-              hf_loras: [],
-              lora_scales: [],
-              disable_safety_checker: false
-            } as GenerationSettings,
-            timestamp: new Date(newImage.created_at).getTime()
-          }, ...prev]);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
   const addToHistory = async (url: string, settings: GenerationSettings) => {
     try {
+      const newImage = {
+        url,
+        settings,
+        timestamp: Date.now()
+      };
+
+      setHistory(prev => {
+        const newHistory = [{
+          url: newImage.url,
+          settings: {
+            prompt: newImage.settings.prompt || '',
+            negative_prompt: newImage.settings.negative_prompt || '',
+            guidance_scale: newImage.settings.guidance_scale || 7.5,
+            num_inference_steps: newImage.settings.num_inference_steps || 30,
+            seed: newImage.settings.seed,
+            num_outputs: newImage.settings.num_outputs || 1,
+            aspect_ratio: newImage.settings.aspect_ratio || "1:1",
+            output_format: newImage.settings.output_format || "webp",
+            output_quality: newImage.settings.output_quality || 80,
+            prompt_strength: newImage.settings.prompt_strength || 0.8,
+            hf_loras: newImage.settings.hf_loras || [],
+            lora_scales: newImage.settings.lora_scales || [],
+            disable_safety_checker: newImage.settings.disable_safety_checker || false
+          } as GenerationSettings,
+          timestamp: Date.now()
+        }, ...prev];
+
+        return newHistory.slice(0, 4);
+      });
+
+      setAllHistory(prev => [{
+        url: newImage.url,
+        settings: settings,
+        timestamp: Date.now()
+      }, ...prev]);
+
       const { error } = await supabase
         .from('images')
         .insert({
@@ -127,22 +110,18 @@ export const useImageHistory = () => {
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error adding image to history:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible d'ajouter l'image à l'historique",
-        variant: "destructive"
-      });
+      console.error('Error adding to history:', error);
     }
   };
 
-  const getDashboardImages = () => history.slice(0, 10);
-  const getAllImages = () => history;
+  useEffect(() => {
+    fetchHistory();
+  }, []);
 
-  return { 
-    history: getDashboardImages(), 
-    allHistory: getAllImages(),
-    addToHistory,
-    isLoading 
+  return {
+    history,
+    allHistory,
+    isLoading,
+    addToHistory
   };
 };
