@@ -8,6 +8,7 @@ import type { GenerationSettings } from '@/types/replicate';
 
 const DEFAULT_LORAS = [
   'AndyVampiro/joa',
+  'stabilityai/sd-vae-ft-mse',
   'AndyVampiro/andy',
   'AndyVampiro/ilenana',
   'AndyVampiro/fog'
@@ -43,16 +44,6 @@ export const LoraSettings = ({ settings, onSettingsChange }: LoraSettingsProps) 
     setLoraHistory(uniqueLoras);
   }, [settings.hf_loras]);
 
-  const formatLoraPath = (lora: string): string => {
-    // Remove any URLs or extra paths, keep only foldername/model format
-    const parts = lora.split('/');
-    if (parts.length >= 2) {
-      // Take the last two parts of the path
-      return `${parts[parts.length - 2]}/${parts[parts.length - 1]}`;
-    }
-    return lora;
-  };
-
   const addLoraField = () => {
     onSettingsChange({
       hf_loras: [...settings.hf_loras, DEFAULT_LORAS[0]],
@@ -75,15 +66,9 @@ export const LoraSettings = ({ settings, onSettingsChange }: LoraSettingsProps) 
     } else {
       if (!value || !value.trim()) return;
       
-      const formattedValue = formatLoraPath(value.trim());
       const newLoras = [...settings.hf_loras];
-      newLoras[index] = formattedValue;
+      newLoras[index] = value.trim();
       onSettingsChange({ hf_loras: newLoras });
-
-      // Add to history if it's a new value
-      if (!loraHistory.includes(formattedValue)) {
-        setLoraHistory(prev => [...prev, formattedValue]);
-      }
     }
   };
 
@@ -98,7 +83,7 @@ export const LoraSettings = ({ settings, onSettingsChange }: LoraSettingsProps) 
                 <HelpCircle className="h-4 w-4 text-primary/50" />
               </TooltipTrigger>
               <TooltipContent>
-                <p className="max-w-xs text-sm">Format: foldername/model (e.g. AndyVampiro/joa)</p>
+                <p className="max-w-xs text-sm">Huggingface path or URL to the LoRA weights</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
