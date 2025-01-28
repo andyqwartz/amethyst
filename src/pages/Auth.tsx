@@ -39,9 +39,20 @@ export const Auth = () => {
         : await supabase.auth.signUp({ email, password });
 
       if (error) {
+        let errorMessage = "Une erreur est survenue";
+        
+        // Messages d'erreur personnalisés
+        if (error.message.includes("Email not confirmed")) {
+          errorMessage = "Email non confirmé. Veuillez vérifier votre boîte mail.";
+        } else if (error.message.includes("Invalid login credentials")) {
+          errorMessage = "Email ou mot de passe incorrect";
+        } else if (error.message.includes("User already registered")) {
+          errorMessage = "Cet email est déjà utilisé";
+        }
+        
         toast({
           title: "Erreur d'authentification",
-          description: "Email ou mot de passe incorrect",
+          description: errorMessage,
           variant: "destructive",
         });
         return;
@@ -78,11 +89,12 @@ export const Auth = () => {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
         options: {
-          redirectTo: 'https://hyplbzvyvbcjzpioemay.supabase.co/auth/v1/callback',
+          redirectTo: window.location.origin,
         }
       });
 
       if (error) {
+        console.error("Erreur GitHub:", error);
         toast({
           title: "Erreur de connexion GitHub",
           description: "Impossible de se connecter avec GitHub. Veuillez réessayer.",
@@ -96,6 +108,7 @@ export const Auth = () => {
       }
 
     } catch (error: any) {
+      console.error("Erreur complète:", error);
       toast({
         title: "Erreur",
         description: "Une erreur est survenue lors de la connexion avec GitHub",
