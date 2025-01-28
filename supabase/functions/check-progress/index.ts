@@ -3,9 +3,8 @@ import Replicate from "https://esm.sh/replicate@0.25.2"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -24,21 +23,42 @@ serve(async (req) => {
 
     const { predictionId } = await req.json()
     if (!predictionId) {
-      throw new Error('predictionId is required')
+      console.error("Missing predictionId in request")
+      return new Response(
+        JSON.stringify({ error: "predictionId is required" }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      )
     }
 
     console.log("Checking progress for prediction:", predictionId)
     const prediction = await replicate.predictions.get(predictionId)
     console.log("Progress response:", prediction)
 
-    return new Response(JSON.stringify(prediction), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+    // Ensure we're sending a properly formatted response
+    const response = {
+      status: prediction.status,
+      output: prediction.output,
+      error: prediction.error,
+      logs: prediction.logs
+    }
+
+    return new Response(
+      JSON.stringify(response), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    )
   } catch (error) {
     console.error("Error checking progress:", error)
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500,
-    })
+    return new Response(
+      JSON.stringify({ 
+        error: error.message,
+        status: 'failed'
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      }
+    )
   }
 })

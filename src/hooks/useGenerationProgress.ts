@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useGenerationPersistence } from './useGenerationPersistence';
 import type { GenerationStatus, GenerationSettings } from '@/types/replicate';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from "@/hooks/use-toast";
 
 export interface GenerationProgressProps {
   isGenerating: boolean;
@@ -19,6 +20,7 @@ export const useGenerationProgress = (
   settings?: GenerationSettings,
   onRetry?: (settings: GenerationSettings) => void
 ): GenerationProgressProps => {
+  const { toast } = useToast();
   const [currentLogs, setCurrentLogs] = useState<string>('');
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState<GenerationStatus>('idle');
@@ -40,10 +42,13 @@ export const useGenerationProgress = (
   }, [shouldRetry, savedSettings, onRetry]);
 
   useEffect(() => {
-    // Clear logs and reset status when generation is stopped
+    // Clear state when generation is stopped
     if (!isGenerating) {
+      console.log('Generation stopped, clearing state');
       setCurrentLogs('');
       setStatus('idle');
+      setProgress(0);
+      localStorage.removeItem('generation_id');
       return;
     }
 
@@ -63,7 +68,13 @@ export const useGenerationProgress = (
 
         if (error) {
           console.error('Error checking progress:', error);
+          toast({
+            title: "Error",
+            description: "Failed to check generation progress",
+            variant: "destructive"
+          });
           setStatus('error');
+          setCurrentLogs('');
           localStorage.removeItem('generation_id');
           return;
         }
@@ -80,11 +91,20 @@ export const useGenerationProgress = (
           localStorage.removeItem('generation_id');
           setStatus('success');
           setCurrentLogs('');
+          toast({
+            title: "Success",
+            description: "Images generated successfully",
+          });
         } else if (prediction.status === 'failed') {
           console.error('Generation failed:', prediction.error);
           localStorage.removeItem('generation_id');
           setStatus('error');
           setCurrentLogs('');
+          toast({
+            title: "Error",
+            description: prediction.error || "Generation failed",
+            variant: "destructive"
+          });
         } else if (prediction.status === 'processing' && prediction.logs) {
           console.log('Generation processing:', prediction.logs);
           setCurrentLogs(prediction.logs);
@@ -92,6 +112,11 @@ export const useGenerationProgress = (
         }
       } catch (error) {
         console.error('Error checking progress:', error);
+        toast({
+          title: "Error",
+          description: "Failed to check generation progress",
+          variant: "destructive"
+        });
         setStatus('error');
         setCurrentLogs('');
         localStorage.removeItem('generation_id');
@@ -102,11 +127,13 @@ export const useGenerationProgress = (
     return () => {
       clearInterval(interval);
       if (!isGenerating) {
+        console.log('Cleaning up generation state');
         setCurrentLogs('');
         setStatus('idle');
+        setProgress(0);
       }
     };
-  }, [isGenerating]);
+  }, [isGenerating, toast]);
 
   return { 
     isGenerating,
