@@ -19,10 +19,14 @@ export const useImageHistory = () => {
   const { fetchUserImages, insertImage } = useSupabaseQueries();
 
   const formatHistory = (images: any[]) => {
-    // Create a Set to track unique URLs
-    const seen = new Set<string>();
-    return images
-      .map(img => ({
+    const uniqueUrls = new Map<string, {
+      url: string;
+      settings: GenerationSettings;
+      timestamp: number;
+    }>();
+
+    images.forEach(img => {
+      const item = {
         url: img.url,
         settings: {
           prompt: img.prompt || '',
@@ -41,12 +45,15 @@ export const useImageHistory = () => {
           reference_image_url: img.reference_image_url || null
         } as GenerationSettings,
         timestamp: new Date(img.created_at).getTime()
-      }))
-      .filter(item => {
-        if (seen.has(item.url)) return false;
-        seen.add(item.url);
-        return true;
-      })
+      };
+
+      // Only keep the most recent version of each URL
+      if (!uniqueUrls.has(img.url) || uniqueUrls.get(img.url)!.timestamp < item.timestamp) {
+        uniqueUrls.set(img.url, item);
+      }
+    });
+
+    return Array.from(uniqueUrls.values())
       .sort((a, b) => b.timestamp - a.timestamp);
   };
 
@@ -62,7 +69,13 @@ export const useImageHistory = () => {
 
       const images = await fetchUserImages(session.session.user.id);
       const formattedHistory = formatHistory(images);
-      setHistory(formattedHistory);
+      
+      // Additional deduplication check before setting history
+      const uniqueHistory = formattedHistory.filter((item, index, self) => 
+        index === self.findIndex(t => t.url === item.url)
+      );
+      
+      setHistory(uniqueHistory);
     } catch (error) {
       console.error('Error fetching history:', error);
       toast({
@@ -76,22 +89,24 @@ export const useImageHistory = () => {
   }, [toast, fetchUserImages]);
 
   const addToHistory = async (url: string, settings: GenerationSettings) => {
-    // Vérifier si l'URL existe déjà dans l'historique
+    console.log('Attempting to add to history:', url);
+    
+    // Check for duplicates in current history
     if (history.some(item => item.url === url)) {
-      console.log('Skipping duplicate URL:', url);
+      console.log('URL already exists in history:', url);
       return;
     }
 
-    // Vérifier si on est en train d'ajouter une image
+    // Check if we're already processing an addition
     if (isAddingToHistory.current) {
-      console.log('Already adding to history, skipping');
+      console.log('Already processing an addition, skipping');
       return;
     }
 
-    // Vérifier le délai minimum entre les ajouts (5 secondes)
+    // Check minimum time between additions
     const now = Date.now();
     if (now - lastAddedTimestamp.current < 5000) {
-      console.log('Too soon after last addition, skipping');
+      console.log('Too soon after last addition, minimum 5s required');
       return;
     }
 
