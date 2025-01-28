@@ -16,18 +16,12 @@ export const Header = ({
   return (
     <div className="relative flex justify-center items-center mb-4">
       {/* Logo and Name */}
-      <div 
-        className="flex items-center gap-4 group hover:scale-105 transition-transform duration-300 cursor-pointer"
-      >
+      <div className="flex items-center gap-3">
         <div className="relative">
-          <div className="absolute inset-0 bg-primary/20 blur-xl animate-[pulse_2s_ease-in-out_infinite] rounded-full group-hover:bg-primary/40 transition-all duration-300"></div>
-          <Sparkles className="h-10 w-10 text-primary relative animate-[bounce_2s_ease-in-out_infinite] group-hover:text-primary-hover transition-colors duration-300" />
+          <div className="absolute inset-0 bg-primary/20 blur-xl animate-pulse rounded-full"></div>
+          <Sparkles className="h-8 w-8 text-primary relative animate-pulse" />
         </div>
-        <h1 
-          className="text-4xl font-bold font-outfit bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent bg-[length:200%] animate-[gradient_8s_linear_infinite] tracking-tight relative group-hover:scale-105 transition-transform duration-300"
-        >
-          {/* Crystalline effect overlay */}
-          <span className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/30 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-[length:200%] animate-[gradient_3s_linear_infinite] blur-sm"></span>
+        <h1 className="text-3xl font-bold font-outfit bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent bg-[length:200%] animate-[gradient_8s_linear_infinite] tracking-tight">
           Amethyst
         </h1>
       </div>
