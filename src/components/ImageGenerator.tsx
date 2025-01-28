@@ -47,7 +47,10 @@ export const ImageGenerator = () => {
         .delete()
         .eq('user_id', session.session.user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error deleting history:', error);
+        throw error;
+      }
 
       toast({
         title: "Success",

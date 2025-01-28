@@ -11,6 +11,7 @@ interface HistoryImage {
 
 export const useImageHistory = () => {
   const [history, setHistory] = useState<HistoryImage[]>([]);
+  const [allHistory, setAllHistory] = useState<HistoryImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const isAddingToHistory = useRef(false);
@@ -61,7 +62,8 @@ export const useImageHistory = () => {
         timestamp: new Date(img.created_at).getTime()
       }));
 
-      setHistory(formattedHistory);
+      setHistory(formattedHistory.slice(0, 4));
+      setAllHistory(formattedHistory);
     } catch (error) {
       console.error('Error fetching history:', error);
       toast({
@@ -173,7 +175,7 @@ export const useImageHistory = () => {
 
   return { 
     history, 
-    allHistory: history, // Return all history for both dashboard and modal
+    allHistory, 
     addToHistory,
     isLoading 
   };
