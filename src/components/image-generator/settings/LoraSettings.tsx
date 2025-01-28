@@ -7,9 +7,9 @@ import { LoraField } from './lora/LoraField';
 import type { GenerationSettings } from '@/types/replicate';
 
 const DEFAULT_LORAS = [
+  'AndyVampiro/andy',
   'AndyVampiro/joa',
   'stabilityai/sd-vae-ft-mse',
-  'AndyVampiro/andy',
   'AndyVampiro/ilenana',
   'AndyVampiro/fog'
 ];
@@ -26,11 +26,11 @@ export const LoraSettings = ({ settings, onSettingsChange }: LoraSettingsProps) 
   });
 
   useEffect(() => {
-    // Set default LoRA if none exists
+    // Set default LoRAs if none exists
     if (!settings.hf_loras || settings.hf_loras.length === 0) {
       onSettingsChange({
-        hf_loras: [DEFAULT_LORAS[0]],
-        lora_scales: [0.8],
+        hf_loras: [DEFAULT_LORAS[0], DEFAULT_LORAS[1]],
+        lora_scales: [1.0, 1.0],
       });
     }
   }, []);
@@ -47,7 +47,7 @@ export const LoraSettings = ({ settings, onSettingsChange }: LoraSettingsProps) 
   const addLoraField = () => {
     onSettingsChange({
       hf_loras: [...settings.hf_loras, DEFAULT_LORAS[0]],
-      lora_scales: [...settings.lora_scales, 0.8],
+      lora_scales: [...settings.lora_scales, 1.0],
     });
   };
 
