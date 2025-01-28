@@ -47,7 +47,10 @@ serve(async (req) => {
       )
     }
 
-    console.log("Generating image with input:", body.input)
+    console.log("Generating image with input:", {
+      ...body.input,
+      image: body.input.image ? "Image URL present" : "No image"
+    })
     
     const prediction = await replicate.predictions.create({
       version: "2389224e115448d9a77c07d7d45672b3f0aa45acacf1c5bcf51857ac295e3aec",
@@ -65,7 +68,7 @@ serve(async (req) => {
         hf_loras: body.input.hf_loras || [],
         lora_scales: body.input.lora_scales || [],
         disable_safety_checker: body.input.disable_safety_checker,
-        image: body.input.image // Ajout de l'image de référence
+        image: body.input.image // Now properly passing the image URL
       }
     })
 

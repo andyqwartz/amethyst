@@ -31,11 +31,6 @@ export const useGenerationProcess = (
       console.log('Successfully added images to history');
     } catch (error) {
       console.error('Failed to add images to history:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de sauvegarder les images dans l'historique",
-        variant: "destructive"
-      });
     } finally {
       cleanupGeneration();
     }
@@ -71,7 +66,8 @@ export const useGenerationProcess = (
           hf_loras: settings.hf_loras,
           lora_scales: settings.lora_scales,
           disable_safety_checker: settings.disable_safety_checker,
-          seed: settings.seed
+          seed: settings.seed,
+          image: settings.reference_image_url // Add the reference image URL here
         }
       });
       
