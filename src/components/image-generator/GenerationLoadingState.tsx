@@ -22,21 +22,20 @@ export const GenerationLoadingState = ({
 
   useEffect(() => {
     if (!isGenerating) {
-      setCurrentMessage(messages[0]);
       return;
     }
     
-    // Calculate message index based on progress thresholds
-    if (progress <= 25) {
-      setCurrentMessage(messages[0]);
-    } else if (progress <= 50) {
-      setCurrentMessage(messages[1]);
-    } else if (progress <= 75) {
-      setCurrentMessage(messages[2]);
-    } else {
-      setCurrentMessage(messages[3]);
+    // Only update message at major progress milestones to avoid flicker
+    const messageIndex = Math.min(
+      Math.floor(progress / 25),
+      messages.length - 1
+    );
+    
+    // Only update if message actually changes
+    if (messages[messageIndex] !== currentMessage) {
+      setCurrentMessage(messages[messageIndex]);
     }
-  }, [isGenerating, progress]);
+  }, [isGenerating, progress, currentMessage]);
 
   if (!isGenerating) return null;
 
