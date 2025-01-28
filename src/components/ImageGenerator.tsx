@@ -35,8 +35,8 @@ export const ImageGenerator = () => {
       const { data: session } = await supabase.auth.getSession();
       if (!session?.session?.user) {
         toast({
-          title: "Error",
-          description: "You must be logged in to delete history",
+          title: "Erreur",
+          description: "Vous devez être connecté pour supprimer l'historique",
           variant: "destructive"
         });
         return;
@@ -50,8 +50,8 @@ export const ImageGenerator = () => {
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "History deleted successfully",
+        title: "Succès",
+        description: "Historique supprimé avec succès",
       });
 
       // Force reload the page to refresh the history
@@ -59,8 +59,8 @@ export const ImageGenerator = () => {
     } catch (error) {
       console.error('Error deleting history:', error);
       toast({
-        title: "Error",
-        description: "Failed to delete history",
+        title: "Erreur",
+        description: "Échec de la suppression de l'historique",
         variant: "destructive"
       });
     }
@@ -88,8 +88,8 @@ export const ImageGenerator = () => {
       handleDownload={handleDownload}
       updateSettings={updateSettings}
       setReferenceImage={setReferenceImage}
-      handleDeleteHistory={handleDeleteHistory}
       handleRemoveReferenceImage={handleRemoveReferenceImage}
+      handleDeleteHistory={handleDeleteHistory}
     />
   );
 };

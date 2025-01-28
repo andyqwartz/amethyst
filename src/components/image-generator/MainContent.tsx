@@ -97,7 +97,7 @@ export const MainContent = ({
           <Button
             variant="outline"
             size="icon"
-            className="w-12 h-12 rounded-full bg-[#D6BCFA]/80 hover:bg-transparent hover:opacity-0 border-none text-white transition-all duration-500 hover:scale-110 shadow-lg backdrop-blur-sm"
+            className="w-12 h-12 rounded-full bg-[#D6BCFA]/80 hover:bg-transparent hover:opacity-80 border-none text-white transition-all duration-500 hover:scale-110 shadow-lg backdrop-blur-sm"
             onClick={onDeleteHistory}
           >
             <Trash2 className="h-5 w-5 transition-opacity duration-300" />
