@@ -1,16 +1,14 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { GenerationSettings } from '@/types/replicate';
 import { useToast } from "@/hooks/use-toast";
 
-interface HistoryImage {
-  url: string;
-  settings: GenerationSettings;
-  timestamp: number;
-}
-
 export const useImageHistory = () => {
-  const [history, setHistory] = useState<HistoryImage[]>([]);
+  const [history, setHistory] = useState<{
+    url: string;
+    settings: GenerationSettings;
+    timestamp: number;
+  }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const isAddingToHistory = useRef(false);

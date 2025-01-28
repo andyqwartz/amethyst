@@ -46,7 +46,7 @@ export const MainContent = ({
   onDeleteHistory
 }: MainContentProps) => {
   return (
-    <Card className="border-none glass-card shadow-xl">
+    <Card className="border-none glass-card shadow-xl relative pb-24">
       <div className="p-6 space-y-8">
         <ReferenceImageUpload
           referenceImage={referenceImage}
@@ -80,29 +80,30 @@ export const MainContent = ({
         {!isLoading && history.length > 0 && (
           <div className="mt-8">
             <h3 className="text-lg font-semibold mb-4 text-white">Historique des générations</h3>
-            <ImagePreview
-              images={history.map(h => h.url)}
-              onTweak={(settings) => onTweak(settings)}
-              onDownload={onDownload}
-              settings={settings}
-              className="mb-16"
-            />
-          </div>
-        )}
-
-        {history.length > 0 && (
-          <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50">
-            <Button
-              variant="outline"
-              size="icon"
-              className="w-12 h-12 rounded-full bg-[#D6BCFA]/80 hover:bg-transparent hover:opacity-0 border-none text-white transition-all duration-500 hover:scale-110 shadow-lg backdrop-blur-sm"
-              onClick={onDeleteHistory}
-            >
-              <Trash2 className="h-5 w-5 transition-opacity duration-300" />
-            </Button>
+            <div className="space-y-8">
+              <ImagePreview
+                images={history.map(h => h.url)}
+                onTweak={(settings) => onTweak(settings)}
+                onDownload={onDownload}
+                settings={settings}
+              />
+            </div>
           </div>
         )}
       </div>
+
+      {history.length > 0 && (
+        <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50">
+          <Button
+            variant="outline"
+            size="icon"
+            className="w-12 h-12 rounded-full bg-[#D6BCFA]/80 hover:bg-transparent hover:opacity-0 border-none text-white transition-all duration-500 hover:scale-110 shadow-lg backdrop-blur-sm"
+            onClick={onDeleteHistory}
+          >
+            <Trash2 className="h-5 w-5 transition-opacity duration-300" />
+          </Button>
+        </div>
+      )}
     </Card>
   );
 };
