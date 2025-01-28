@@ -19,37 +19,33 @@ export const useImageHistory = () => {
   const { fetchUserImages, insertImage } = useSupabaseQueries();
 
   const formatHistory = (images: any[]) => {
-    const uniqueUrls = new Map<string, {
-      url: string;
-      settings: GenerationSettings;
-      timestamp: number;
-    }>();
-
+    const uniqueUrls = new Map();
+    
     images.forEach(img => {
-      const item = {
-        url: img.url,
-        settings: {
-          prompt: img.prompt || '',
-          negative_prompt: img.negative_prompt || '',
-          guidance_scale: img.guidance_scale || 7.5,
-          num_inference_steps: img.steps || 30,
-          seed: img.seed,
-          num_outputs: img.num_outputs || 1,
-          aspect_ratio: img.aspect_ratio || "1:1",
-          output_format: img.output_format || "webp",
-          output_quality: img.output_quality || 80,
-          prompt_strength: img.prompt_strength || 0.8,
-          hf_loras: img.settings?.hf_loras || [],
-          lora_scales: img.settings?.lora_scales || [],
-          disable_safety_checker: false,
-          reference_image_url: img.reference_image_url || null
-        } as GenerationSettings,
-        timestamp: new Date(img.created_at).getTime()
-      };
-
-      // Only keep the most recent version of each URL
-      if (!uniqueUrls.has(img.url) || uniqueUrls.get(img.url)!.timestamp < item.timestamp) {
-        uniqueUrls.set(img.url, item);
+      const key = img.url;
+      const timestamp = new Date(img.created_at).getTime();
+      
+      if (!uniqueUrls.has(key) || timestamp > uniqueUrls.get(key).timestamp) {
+        uniqueUrls.set(key, {
+          url: img.url,
+          settings: {
+            prompt: img.prompt || '',
+            negative_prompt: img.negative_prompt || '',
+            guidance_scale: img.guidance_scale || 7.5,
+            num_inference_steps: img.steps || 30,
+            seed: img.seed,
+            num_outputs: img.num_outputs || 1,
+            aspect_ratio: img.aspect_ratio || "1:1",
+            output_format: img.output_format || "webp",
+            output_quality: img.output_quality || 80,
+            prompt_strength: img.prompt_strength || 0.8,
+            hf_loras: img.settings?.hf_loras || [],
+            lora_scales: img.settings?.lora_scales || [],
+            disable_safety_checker: false,
+            reference_image_url: img.reference_image_url || null
+          },
+          timestamp
+        });
       }
     });
 
@@ -69,13 +65,7 @@ export const useImageHistory = () => {
 
       const images = await fetchUserImages(session.session.user.id);
       const formattedHistory = formatHistory(images);
-      
-      // Additional deduplication check before setting history
-      const uniqueHistory = formattedHistory.filter((item, index, self) => 
-        index === self.findIndex(t => t.url === item.url)
-      );
-      
-      setHistory(uniqueHistory);
+      setHistory(formattedHistory);
     } catch (error) {
       console.error('Error fetching history:', error);
       toast({
@@ -91,22 +81,22 @@ export const useImageHistory = () => {
   const addToHistory = async (url: string, settings: GenerationSettings) => {
     console.log('Attempting to add to history:', url);
     
-    // Check for duplicates in current history
+    // Vérifier si l'URL existe déjà dans l'historique
     if (history.some(item => item.url === url)) {
-      console.log('URL already exists in history:', url);
+      console.log('URL already exists in history, skipping:', url);
       return;
     }
 
-    // Check if we're already processing an addition
+    // Vérifier si nous sommes déjà en train d'ajouter une image
     if (isAddingToHistory.current) {
       console.log('Already processing an addition, skipping');
       return;
     }
 
-    // Check minimum time between additions
+    // Vérifier le délai minimum entre les ajouts
     const now = Date.now();
-    if (now - lastAddedTimestamp.current < 5000) {
-      console.log('Too soon after last addition, minimum 5s required');
+    if (now - lastAddedTimestamp.current < 2000) { // Réduit à 2 secondes
+      console.log('Too soon after last addition, skipping');
       return;
     }
 
@@ -128,11 +118,6 @@ export const useImageHistory = () => {
 
       await insertImage(session.session.user.id, url, settings);
       await fetchHistory();
-      
-      toast({
-        title: "Image sauvegardée",
-        description: "L'image a été ajoutée à votre historique",
-      });
     } catch (error) {
       console.error('Error adding to history:', error);
       toast({

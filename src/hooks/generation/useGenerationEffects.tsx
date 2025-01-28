@@ -8,43 +8,29 @@ export const useGenerationEffects = (
   generatedImages: string[],
   settings: GenerationSettings,
   setIsGenerating: (isGenerating: boolean) => void,
-  addToHistory: (url: string, settings: GenerationSettings) => Promise<void>
+  addToHistory: (url: string, settings: GenerationSettings) => void
 ) => {
-  // Effect for handling reference image updates
+  // Effet pour mettre à jour l'image de référence dans les paramètres
   useEffect(() => {
-    if (referenceImage) {
-      updateSettings({ reference_image_url: referenceImage });
-    } else {
-      updateSettings({ reference_image_url: null });
-    }
+    updateSettings({ reference_image_url: referenceImage });
   }, [referenceImage, updateSettings]);
 
-  // Effect for handling generation completion
+  // Effet pour gérer le statut de génération et l'historique
   useEffect(() => {
-    let isAddingToHistory = false;
-
-    const addImagesToHistory = async () => {
-      if (generationStatus === 'success' && generatedImages.length > 0 && !isAddingToHistory) {
-        isAddingToHistory = true;
-        console.log('Adding generated images to history:', generatedImages);
-        
-        try {
-          // Process each image sequentially to avoid race conditions
-          for (const url of generatedImages) {
-            await addToHistory(url, settings);
-          }
-        } catch (error) {
-          console.error('Failed to add images to history:', error);
-        } finally {
-          isAddingToHistory = false;
-          setIsGenerating(false);
+    if (generationStatus === 'success' && generatedImages.length > 0) {
+      console.log('Generation successful, processing images:', generatedImages);
+      setIsGenerating(false);
+      
+      // Ajouter chaque image à l'historique de manière séquentielle
+      const addImages = async () => {
+        for (const url of generatedImages) {
+          await addToHistory(url, settings);
         }
-      } else if (generationStatus === 'error') {
-        console.log('Generation failed');
-        setIsGenerating(false);
-      }
-    };
-
-    addImagesToHistory();
-  }, [generationStatus, generatedImages, settings, addToHistory, setIsGenerating]);
+      };
+      
+      addImages();
+    } else if (generationStatus === 'error') {
+      setIsGenerating(false);
+    }
+  }, [generationStatus, generatedImages, settings, setIsGenerating, addToHistory]);
 };
