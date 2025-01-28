@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { generateImage } from '@/services/replicate';
 import type { GenerationSettings, GenerationStatus } from '@/types/replicate';
@@ -15,7 +15,7 @@ export const useImageGeneration = () => {
   const [predictionId, setPredictionId] = useState<string | null>(null);
 
   // Initialize predictionId from localStorage after initial render
-  React.useEffect(() => {
+  useEffect(() => {
     const savedPredictionId = localStorage.getItem(GENERATION_ID_KEY);
     if (savedPredictionId) {
       setPredictionId(savedPredictionId);
