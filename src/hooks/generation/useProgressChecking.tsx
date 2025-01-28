@@ -21,6 +21,8 @@ export const useProgressChecking = (isGenerating: boolean) => {
     const generationId = localStorage.getItem('generation_id');
     if (!generationId) return;
 
+    console.log('Checking progress for generation:', generationId);
+
     const checkProgress = async () => {
       try {
         const { data: prediction, error } = await supabase.functions.invoke('check-progress', {
@@ -42,7 +44,10 @@ export const useProgressChecking = (isGenerating: boolean) => {
 
         if (!prediction) return;
 
+        console.log('Progress update received:', prediction);
+
         if (prediction.status === 'succeeded') {
+          console.log('Generation completed successfully');
           localStorage.removeItem('generation_id');
           setStatus('success');
           setCurrentLogs('');
@@ -50,7 +55,10 @@ export const useProgressChecking = (isGenerating: boolean) => {
             title: "Success",
             description: "Images generated successfully",
           });
+          // Force isGenerating to false after success
+          window.dispatchEvent(new CustomEvent('generation-complete'));
         } else if (prediction.status === 'failed') {
+          console.error('Generation failed:', prediction.error);
           localStorage.removeItem('generation_id');
           setStatus('error');
           setCurrentLogs('');
@@ -59,7 +67,10 @@ export const useProgressChecking = (isGenerating: boolean) => {
             description: prediction.error || "Generation failed",
             variant: "destructive"
           });
+          // Force isGenerating to false after failure
+          window.dispatchEvent(new CustomEvent('generation-complete'));
         } else if (prediction.status === 'processing' && prediction.logs) {
+          console.log('Generation in progress:', prediction.logs);
           setCurrentLogs(prediction.logs);
           setStatus('loading');
         }
@@ -73,6 +84,8 @@ export const useProgressChecking = (isGenerating: boolean) => {
         setStatus('error');
         setCurrentLogs('');
         localStorage.removeItem('generation_id');
+        // Force isGenerating to false after error
+        window.dispatchEvent(new CustomEvent('generation-complete'));
       }
     };
 
