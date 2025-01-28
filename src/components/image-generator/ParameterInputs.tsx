@@ -70,6 +70,36 @@ export const ParameterInputs = ({ settings, onSettingsChange }: ParameterInputsP
         </div>
 
         <div className="space-y-2">
+          <Label className="flex items-center gap-2">
+            Number of Images
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <span className="text-xs text-primary/50">(?)</span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Number of images to generate (1-4)</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </Label>
+          <Select
+            value={settings.numOutputs?.toString()}
+            onValueChange={(value) => onSettingsChange({ numOutputs: parseInt(value) })}
+          >
+            <SelectTrigger className="bg-popover border-primary/20">
+              <SelectValue placeholder="Select number of images" />
+            </SelectTrigger>
+            <SelectContent className="bg-popover border-primary/20">
+              <SelectItem value="1">1 image</SelectItem>
+              <SelectItem value="2">2 images</SelectItem>
+              <SelectItem value="3">3 images</SelectItem>
+              <SelectItem value="4">4 images</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
           <Label>Aspect Ratio</Label>
           <Select
             value={settings.aspectRatio}
