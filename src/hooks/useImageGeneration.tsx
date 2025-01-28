@@ -4,20 +4,25 @@ import { generateImage } from '@/services/replicate';
 import type { GenerationSettings, GenerationStatus } from '@/types/replicate';
 import { useImageHistory } from './useImageHistory';
 
-const POLL_INTERVAL = 2000; // 2 seconds
+const POLL_INTERVAL = 2000; // 2 secondes
+const GENERATION_ID_KEY = 'generation_id';
 
 export const useImageGeneration = () => {
   const { toast } = useToast();
   const [status, setStatus] = useState<GenerationStatus>('idle');
   const [generatedImages, setGeneratedImages] = useState<string[]>([]);
   const { addToHistory } = useImageHistory();
-  const [predictionId, setPredictionId] = useState<string | null>(null);
+  const [predictionId, setPredictionId] = useState<string | null>(
+    localStorage.getItem(GENERATION_ID_KEY)
+  );
 
   const generate = async (settings: GenerationSettings) => {
+    // Vérifier si une génération est déjà en cours
     if (status === 'loading') {
       throw new Error('Une génération est déjà en cours');
     }
 
+    // Vérifier si le prompt est vide
     if (!settings.prompt.trim()) {
       throw new Error('Le prompt ne peut pas être vide');
     }
@@ -26,6 +31,31 @@ export const useImageGeneration = () => {
     setStatus('loading');
     
     try {
+      // Si on a un ID de prédiction sauvegardé, on vérifie son état
+      const savedPredictionId = localStorage.getItem(GENERATION_ID_KEY);
+      if (savedPredictionId) {
+        console.log('Checking saved prediction:', savedPredictionId);
+        const pollResponse = await generateImage({ predictionId: savedPredictionId });
+        
+        if (pollResponse.status === 'success') {
+          setGeneratedImages(pollResponse.output);
+          setStatus('success');
+          localStorage.removeItem(GENERATION_ID_KEY);
+          setPredictionId(null);
+          
+          for (const url of pollResponse.output) {
+            await addToHistory(url, pollResponse.settings);
+          }
+          
+          toast({
+            title: "Images générées avec succès",
+            description: `${pollResponse.output.length} image(s) générée(s)`,
+          });
+          return;
+        }
+      }
+
+      // Sinon, on démarre une nouvelle génération
       const response = await generateImage({
         input: {
           prompt: settings.prompt,
@@ -45,7 +75,9 @@ export const useImageGeneration = () => {
       });
       
       if (response.status === 'started') {
+        console.log('Generation started with prediction ID:', response.predictionId);
         setPredictionId(response.predictionId);
+        localStorage.setItem(GENERATION_ID_KEY, response.predictionId);
         
         const pollInterval = setInterval(async () => {
           try {
@@ -55,6 +87,7 @@ export const useImageGeneration = () => {
               setGeneratedImages(pollResponse.output);
               setStatus('success');
               clearInterval(pollInterval);
+              localStorage.removeItem(GENERATION_ID_KEY);
               setPredictionId(null);
               
               for (const url of pollResponse.output) {
@@ -72,6 +105,7 @@ export const useImageGeneration = () => {
             console.error('Error checking generation status:', error);
             setStatus('error');
             clearInterval(pollInterval);
+            localStorage.removeItem(GENERATION_ID_KEY);
             setPredictionId(null);
             throw error;
           }
@@ -82,6 +116,8 @@ export const useImageGeneration = () => {
     } catch (error) {
       console.error('Generation failed:', error);
       setStatus('error');
+      localStorage.removeItem(GENERATION_ID_KEY);
+      setPredictionId(null);
       throw error;
     }
   };
@@ -89,6 +125,7 @@ export const useImageGeneration = () => {
   return {
     status,
     generatedImages,
-    generate
+    generate,
+    predictionId
   };
 };

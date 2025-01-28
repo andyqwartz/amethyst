@@ -6,6 +6,7 @@ const GENERATION_PROGRESS_KEY = 'generation_progress';
 const GENERATION_TIMESTAMP_KEY = 'generation_timestamp';
 const GENERATION_FILE_KEY = 'generation_file';
 const GENERATION_SETTINGS_KEY = 'generation_settings';
+const GENERATION_ID_KEY = 'generation_id';
 
 interface PersistenceResult {
   shouldRetry: boolean;
@@ -21,9 +22,10 @@ export const useGenerationPersistence = (
   file?: string | null,
   settings?: GenerationSettings
 ): PersistenceResult => {
-  // Save state
+  // Sauvegarder l'état
   useEffect(() => {
     if (status === 'loading') {
+      console.log('Saving generation state:', { status, progress, file, settings });
       localStorage.setItem(GENERATION_STATUS_KEY, status);
       localStorage.setItem(GENERATION_PROGRESS_KEY, progress.toString());
       localStorage.setItem(GENERATION_TIMESTAMP_KEY, Date.now().toString());
@@ -34,15 +36,17 @@ export const useGenerationPersistence = (
         localStorage.setItem(GENERATION_SETTINGS_KEY, JSON.stringify(settings));
       }
     } else if (status === 'success' || status === 'error') {
+      console.log('Clearing generation state due to completion:', status);
       localStorage.removeItem(GENERATION_STATUS_KEY);
       localStorage.removeItem(GENERATION_PROGRESS_KEY);
       localStorage.removeItem(GENERATION_TIMESTAMP_KEY);
       localStorage.removeItem(GENERATION_FILE_KEY);
       localStorage.removeItem(GENERATION_SETTINGS_KEY);
+      localStorage.removeItem(GENERATION_ID_KEY);
     }
   }, [status, progress, file, settings]);
 
-  // Restore state on load
+  // Restaurer l'état au chargement
   useEffect(() => {
     const savedStatus = localStorage.getItem(GENERATION_STATUS_KEY) as GenerationStatus | null;
     const savedProgress = localStorage.getItem(GENERATION_PROGRESS_KEY);
@@ -53,16 +57,19 @@ export const useGenerationPersistence = (
     if (savedStatus === 'loading' && savedProgress && savedTimestamp) {
       const timePassed = Date.now() - Number(savedTimestamp);
       
-      // If more than 5 minutes have passed, clear everything
+      // Si plus de 5 minutes se sont écoulées, on nettoie tout
       if (timePassed > 5 * 60 * 1000) {
+        console.log('Generation state expired, clearing...');
         localStorage.removeItem(GENERATION_STATUS_KEY);
         localStorage.removeItem(GENERATION_PROGRESS_KEY);
         localStorage.removeItem(GENERATION_TIMESTAMP_KEY);
         localStorage.removeItem(GENERATION_FILE_KEY);
         localStorage.removeItem(GENERATION_SETTINGS_KEY);
+        localStorage.removeItem(GENERATION_ID_KEY);
         setStatus('idle');
         setProgress(0);
       } else {
+        console.log('Restoring generation state:', { savedStatus, savedProgress, savedSettings });
         setStatus('loading');
         setProgress(Number(savedProgress));
       }
