@@ -74,9 +74,7 @@ serve(async (req) => {
     
     const prediction = await replicate.predictions.create({
       version: "2389224e115448d9a77c07d7d45672b3f0aa45acacf1c5bcf51857ac295e3aec",
-      input: input,
-      webhook: null,
-      webhook_events_filter: ["completed"]
+      input: input
     })
 
     console.log("Generation started:", prediction)
