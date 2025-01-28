@@ -36,7 +36,8 @@ export const ImageGenerator = () => {
     (savedSettings) => {
       toast({
         title: "Reprise de la génération",
-        description: "La génération précédente a été interrompue, reprise en cours..."
+        description: "La génération précédente a été interrompue, reprise en cours...",
+        className: "animate-fade-in"
       });
       handleGenerate(savedSettings);
     }
@@ -51,8 +52,12 @@ export const ImageGenerator = () => {
     toast
   );
 
+  // Clear local storage on initial load to prevent stale state
   useEffect(() => {
-    localStorage.clear();
+    localStorage.removeItem('generation_status');
+    localStorage.removeItem('generation_progress');
+    localStorage.removeItem('generation_timestamp');
+    localStorage.removeItem('generation_id');
     resetSettings();
   }, []);
 
@@ -63,7 +68,9 @@ export const ImageGenerator = () => {
   }, [savedFile]);
 
   const handleGenerate = (settingsToUse = settings) => {
-    handleGenerateBase(generate, settingsToUse, isGenerating);
+    if (!isGenerating) {
+      handleGenerateBase(generate, settingsToUse, isGenerating);
+    }
   };
 
   const handleTweak = (imageSettings: typeof settings) => {
@@ -81,33 +88,31 @@ export const ImageGenerator = () => {
   };
 
   return (
-    <>
-      <div className="min-h-screen p-4 md:p-6">
-        <div className="max-w-2xl mx-auto">
-          <Header
-            onHistoryClick={() => setShowHistory(true)}
-            onSettingsClick={() => setShowSettings(!showSettings)}
-            onHelpClick={() => setShowHelp(true)}
-          />
+    <div className="min-h-screen p-4 md:p-6 animate-fade-in">
+      <div className="max-w-2xl mx-auto">
+        <Header
+          onHistoryClick={() => setShowHistory(true)}
+          onSettingsClick={() => setShowSettings(!showSettings)}
+          onHelpClick={() => setShowHelp(true)}
+        />
 
-          <MainContent
-            referenceImage={referenceImage}
-            showSettings={showSettings}
-            settings={settings}
-            isGenerating={isGenerating}
-            generatedImages={generatedImages}
-            history={history}
-            isLoading={isLoading}
-            onImageUpload={handleImageUpload}
-            onImageClick={handleImageClick}
-            onRemoveImage={() => setReferenceImage(null)}
-            onSettingsChange={updateSettings}
-            onGenerate={() => handleGenerate()}
-            onToggleSettings={() => setShowSettings(!showSettings)}
-            onTweak={handleTweak}
-            onDownload={handleDownload}
-          />
-        </div>
+        <MainContent
+          referenceImage={referenceImage}
+          showSettings={showSettings}
+          settings={settings}
+          isGenerating={isGenerating}
+          generatedImages={generatedImages}
+          history={history}
+          isLoading={isLoading}
+          onImageUpload={handleImageUpload}
+          onImageClick={handleImageClick}
+          onRemoveImage={() => setReferenceImage(null)}
+          onSettingsChange={updateSettings}
+          onGenerate={() => handleGenerate()}
+          onToggleSettings={() => setShowSettings(!showSettings)}
+          onTweak={handleTweak}
+          onDownload={handleDownload}
+        />
       </div>
 
       <HelpModal
@@ -127,6 +132,6 @@ export const ImageGenerator = () => {
         isGenerating={isGenerating} 
         progress={progress}
       />
-    </>
+    </div>
   );
 };

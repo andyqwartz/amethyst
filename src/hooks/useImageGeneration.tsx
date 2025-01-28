@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { generateImage } from '@/services/replicate';
 import type { GenerationSettings, GenerationStatus } from '@/types/replicate';
@@ -13,6 +13,18 @@ export const useImageGeneration = () => {
   const [generatedImages, setGeneratedImages] = useState<string[]>([]);
   const { addToHistory } = useImageHistory();
   const [predictionId, setPredictionId] = useState<string | null>(null);
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isGeneratingRef = useRef(false);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+      }
+      localStorage.removeItem(GENERATION_ID_KEY);
+    };
+  }, []);
 
   // Initialize predictionId from localStorage after initial render
   useEffect(() => {
@@ -23,8 +35,15 @@ export const useImageGeneration = () => {
   }, []);
 
   const generate = async (settings: GenerationSettings) => {
-    if (status === 'loading') {
-      throw new Error('Une génération est déjà en cours');
+    // Prevent multiple simultaneous generations
+    if (isGeneratingRef.current || status === 'loading') {
+      console.warn('Generation already in progress, skipping');
+      toast({
+        title: "Génération en cours",
+        description: "Une génération est déjà en cours, veuillez patienter",
+        variant: "destructive"
+      });
+      return;
     }
 
     if (!settings.prompt.trim()) {
@@ -33,8 +52,15 @@ export const useImageGeneration = () => {
 
     console.log('Starting generation with settings:', settings);
     setStatus('loading');
+    isGeneratingRef.current = true;
     
     try {
+      // Clear any existing interval
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+
       if (predictionId) {
         console.log('Checking saved prediction:', predictionId);
         const pollResponse = await generateImage({ predictionId });
@@ -46,13 +72,14 @@ export const useImageGeneration = () => {
           setPredictionId(null);
           
           for (const url of pollResponse.output) {
-            await addToHistory(url, pollResponse.settings);
+            await addToHistory(url, settings);
           }
           
           toast({
             title: "Images générées avec succès",
             description: `${pollResponse.output.length} image(s) générée(s)`,
           });
+          isGeneratingRef.current = false;
           return;
         }
       }
@@ -80,24 +107,27 @@ export const useImageGeneration = () => {
         setPredictionId(response.predictionId);
         localStorage.setItem(GENERATION_ID_KEY, response.predictionId);
         
-        const pollInterval = setInterval(async () => {
+        pollIntervalRef.current = setInterval(async () => {
           try {
             const pollResponse = await generateImage({ predictionId: response.predictionId });
             
             if (pollResponse.status === 'success') {
               setGeneratedImages(pollResponse.output);
               setStatus('success');
-              clearInterval(pollInterval);
+              clearInterval(pollIntervalRef.current!);
+              pollIntervalRef.current = null;
               localStorage.removeItem(GENERATION_ID_KEY);
               setPredictionId(null);
+              isGeneratingRef.current = false;
               
               for (const url of pollResponse.output) {
-                await addToHistory(url, pollResponse.settings);
+                await addToHistory(url, settings);
               }
               
               toast({
                 title: "Images générées avec succès",
                 description: `${pollResponse.output.length} image(s) générée(s)`,
+                className: "animate-fade-in"
               });
             } else if (pollResponse.status === 'error') {
               throw new Error(pollResponse.error);
@@ -105,9 +135,11 @@ export const useImageGeneration = () => {
           } catch (error) {
             console.error('Error checking generation status:', error);
             setStatus('error');
-            clearInterval(pollInterval);
+            clearInterval(pollIntervalRef.current!);
+            pollIntervalRef.current = null;
             localStorage.removeItem(GENERATION_ID_KEY);
             setPredictionId(null);
+            isGeneratingRef.current = false;
             throw error;
           }
         }, POLL_INTERVAL);
@@ -119,6 +151,7 @@ export const useImageGeneration = () => {
       setStatus('error');
       localStorage.removeItem(GENERATION_ID_KEY);
       setPredictionId(null);
+      isGeneratingRef.current = false;
       throw error;
     }
   };
