@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { GenerationSettings } from '@/types/replicate';
 import type { Json } from '@/integrations/supabase/types';
@@ -25,6 +25,7 @@ export const useImageHistory = () => {
   const [history, setHistory] = useState<HistoryImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const isAddingToHistory = useRef(false);
 
   const fetchHistory = async () => {
     try {
@@ -131,6 +132,13 @@ export const useImageHistory = () => {
   }, []);
 
   const addToHistory = async (url: string, settings: GenerationSettings) => {
+    if (isAddingToHistory.current) {
+      console.log('Already adding to history, skipping duplicate call');
+      return;
+    }
+
+    isAddingToHistory.current = true;
+
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -180,6 +188,8 @@ export const useImageHistory = () => {
         description: "Unable to save image to history",
         variant: "destructive"
       });
+    } finally {
+      isAddingToHistory.current = false;
     }
   };
 
