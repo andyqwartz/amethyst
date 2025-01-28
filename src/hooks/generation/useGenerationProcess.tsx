@@ -37,9 +37,25 @@ export const useGenerationProcess = (
       });
     } catch (error) {
       console.error('Failed to add images to history:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de sauvegarder les images dans l'historique",
+        variant: "destructive"
+      });
     } finally {
       cleanupGeneration();
     }
+  };
+
+  const handleGenerationError = (error: Error) => {
+    console.error('Generation failed:', error);
+    setStatus('error');
+    cleanupGeneration();
+    toast({
+      title: "Erreur de génération",
+      description: error.message,
+      variant: "destructive"
+    });
   };
 
   const generate = async (settings: GenerationSettings) => {
@@ -91,26 +107,26 @@ export const useGenerationProcess = (
             const pollResponse = await generateImage({ predictionId: response.predictionId });
             console.log('Poll response:', pollResponse);
             
-            if (pollResponse.status === 'success' && pollResponse.output) {
+            if (pollResponse.status === 'succeeded' && pollResponse.output) {
+              clearInterval(pollIntervalRef.current!);
               await handleGenerationSuccess(pollResponse.output, settings);
-            } else if (pollResponse.status === 'error') {
-              throw new Error(pollResponse.error);
+            } else if (pollResponse.status === 'failed') {
+              clearInterval(pollIntervalRef.current!);
+              handleGenerationError(new Error(pollResponse.error || 'La génération a échoué'));
+            } else if (pollResponse.status === 'processing') {
+              console.log('Generation in progress:', pollResponse.logs);
             }
           } catch (error) {
             console.error('Error checking generation status:', error);
-            setStatus('error');
-            cleanupGeneration();
-            throw error;
+            clearInterval(pollIntervalRef.current!);
+            handleGenerationError(error as Error);
           }
-        }, 2000);
+        }, 1000); // Polling plus fréquent pour une meilleure réactivité
       } else {
         throw new Error('Failed to start generation');
       }
     } catch (error) {
-      console.error('Generation failed:', error);
-      setStatus('error');
-      cleanupGeneration();
-      throw error;
+      handleGenerationError(error as Error);
     }
   };
 
