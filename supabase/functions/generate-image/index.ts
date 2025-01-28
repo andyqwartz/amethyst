@@ -45,7 +45,7 @@ serve(async (req) => {
       )
     }
 
-    // Prepare the input with the reference image
+    // Prepare the input
     const input = {
       prompt: body.input.prompt,
       negative_prompt: body.input.negative_prompt || "",
@@ -61,15 +61,31 @@ serve(async (req) => {
       disable_safety_checker: true
     }
 
-    // Add reference image if present
+    // If there's a reference image, fetch it and convert to base64
     if (body.input.reference_image_url) {
       console.log("Reference image URL detected:", body.input.reference_image_url)
-      input.image = body.input.reference_image_url
+      try {
+        const imageResponse = await fetch(body.input.reference_image_url)
+        if (!imageResponse.ok) {
+          throw new Error(`Failed to fetch image: ${imageResponse.statusText}`)
+        }
+        
+        const imageBuffer = await imageResponse.arrayBuffer()
+        const base64Image = btoa(String.fromCharCode(...new Uint8Array(imageBuffer)))
+        input.image = `data:${imageResponse.headers.get('content-type')};base64,${base64Image}`
+        console.log("Successfully converted image to base64")
+      } catch (error) {
+        console.error("Error processing reference image:", error)
+        return new Response(
+          JSON.stringify({ error: "Failed to process reference image" }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+        )
+      }
     }
 
     console.log("Starting generation with input:", {
       ...input,
-      image: input.image ? "Reference image present" : "No reference image"
+      image: input.image ? "Base64 image present" : "No reference image"
     })
     
     const prediction = await replicate.predictions.create({
