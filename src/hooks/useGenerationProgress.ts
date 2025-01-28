@@ -10,6 +10,7 @@ export const useGenerationProgress = (
 ) => {
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState<GenerationStatus>('idle');
+  const [hasNotifiedRetry, setHasNotifiedRetry] = useState(false);
 
   const { shouldRetry, savedFile, savedSettings } = useGenerationPersistence(
     isGenerating ? 'loading' : status,
@@ -25,6 +26,7 @@ export const useGenerationProgress = (
     if (!isGenerating) {
       setProgress(0);
       setStatus('idle');
+      setHasNotifiedRetry(false);
       localStorage.removeItem('generation_status');
       localStorage.removeItem('generation_progress');
       localStorage.removeItem('generation_timestamp');
@@ -34,11 +36,12 @@ export const useGenerationProgress = (
 
   // Handle generation retry
   useEffect(() => {
-    if (shouldRetry && savedSettings && onRetry) {
+    if (shouldRetry && savedSettings && onRetry && !hasNotifiedRetry) {
       console.log('Reprising generation with saved settings:', savedSettings);
+      setHasNotifiedRetry(true);
       onRetry(savedSettings);
     }
-  }, [shouldRetry, savedSettings, onRetry]);
+  }, [shouldRetry, savedSettings, onRetry, hasNotifiedRetry]);
 
   // Update progress based on generation status
   useEffect(() => {
