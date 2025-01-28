@@ -5,13 +5,18 @@ import { useImageHistory } from '../useImageHistory';
 import { useGenerationState } from './useGenerationState';
 
 const formatLoraPath = (lora: string): string => {
-  // Handle both URL and simple folder/model format
+  // If it's already in the correct format (folder/model), return as is
+  if (lora.split('/').length === 2 && !lora.includes('http')) {
+    return lora;
+  }
+  
   // If it's a URL, extract the last two parts
   if (lora.includes('http')) {
     const urlParts = lora.split('/');
     return `${urlParts[urlParts.length - 2]}/${urlParts[urlParts.length - 1]}`;
   }
-  // For simple paths, ensure we only have folder/model format
+  
+  // For any other format, try to extract folder/model
   const parts = lora.split('/');
   if (parts.length >= 2) {
     return `${parts[parts.length - 2]}/${parts[parts.length - 1]}`;
@@ -61,7 +66,7 @@ export const useGenerationProcess = (
       throw new Error('Le prompt ne peut pas être vide');
     }
 
-    console.log('Starting generation with settings:', settings);
+    console.log('Starting generation with original settings:', settings);
     setStatus('loading');
     generationInProgressRef.current = true;
     abortControllerRef.current = new AbortController();
@@ -72,7 +77,10 @@ export const useGenerationProcess = (
       hf_loras: settings.hf_loras.map(formatLoraPath),
     };
     
-    console.log('Sending formatted settings:', formattedSettings);
+    console.log('Sending formatted settings to API:', {
+      ...formattedSettings,
+      reference_image_url: formattedSettings.reference_image_url ? 'Present' : 'Not present'
+    });
     
     try {
       const response = await generateImage({

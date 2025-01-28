@@ -3,6 +3,15 @@ import { supabase } from '@/integrations/supabase/client';
 
 export async function generateImage(params: { input?: ReplicateInput; predictionId?: string }): Promise<any> {
   try {
+    console.log('Generating image with params:', {
+      ...params,
+      input: params.input ? {
+        ...params.input,
+        image: params.input.image ? 'Present' : 'Not present',
+        hf_loras: params.input?.hf_loras
+      } : undefined
+    });
+
     const { data, error } = await supabase.functions.invoke('generate-image', {
       body: params,
     });
@@ -16,16 +25,13 @@ export async function generateImage(params: { input?: ReplicateInput; prediction
       throw new Error('No data received from generation endpoint');
     }
 
-    // Log the response for debugging
     console.log('Generation API response:', data);
 
-    // Additional check for API errors
     if (data.error) {
       console.error('API error:', data.error);
       throw new Error(data.error);
     }
 
-    // If it's a status check, return the response directly
     if (params.predictionId) {
       return {
         status: data.status,
@@ -34,7 +40,6 @@ export async function generateImage(params: { input?: ReplicateInput; prediction
       };
     }
 
-    // If it's a new generation, return the prediction ID
     return {
       status: 'started',
       predictionId: data.id
