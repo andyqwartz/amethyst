@@ -14,11 +14,13 @@ export const AdvancedSettings = ({ settings, onSettingsChange }: AdvancedSetting
   console.log('AdvancedSettings - settings:', settings);
   
   return (
-    <div className="space-y-6 p-6 bg-card/95 backdrop-blur-xl rounded-xl border border-primary/10 shadow-xl">
-      <BasicSettings settings={settings} onSettingsChange={onSettingsChange} />
-      <ParameterInputs settings={settings} onSettingsChange={onSettingsChange} />
-      <OutputSettings settings={settings} onSettingsChange={onSettingsChange} />
-      <LoraSettings settings={settings} onSettingsChange={onSettingsChange} />
+    <div className="space-y-12 p-8 bg-card/95 backdrop-blur-xl rounded-xl border border-primary/10 shadow-xl">
+      <div className="space-y-10">
+        <BasicSettings settings={settings} onSettingsChange={onSettingsChange} />
+        <ParameterInputs settings={settings} onSettingsChange={onSettingsChange} />
+        <OutputSettings settings={settings} onSettingsChange={onSettingsChange} />
+        <LoraSettings settings={settings} onSettingsChange={onSettingsChange} />
+      </div>
     </div>
   );
 };
