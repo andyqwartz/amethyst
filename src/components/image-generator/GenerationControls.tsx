@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Settings, Sparkles } from 'lucide-react';
+import { useToast } from "@/components/ui/use-toast";
 import type { GenerationSettings } from '@/types/replicate';
 
 interface GenerationControlsProps {
@@ -18,6 +19,8 @@ export const GenerationControls = ({
   onToggleSettings,
   isGenerating
 }: GenerationControlsProps) => {
+  const { toast } = useToast();
+
   const handleTextareaInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const textarea = e.target;
     textarea.style.height = 'auto';
@@ -30,6 +33,18 @@ export const GenerationControls = ({
       hf_loras: [],
       lora_scales: []
     });
+  };
+
+  const handleGenerate = () => {
+    if (!settings.prompt?.trim()) {
+      toast({
+        title: "Prompt requis",
+        description: "Veuillez entrer une description de l'image à générer",
+        variant: "destructive"
+      });
+      return;
+    }
+    onGenerate();
   };
 
   return (
@@ -90,7 +105,7 @@ export const GenerationControls = ({
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
-                  onGenerate();
+                  handleGenerate();
                 }
               }}
             />
@@ -109,7 +124,7 @@ export const GenerationControls = ({
         </Button>
 
         <Button
-          onClick={onGenerate}
+          onClick={handleGenerate}
           disabled={isGenerating}
           className="w-full bg-primary hover:bg-primary-hover text-primary-foreground rounded-full transition-all duration-200"
         >

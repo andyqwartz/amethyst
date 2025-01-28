@@ -39,11 +39,25 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
     </TooltipProvider>
   );
 
+  React.useEffect(() => {
+    // Set default values when component mounts
+    if (!settings.aspect_ratio) {
+      onSettingsChange({
+        aspect_ratio: "1:1",
+        num_inference_steps: 28,
+        guidance_scale: 7.5,
+        prompt_strength: 0.8,
+        output_format: "webp",
+        output_quality: 90
+      });
+    }
+  }, []);
+
   return (
     <div className="space-y-6">
       <div className="space-y-3">
         <Label className="flex items-center">
-          Aspect Ratio {renderTooltip("Choose the dimensions for your generated image")}
+          Format {renderTooltip("Choose the dimensions for your generated image")}
         </Label>
         <Select
           value={settings.aspect_ratio}
@@ -70,31 +84,14 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
       <div className="space-y-4">
         <div>
           <Label className="flex items-center mb-3">
-            Number of Steps {renderTooltip("Number of inference steps")}
-          </Label>
-          <div className="space-y-2">
-            <Slider
-              value={[settings.num_inference_steps]}
-              onValueChange={([value]) => onSettingsChange({ num_inference_steps: value })}
-              max={50}
-              min={1}
-              step={1}
-              className="[&_[role=slider]]:bg-primary"
-            />
-            <span className="text-xs text-primary/50 block mt-2">{settings.num_inference_steps}</span>
-          </div>
-        </div>
-
-        <div>
-          <Label className="flex items-center mb-3">
             Guidance Scale {renderTooltip("Controls how closely the output adheres to the prompt")}
           </Label>
           <div className="space-y-2">
             <Slider
               value={[settings.guidance_scale]}
               onValueChange={([value]) => onSettingsChange({ guidance_scale: value })}
-              max={10}
-              min={0}
+              max={20}
+              min={1}
               step={0.1}
               className="[&_[role=slider]]:bg-primary"
             />
@@ -104,7 +101,7 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
 
         <div>
           <Label className="flex items-center mb-3">
-            Prompt Strength {renderTooltip("Prompt strength when using image to image")}
+            Prompt Strength {renderTooltip("Controls the influence of the prompt on the final image")}
           </Label>
           <div className="space-y-2">
             <Slider
@@ -116,6 +113,23 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
               className="[&_[role=slider]]:bg-primary"
             />
             <span className="text-xs text-primary/50 block mt-2">{settings.prompt_strength}</span>
+          </div>
+        </div>
+
+        <div>
+          <Label className="flex items-center mb-3">
+            Steps {renderTooltip("Number of inference steps (higher = more detail but slower)")}
+          </Label>
+          <div className="space-y-2">
+            <Slider
+              value={[settings.num_inference_steps]}
+              onValueChange={([value]) => onSettingsChange({ num_inference_steps: value })}
+              max={50}
+              min={10}
+              step={1}
+              className="[&_[role=slider]]:bg-primary"
+            />
+            <span className="text-xs text-primary/50 block mt-2">{settings.num_inference_steps}</span>
           </div>
         </div>
       </div>
