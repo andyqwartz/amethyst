@@ -6,11 +6,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 }
 
-const GENERATION_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 const MODEL_VERSION = "lucataco/sdxl:c86579ac5193b3d184651424d6c766f9b699c05b5d8360e3f6c6c5c6e01013c5";
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -28,14 +26,12 @@ serve(async (req) => {
     const { input, predictionId } = await req.json()
     console.log("Request received:", { input, predictionId })
 
-    // If checking status of existing prediction
     if (predictionId) {
       console.log("Checking status for prediction:", predictionId)
       try {
         const prediction = await replicate.predictions.get(predictionId)
         console.log("Status check response:", prediction)
         
-        // If the prediction is completed or failed, we can return the result
         if (prediction.status === 'succeeded') {
           return new Response(JSON.stringify({ 
             status: 'success',
@@ -55,7 +51,6 @@ serve(async (req) => {
           })
         }
         
-        // Still processing
         return new Response(JSON.stringify({ 
           status: 'processing',
           predictionId 
@@ -75,7 +70,6 @@ serve(async (req) => {
       }
     }
 
-    // New generation request
     if (!input?.prompt) {
       return new Response(JSON.stringify({ 
         error: "Missing required field: prompt" 
@@ -97,8 +91,14 @@ serve(async (req) => {
           num_inference_steps: input.num_inference_steps,
           num_outputs: input.num_outputs || 1,
           seed: input.seed,
-          width: 1024,
-          height: 1024
+          image: input.image,
+          hf_loras: input.hf_loras,
+          lora_scales: input.lora_scales,
+          aspect_ratio: input.aspect_ratio || "1:1",
+          output_format: input.output_format || "webp",
+          output_quality: input.output_quality || 80,
+          prompt_strength: input.prompt_strength || 0.8,
+          disable_safety_checker: input.disable_safety_checker || false
         }
       })
 

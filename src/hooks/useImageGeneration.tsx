@@ -26,12 +26,27 @@ export const useImageGeneration = () => {
     setStatus('loading');
     
     try {
-      const response = await generateImage({ input: settings });
+      const response = await generateImage({
+        input: {
+          prompt: settings.prompt,
+          negative_prompt: settings.negativePrompt,
+          guidance_scale: settings.guidanceScale,
+          num_inference_steps: settings.steps,
+          num_outputs: settings.numOutputs,
+          aspect_ratio: settings.aspectRatio,
+          output_format: settings.outputFormat,
+          output_quality: settings.outputQuality,
+          prompt_strength: settings.promptStrength,
+          hf_loras: settings.hfLoras,
+          lora_scales: settings.loraScales,
+          disable_safety_checker: settings.disableSafetyChecker,
+          seed: settings.seed
+        }
+      });
       
       if (response.status === 'started') {
         setPredictionId(response.predictionId);
         
-        // Start polling for results
         const pollInterval = setInterval(async () => {
           try {
             const pollResponse = await generateImage({ predictionId: response.predictionId });
@@ -42,7 +57,6 @@ export const useImageGeneration = () => {
               clearInterval(pollInterval);
               setPredictionId(null);
               
-              // Add generated images to history
               for (const url of pollResponse.output) {
                 await addToHistory(url, pollResponse.settings);
               }
