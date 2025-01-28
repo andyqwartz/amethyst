@@ -1,67 +1,41 @@
-import { useState } from 'react';
+import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from "@/hooks/use-toast";
 
 export const useImageUpload = (setReferenceImage: (image: string | null) => void) => {
-  const { toast } = useToast();
-
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      try {
-        const fileExt = file.name.split('.').pop();
-        const filePath = `${crypto.randomUUID()}.${fileExt}`;
+    if (!file) return;
 
-        // Upload to Supabase Storage
-        const { data, error } = await supabase.storage
-          .from('reference-images')
-          .upload(filePath, file, {
-            upsert: false
-          });
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${crypto.randomUUID()}.${fileExt}`;
+      const { data, error } = await supabase.storage
+        .from('reference-images')
+        .upload(fileName, file);
 
-        if (error) {
-          console.error('Error uploading file:', error);
-          toast({
-            title: "Erreur d'upload",
-            description: "Une erreur est survenue lors de l'upload de l'image",
-            variant: "destructive"
-          });
-          return;
-        }
+      if (error) {
+        console.error('Error uploading file:', error);
+        return;
+      }
 
-        // Get public URL
+      if (data) {
         const { data: { publicUrl } } = supabase.storage
           .from('reference-images')
-          .getPublicUrl(filePath);
-
-        setReferenceImage(publicUrl);
+          .getPublicUrl(data.path);
         
-        toast({
-          title: "Upload réussi",
-          description: "L'image a été uploadée avec succès",
-        });
-      } catch (error) {
-        console.error('Error in handleImageUpload:', error);
-        toast({
-          title: "Erreur",
-          description: "Une erreur inattendue est survenue",
-          variant: "destructive"
-        });
+        setReferenceImage(publicUrl);
       }
+    } catch (error) {
+      console.error('Error in handleImageUpload:', error);
     }
-  };
+  }, [setReferenceImage]);
 
-  const handleImageClick = () => {
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/*';
-    fileInput.onchange = (e) => {
-      if (e.target instanceof HTMLInputElement) {
-        handleImageUpload({ target: e.target } as React.ChangeEvent<HTMLInputElement>);
-      }
-    };
-    fileInput.click();
-  };
+  const handleImageClick = useCallback(() => {
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.click();
+    }
+  }, []);
 
   return {
     handleImageUpload,
