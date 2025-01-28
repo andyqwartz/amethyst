@@ -3,8 +3,7 @@ import Replicate from "https://esm.sh/replicate@0.25.2"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 serve(async (req) => {
@@ -64,6 +63,7 @@ serve(async (req) => {
 
     // Add image if present for img2img mode
     if (body.input.reference_image_url) {
+      console.log("Reference image URL detected:", body.input.reference_image_url)
       input.image = body.input.reference_image_url
       input.mode = "img2img"
     } else {

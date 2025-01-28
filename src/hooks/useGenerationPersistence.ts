@@ -22,7 +22,7 @@ export const useGenerationPersistence = (
   file?: string | null,
   settings?: GenerationSettings
 ): PersistenceResult => {
-  // Sauvegarder l'état
+  // Save state
   useEffect(() => {
     if (status === 'loading') {
       console.log('Saving generation state:', { status, progress, file, settings });
@@ -46,7 +46,7 @@ export const useGenerationPersistence = (
     }
   }, [status, progress, file, settings]);
 
-  // Restaurer l'état au chargement
+  // Restore state on load
   useEffect(() => {
     const savedStatus = localStorage.getItem(GENERATION_STATUS_KEY) as GenerationStatus | null;
     const savedProgress = localStorage.getItem(GENERATION_PROGRESS_KEY);
@@ -57,7 +57,7 @@ export const useGenerationPersistence = (
     if (savedStatus === 'loading' && savedProgress && savedTimestamp) {
       const timePassed = Date.now() - Number(savedTimestamp);
       
-      // Si plus de 5 minutes se sont écoulées, on nettoie tout
+      // If more than 5 minutes have passed, clean everything
       if (timePassed > 5 * 60 * 1000) {
         console.log('Generation state expired, clearing...');
         localStorage.removeItem(GENERATION_STATUS_KEY);

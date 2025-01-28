@@ -23,28 +23,28 @@ export const useGenerationProgress = (
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState<GenerationStatus>('idle');
 
-  const { savedFile, savedSettings } = useGenerationPersistence(
-    status,
+  // Use the persistence hook to save/restore state
+  const { shouldRetry, savedFile, savedSettings } = useGenerationPersistence(
+    isGenerating ? 'loading' : status,
     progress,
     setStatus,
     setProgress,
-    referenceImage || null,
+    referenceImage,
     settings
   );
 
-  // Reset states when generation stops
+  // Si une génération était en cours et qu'on a les paramètres sauvegardés, on la reprend
+  useEffect(() => {
+    if (shouldRetry && savedSettings && onRetry) {
+      console.log('Resuming generation with saved settings:', savedSettings);
+      onRetry(savedSettings);
+    }
+  }, [shouldRetry, savedSettings, onRetry]);
+
   useEffect(() => {
     if (!isGenerating) {
-      setCurrentLogs('');
-      localStorage.removeItem('generation_status');
-      localStorage.removeItem('generation_id');
       return;
     }
-  }, [isGenerating]);
-
-  // Update progress based on real generation status
-  useEffect(() => {
-    if (!isGenerating) return;
 
     const generationId = localStorage.getItem('generation_id');
     if (!generationId) return;
