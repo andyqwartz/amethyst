@@ -32,8 +32,6 @@ export const useImageHistoryFetch = (
 
       const formattedHistory = images.map(img => {
         const imgSettings = img.settings as ImageSettings;
-        const outputFormat = img.output_format as "webp" | "jpg" | "png" || "webp";
-        
         return {
           url: img.url,
           settings: {
@@ -44,14 +42,14 @@ export const useImageHistoryFetch = (
             seed: img.seed,
             num_outputs: img.num_outputs || 1,
             aspect_ratio: img.aspect_ratio || "1:1",
-            output_format: outputFormat,
+            output_format: img.output_format || "webp",
             output_quality: img.output_quality || 80,
             prompt_strength: img.prompt_strength || 0.8,
             hf_loras: imgSettings?.hf_loras || [],
             lora_scales: imgSettings?.lora_scales || [],
             disable_safety_checker: imgSettings?.disable_safety_checker || false,
             reference_image_url: img.reference_image_url || null
-          } as GenerationSettings,
+          },
           timestamp: new Date(img.created_at).getTime()
         };
       });

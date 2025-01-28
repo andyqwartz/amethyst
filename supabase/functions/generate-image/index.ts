@@ -17,7 +17,6 @@ serve(async (req) => {
   try {
     const REPLICATE_API_KEY = Deno.env.get('REPLICATE_API_KEY')
     if (!REPLICATE_API_KEY) {
-      console.error('REPLICATE_API_KEY is not set');
       throw new Error('REPLICATE_API_KEY is not set')
     }
 
@@ -26,32 +25,19 @@ serve(async (req) => {
     })
 
     const body = await req.json()
-    console.log("Received request body:", {
-      ...body,
-      input: body.input ? {
-        ...body.input,
-        image: body.input.image ? 'Present' : 'Not present'
-      } : undefined
-    });
 
     // If it's a status check request
     if (body.predictionId) {
       console.log("Checking status for prediction:", body.predictionId)
       const prediction = await replicate.predictions.get(body.predictionId)
       console.log("Status check response:", prediction)
-      return new Response(JSON.stringify({
-        status: prediction.status,
-        output: prediction.output,
-        error: prediction.error,
-        logs: prediction.logs
-      }), {
+      return new Response(JSON.stringify(prediction), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
     // If it's a generation request
     if (!body.input?.prompt) {
-      console.error("Missing prompt in request");
       return new Response(
         JSON.stringify({ 
           error: "Missing required field: prompt is required" 
@@ -86,8 +72,7 @@ serve(async (req) => {
 
     console.log("Starting generation with input:", {
       ...input,
-      image: input.image ? "Image present" : "No image",
-      hf_loras: input.hf_loras
+      image: input.image ? "Image present" : "No image"
     })
 
     try {
@@ -97,10 +82,7 @@ serve(async (req) => {
       })
 
       console.log("Generation started:", prediction)
-      return new Response(JSON.stringify({
-        id: prediction.id,
-        status: prediction.status
-      }), {
+      return new Response(JSON.stringify(prediction), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       })

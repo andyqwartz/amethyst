@@ -8,32 +8,22 @@ export const useImageGeneratorState = () => {
   const [showHistory, setShowHistory] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [referenceImage, setReferenceImage] = useState<string | null>(() => {
+    // Check if the image was explicitly removed
     const wasRemoved = localStorage.getItem('referenceImageRemoved') === 'true';
     if (wasRemoved) {
       return null;
     }
+    // Try to get the saved reference image
     return localStorage.getItem('referenceImage');
   });
 
+  // Update localStorage when reference image changes
   useEffect(() => {
     if (referenceImage) {
       localStorage.setItem('referenceImage', referenceImage);
       localStorage.removeItem('referenceImageRemoved');
     }
   }, [referenceImage]);
-
-  // Add listener for generation-complete event
-  useEffect(() => {
-    const handleGenerationComplete = () => {
-      console.log('Generation complete event received');
-      setIsGenerating(false);
-    };
-
-    window.addEventListener('generation-complete', handleGenerationComplete);
-    return () => {
-      window.removeEventListener('generation-complete', handleGenerationComplete);
-    };
-  }, []);
 
   const handleRemoveReferenceImage = () => {
     setReferenceImage(null);

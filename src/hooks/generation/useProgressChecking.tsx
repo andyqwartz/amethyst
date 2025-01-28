@@ -3,17 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/hooks/use-toast";
 import type { GenerationStatus } from '@/types/replicate';
 
-export interface GenerationProgressProps {
-  isGenerating: boolean;
-  currentLogs: string;
-  progress: number;
-  setProgress: (progress: number) => void;
-  status: GenerationStatus;
-}
-
-export const useProgressChecking = (
-  isGenerating: boolean
-): GenerationProgressProps => {
+export const useProgressChecking = (isGenerating: boolean) => {
   const { toast } = useToast();
   const [currentLogs, setCurrentLogs] = useState<string>('');
   const [progress, setProgress] = useState(0);
@@ -21,7 +11,6 @@ export const useProgressChecking = (
 
   useEffect(() => {
     if (!isGenerating) {
-      console.log('Generation stopped, clearing state');
       setCurrentLogs('');
       setStatus('idle');
       setProgress(0);
@@ -30,16 +19,10 @@ export const useProgressChecking = (
     }
 
     const generationId = localStorage.getItem('generation_id');
-    if (!generationId) {
-      console.log('No generation ID found');
-      return;
-    }
-
-    console.log('Starting progress check for generation:', generationId);
+    if (!generationId) return;
 
     const checkProgress = async () => {
       try {
-        console.log('Checking progress for ID:', generationId);
         const { data: prediction, error } = await supabase.functions.invoke('check-progress', {
           body: { predictionId: generationId }
         });
@@ -54,19 +37,12 @@ export const useProgressChecking = (
           setStatus('error');
           setCurrentLogs('');
           localStorage.removeItem('generation_id');
-          window.dispatchEvent(new CustomEvent('generation-complete'));
           return;
         }
 
-        if (!prediction) {
-          console.warn('No prediction data received');
-          return;
-        }
-
-        console.log('Progress update received:', prediction);
+        if (!prediction) return;
 
         if (prediction.status === 'succeeded') {
-          console.log('Generation succeeded:', prediction.output);
           localStorage.removeItem('generation_id');
           setStatus('success');
           setCurrentLogs('');
@@ -74,9 +50,7 @@ export const useProgressChecking = (
             title: "Success",
             description: "Images generated successfully",
           });
-          window.dispatchEvent(new CustomEvent('generation-complete'));
         } else if (prediction.status === 'failed') {
-          console.error('Generation failed:', prediction.error);
           localStorage.removeItem('generation_id');
           setStatus('error');
           setCurrentLogs('');
@@ -85,9 +59,7 @@ export const useProgressChecking = (
             description: prediction.error || "Generation failed",
             variant: "destructive"
           });
-          window.dispatchEvent(new CustomEvent('generation-complete'));
         } else if (prediction.status === 'processing' && prediction.logs) {
-          console.log('Generation in progress:', prediction.logs);
           setCurrentLogs(prediction.logs);
           setStatus('loading');
         }
@@ -101,7 +73,6 @@ export const useProgressChecking = (
         setStatus('error');
         setCurrentLogs('');
         localStorage.removeItem('generation_id');
-        window.dispatchEvent(new CustomEvent('generation-complete'));
       }
     };
 
@@ -109,11 +80,5 @@ export const useProgressChecking = (
     return () => clearInterval(interval);
   }, [isGenerating, toast]);
 
-  return { 
-    isGenerating,
-    currentLogs,
-    progress,
-    setProgress,
-    status
-  };
+  return { currentLogs, progress, setProgress, status };
 };
