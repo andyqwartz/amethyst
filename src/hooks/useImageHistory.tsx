@@ -28,12 +28,18 @@ export const useImageHistory = () => {
 
   const fetchHistory = async () => {
     try {
+      console.log('Fetching image history...');
       const { data: images, error } = await supabase
         .from('images')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching images:', error);
+        throw error;
+      }
+
+      console.log('Fetched images:', images);
 
       const formattedHistory = images.map(img => ({
         url: img.url,
@@ -76,6 +82,7 @@ export const useImageHistory = () => {
       .on('postgres_changes', 
         { event: 'INSERT', schema: 'public', table: 'images' },
         (payload) => {
+          console.log('New image inserted:', payload);
           const newImage = payload.new as ImageRecord;
           setHistory(prev => [{
             url: newImage.url,
@@ -85,11 +92,11 @@ export const useImageHistory = () => {
               guidance_scale: newImage.guidance_scale || 7.5,
               num_inference_steps: newImage.steps || 30,
               seed: newImage.seed,
-              num_outputs: 1,
-              aspect_ratio: "1:1",
-              output_format: "webp",
-              output_quality: 80,
-              prompt_strength: 0.8,
+              num_outputs: newImage.num_outputs || 1,
+              aspect_ratio: newImage.aspect_ratio || "1:1",
+              output_format: newImage.output_format || "webp",
+              output_quality: newImage.output_quality || 80,
+              prompt_strength: newImage.prompt_strength || 0.8,
               hf_loras: [],
               lora_scales: [],
               disable_safety_checker: false
@@ -107,6 +114,7 @@ export const useImageHistory = () => {
 
   const addToHistory = async (url: string, settings: GenerationSettings) => {
     try {
+      console.log('Adding image to history:', { url, settings });
       const { error } = await supabase
         .from('images')
         .insert({
@@ -125,7 +133,13 @@ export const useImageHistory = () => {
           prompt_strength: settings.prompt_strength
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error adding image to history:', error);
+        throw error;
+      }
+
+      // Refresh history after adding new image
+      fetchHistory();
     } catch (error) {
       console.error('Error adding image to history:', error);
       toast({
@@ -136,12 +150,9 @@ export const useImageHistory = () => {
     }
   };
 
-  const getDashboardImages = () => history.slice(0, 10);
-  const getAllImages = () => history;
-
   return { 
-    history: getDashboardImages(), 
-    allHistory: getAllImages(),
+    history, 
+    allHistory: history,
     addToHistory,
     isLoading 
   };
