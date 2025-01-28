@@ -7,6 +7,7 @@ import { LoraField } from './lora/LoraField';
 import type { GenerationSettings } from '@/types/replicate';
 
 const DEFAULT_LORAS = [
+  'stabilityai/sd-vae-ft-mse',
   'AndyVampiro/joa',
   'AndyVampiro/andy',
   'AndyVampiro/ilenana',
@@ -23,6 +24,16 @@ export const LoraSettings = ({ settings, onSettingsChange }: LoraSettingsProps) 
     const saved = localStorage.getItem('lora_history');
     return saved ? JSON.parse(saved).filter((item: string) => item && item.trim()) : DEFAULT_LORAS;
   });
+
+  useEffect(() => {
+    // Set default LoRA if none exists
+    if (!settings.hf_loras || settings.hf_loras.length === 0) {
+      onSettingsChange({
+        hf_loras: [DEFAULT_LORAS[0]],
+        lora_scales: [0.8],
+      });
+    }
+  }, []);
 
   useEffect(() => {
     const uniqueLoras = Array.from(new Set([
