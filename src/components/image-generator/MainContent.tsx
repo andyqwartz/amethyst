@@ -44,6 +44,10 @@ export const MainContent = ({
   onDownload,
   onDeleteHistory
 }: MainContentProps) => {
+  // Combine generated images and history into a single array
+  const allImages = [...generatedImages, ...history.map(h => h.url)];
+  const uniqueImages = Array.from(new Set(allImages));
+
   return (
     <Card className="border-none glass-card shadow-xl relative">
       <div className="p-6 space-y-8">
@@ -69,20 +73,10 @@ export const MainContent = ({
           />
         )}
 
-        {generatedImages.length > 0 && (
+        {!isLoading && uniqueImages.length > 0 && (
           <ImageSection
             title="Images générées"
-            images={generatedImages}
-            onTweak={onTweak}
-            onDownload={onDownload}
-            settings={settings}
-          />
-        )}
-
-        {!isLoading && history.length > 0 && (
-          <ImageSection
-            title="Historique des générations"
-            images={history.map(h => h.url)}
+            images={uniqueImages}
             onTweak={onTweak}
             onDownload={onDownload}
             settings={settings}

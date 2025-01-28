@@ -41,7 +41,6 @@ export const ImageGeneratorContainer = ({
   settings,
   generatedImages,
   history,
-  allHistory,
   isLoading,
   progress,
   currentLogs,
@@ -51,7 +50,6 @@ export const ImageGeneratorContainer = ({
   handleTweak,
   handleDownload,
   updateSettings,
-  setReferenceImage,
   handleRemoveReferenceImage,
   handleDeleteHistory
 }: ImageGeneratorContainerProps) => {
@@ -80,7 +78,7 @@ export const ImageGeneratorContainer = ({
           settings={settings}
           isGenerating={isGenerating}
           generatedImages={generatedImages}
-          history={allHistory}
+          history={history}
           isLoading={isLoading}
           onImageUpload={handleImageUpload}
           onImageClick={handleImageClick}
