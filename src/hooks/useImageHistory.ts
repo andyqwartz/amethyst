@@ -1,21 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { GenerationSettings } from '@/types/replicate';
 import type { Json } from '@/integrations/supabase/types';
 
-interface ImageHistoryItem {
-  url: string;
-  settings: GenerationSettings;
-  timestamp: number;
-}
-
 export const useImageHistory = () => {
-  const [history, setHistory] = useState<ImageHistoryItem[]>([]);
-  const [allHistory, setAllHistory] = useState<ImageHistoryItem[]>([]);
+  const [history, setHistory] = useState<{
+    url: string;
+    settings: GenerationSettings;
+    timestamp: number;
+  }[]>([]);
+  const [allHistory, setAllHistory] = useState<{
+    url: string;
+    settings: GenerationSettings;
+    timestamp: number;
+  }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchHistory = async () => {
+  const fetchHistory = useCallback(async () => {
     try {
+      setIsLoading(true);
       const { data: images, error } = await supabase
         .from('images')
         .select('*')
@@ -23,7 +26,7 @@ export const useImageHistory = () => {
 
       if (error) throw error;
 
-      const historyItems = images.map(img => ({
+      const formattedHistory = images.map(img => ({
         url: img.url,
         settings: {
           prompt: img.prompt || '',
@@ -43,53 +46,61 @@ export const useImageHistory = () => {
         timestamp: new Date(img.created_at).getTime()
       }));
 
-      setHistory(historyItems.slice(0, 4));
-      setAllHistory(historyItems);
-      setIsLoading(false);
+      setHistory(formattedHistory.slice(0, 4));
+      setAllHistory(formattedHistory);
     } catch (error) {
       console.error('Error fetching history:', error);
+    } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const addToHistory = async (url: string, settings: GenerationSettings) => {
+  useEffect(() => {
+    fetchHistory();
+
+    const channel = supabase
+      .channel('images_changes')
+      .on('postgres_changes', 
+        { event: 'INSERT', schema: 'public', table: 'images' },
+        (payload) => {
+          const newImage = payload.new as any;
+          const formattedImage = {
+            url: newImage.url,
+            settings: {
+              prompt: newImage.prompt || '',
+              negative_prompt: newImage.negative_prompt || '',
+              guidance_scale: newImage.guidance_scale || 7.5,
+              num_inference_steps: newImage.steps || 30,
+              seed: newImage.seed,
+              num_outputs: 1,
+              aspect_ratio: "1:1",
+              output_format: "webp",
+              output_quality: 80,
+              prompt_strength: 0.8,
+              hf_loras: [],
+              lora_scales: [],
+              disable_safety_checker: false
+            } as GenerationSettings,
+            timestamp: new Date(newImage.created_at).getTime()
+          };
+
+          setHistory(prev => {
+            const newHistory = [formattedImage, ...prev];
+            return newHistory.slice(0, 4);
+          });
+
+          setAllHistory(prev => [formattedImage, ...prev]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchHistory]);
+
+  const addToHistory = useCallback(async (url: string, settings: GenerationSettings) => {
     try {
-      const newImage = {
-        url,
-        settings,
-        timestamp: Date.now()
-      };
-
-      setHistory(prev => {
-        const newHistory = [{
-          url: newImage.url,
-          settings: {
-            prompt: newImage.settings.prompt || '',
-            negative_prompt: newImage.settings.negative_prompt || '',
-            guidance_scale: newImage.settings.guidance_scale || 7.5,
-            num_inference_steps: newImage.settings.num_inference_steps || 30,
-            seed: newImage.settings.seed,
-            num_outputs: newImage.settings.num_outputs || 1,
-            aspect_ratio: newImage.settings.aspect_ratio || "1:1",
-            output_format: newImage.settings.output_format || "webp",
-            output_quality: newImage.settings.output_quality || 80,
-            prompt_strength: newImage.settings.prompt_strength || 0.8,
-            hf_loras: newImage.settings.hf_loras || [],
-            lora_scales: newImage.settings.lora_scales || [],
-            disable_safety_checker: newImage.settings.disable_safety_checker || false
-          } as GenerationSettings,
-          timestamp: Date.now()
-        }, ...prev];
-
-        return newHistory.slice(0, 4);
-      });
-
-      setAllHistory(prev => [{
-        url: newImage.url,
-        settings: settings,
-        timestamp: Date.now()
-      }, ...prev]);
-
       const { error } = await supabase
         .from('images')
         .insert({
@@ -112,10 +123,6 @@ export const useImageHistory = () => {
     } catch (error) {
       console.error('Error adding to history:', error);
     }
-  };
-
-  useEffect(() => {
-    fetchHistory();
   }, []);
 
   return {
