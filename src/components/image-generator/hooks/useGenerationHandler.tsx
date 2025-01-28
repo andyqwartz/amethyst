@@ -14,7 +14,9 @@ export const useGenerationHandler = (
     settings: GenerationSettings,
     isGenerating: boolean
   ) => {
+    // Prevent multiple generations
     if (isGenerating || isProcessing) {
+      console.log('Generation already in progress, skipping');
       toast({
         title: "Génération en cours",
         description: "Veuillez attendre la fin de la génération en cours",
@@ -32,25 +34,28 @@ export const useGenerationHandler = (
       return;
     }
 
-    setIsProcessing(true);
-    setIsGenerating(true);
-    
     try {
+      setIsProcessing(true);
+      setIsGenerating(true);
       await generate(settings);
     } catch (error) {
+      console.error('Generation error:', error);
       toast({
         title: "Erreur",
         description: error.message,
         variant: "destructive"
       });
-    } finally {
+      // Make sure to reset states on error
       setIsProcessing(false);
+      setIsGenerating(false);
     }
   };
 
+  // Reset states when generation completes or fails
   useEffect(() => {
     if (status === 'success' || status === 'error') {
       setIsGenerating(false);
+      setIsProcessing(false);
       localStorage.removeItem('generation_status');
       localStorage.removeItem('generation_progress');
       localStorage.removeItem('generation_timestamp');
