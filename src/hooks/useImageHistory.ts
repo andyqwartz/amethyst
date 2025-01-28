@@ -39,18 +39,18 @@ export const useImageHistory = () => {
         url: img.url,
         settings: {
           prompt: img.prompt || '',
-          negativePrompt: img.negative_prompt || '',
-          guidanceScale: img.guidance_scale || 7.5,
-          steps: img.steps || 30,
+          negative_prompt: img.negative_prompt || '',
+          guidance_scale: img.guidance_scale || 7.5,
+          num_inference_steps: img.steps || 30,
           seed: img.seed,
-          numOutputs: img.num_outputs || 1,
-          aspectRatio: img.aspect_ratio || "1:1",
-          outputFormat: img.output_format || "webp",
-          outputQuality: img.output_quality || 80,
-          promptStrength: img.prompt_strength || 0.8,
-          hfLoras: [],
-          loraScales: [],
-          disableSafetyChecker: false
+          num_outputs: img.num_outputs || 1,
+          aspect_ratio: img.aspect_ratio || "1:1",
+          output_format: img.output_format || "webp",
+          output_quality: img.output_quality || 80,
+          prompt_strength: img.prompt_strength || 0.8,
+          hf_loras: [],
+          lora_scales: [],
+          disable_safety_checker: false
         } as GenerationSettings,
         timestamp: new Date(img.created_at).getTime()
       }));
@@ -81,18 +81,18 @@ export const useImageHistory = () => {
             url: newImage.url,
             settings: {
               prompt: newImage.prompt || '',
-              negativePrompt: newImage.negative_prompt || '',
-              guidanceScale: newImage.guidance_scale || 7.5,
-              steps: newImage.steps || 30,
+              negative_prompt: newImage.negative_prompt || '',
+              guidance_scale: newImage.guidance_scale || 7.5,
+              num_inference_steps: newImage.steps || 30,
               seed: newImage.seed,
-              numOutputs: 1,
-              aspectRatio: "1:1",
-              outputFormat: "webp",
-              outputQuality: 80,
-              promptStrength: 0.8,
-              hfLoras: [],
-              loraScales: [],
-              disableSafetyChecker: false
+              num_outputs: 1,
+              aspect_ratio: "1:1",
+              output_format: "webp",
+              output_quality: 80,
+              prompt_strength: 0.8,
+              hf_loras: [],
+              lora_scales: [],
+              disable_safety_checker: false
             } as GenerationSettings,
             timestamp: new Date(newImage.created_at).getTime()
           }, ...prev]);
@@ -114,15 +114,15 @@ export const useImageHistory = () => {
           settings: settings as unknown as Json,
           user_id: (await supabase.auth.getUser()).data.user?.id,
           prompt: settings.prompt,
-          negative_prompt: settings.negativePrompt,
-          guidance_scale: settings.guidanceScale,
-          steps: settings.steps,
+          negative_prompt: settings.negative_prompt,
+          guidance_scale: settings.guidance_scale,
+          steps: settings.num_inference_steps,
           seed: settings.seed,
-          num_outputs: settings.numOutputs,
-          aspect_ratio: settings.aspectRatio,
-          output_format: settings.outputFormat,
-          output_quality: settings.outputQuality,
-          prompt_strength: settings.promptStrength
+          num_outputs: settings.num_outputs,
+          aspect_ratio: settings.aspect_ratio,
+          output_format: settings.output_format,
+          output_quality: settings.output_quality,
+          prompt_strength: settings.prompt_strength
         });
 
       if (error) throw error;
