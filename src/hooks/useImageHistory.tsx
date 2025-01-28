@@ -115,12 +115,18 @@ export const useImageHistory = () => {
   const addToHistory = async (url: string, settings: GenerationSettings) => {
     try {
       console.log('Adding image to history:', { url, settings });
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
       const { error } = await supabase
         .from('images')
         .insert({
           url,
           settings: settings as unknown as Json,
-          user_id: (await supabase.auth.getUser()).data.user?.id,
+          user_id: user.id,
           prompt: settings.prompt,
           negative_prompt: settings.negative_prompt,
           guidance_scale: settings.guidance_scale,
