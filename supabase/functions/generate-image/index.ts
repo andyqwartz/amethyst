@@ -1,10 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import Replicate from "https://esm.sh/replicate@0.25.2"
 
+const MODEL_VERSION = "2389224e115448d9a77c07d7d45672b3f0aa45acacf1c5bcf51857ac295e3aec";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-}
+};
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -46,7 +48,7 @@ serve(async (req) => {
       )
     }
 
-    // Prepare the input
+    // Prepare the input according to the model's schema
     const input = {
       prompt: body.input.prompt,
       negative_prompt: body.input.negative_prompt || "",
@@ -59,40 +61,23 @@ serve(async (req) => {
       prompt_strength: body.input.prompt_strength || 0.8,
       hf_loras: body.input.hf_loras || [],
       lora_scales: body.input.lora_scales || [],
-      disable_safety_checker: true
+      disable_safety_checker: body.input.disable_safety_checker || false
     }
 
-    // If there's a reference image, fetch it and convert to base64
-    if (body.input.reference_image_url) {
-      console.log("Reference image URL detected:", body.input.reference_image_url)
-      try {
-        const imageResponse = await fetch(body.input.reference_image_url)
-        if (!imageResponse.ok) {
-          throw new Error(`Failed to fetch image: ${imageResponse.statusText}`)
-        }
-        
-        const imageBuffer = await imageResponse.arrayBuffer()
-        const base64Image = btoa(String.fromCharCode(...new Uint8Array(imageBuffer)))
-        const contentType = imageResponse.headers.get('content-type') || 'image/png'
-        input.image = `data:${contentType};base64,${base64Image}`
-        console.log("Successfully converted image to base64")
-      } catch (error) {
-        console.error("Error processing reference image:", error)
-        return new Response(
-          JSON.stringify({ error: "Failed to process reference image", details: error.message }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
-        )
-      }
+    // If there's a reference image, include it
+    if (body.input.image) {
+      console.log("Reference image detected")
+      input.image = body.input.image
     }
 
     console.log("Starting generation with input:", {
       ...input,
-      image: input.image ? "Base64 image present" : "No reference image"
+      image: input.image ? "Image present" : "No image"
     })
-    
+
     try {
       const prediction = await replicate.predictions.create({
-        version: "2389224e115448d9a77c07d7d45672b3f0aa45acacf1c5bcf51857ac295e3aec",
+        version: MODEL_VERSION,
         input: input
       })
 
