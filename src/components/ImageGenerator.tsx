@@ -26,7 +26,8 @@ export const ImageGenerator = () => {
     handleTweak,
     handleDownload,
     updateSettings,
-    setReferenceImage
+    setReferenceImage,
+    handleRemoveReferenceImage
   } = useImageGeneratorLogic();
 
   const handleDeleteHistory = async () => {
@@ -88,6 +89,7 @@ export const ImageGenerator = () => {
       updateSettings={updateSettings}
       setReferenceImage={setReferenceImage}
       handleDeleteHistory={handleDeleteHistory}
+      handleRemoveReferenceImage={handleRemoveReferenceImage}
     />
   );
 };
