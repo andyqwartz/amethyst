@@ -1,7 +1,6 @@
 import React from 'react';
 import { GuidanceScale } from './settings/parameters/GuidanceScale';
 import { Steps } from './settings/parameters/Steps';
-import { OutputSettings } from './settings/parameters/OutputSettings';
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -14,6 +13,9 @@ interface ParameterInputsProps {
 }
 
 export const ParameterInputs = ({ settings, onSettingsChange }: ParameterInputsProps) => {
+  console.log('ParameterInputs - settings:', settings);
+  console.log('ParameterInputs - numOutputs:', settings.numOutputs);
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -42,13 +44,13 @@ export const ParameterInputs = ({ settings, onSettingsChange }: ParameterInputsP
           </TooltipProvider>
         </Label>
         <Select
-          value={settings.numOutputs.toString()}
+          value={settings.numOutputs?.toString()}
           onValueChange={(value) => onSettingsChange({ numOutputs: parseInt(value) })}
         >
-          <SelectTrigger className="bg-popover border-primary/20">
+          <SelectTrigger className="w-full bg-popover border-primary/20">
             <SelectValue placeholder="Sélectionner le nombre d'images" />
           </SelectTrigger>
-          <SelectContent className="bg-popover border-primary/20">
+          <SelectContent>
             <SelectItem value="1">1 image</SelectItem>
             <SelectItem value="2">2 images</SelectItem>
             <SelectItem value="3">3 images</SelectItem>
@@ -56,13 +58,6 @@ export const ParameterInputs = ({ settings, onSettingsChange }: ParameterInputsP
           </SelectContent>
         </Select>
       </div>
-
-      <OutputSettings
-        aspectRatio={settings.aspectRatio}
-        outputFormat={settings.outputFormat}
-        onAspectRatioChange={(value) => onSettingsChange({ aspectRatio: value })}
-        onOutputFormatChange={(value) => onSettingsChange({ outputFormat: value })}
-      />
     </div>
   );
 };
