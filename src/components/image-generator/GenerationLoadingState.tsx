@@ -20,14 +20,27 @@ export const GenerationLoadingState = ({
 }: GenerationLoadingStateProps) => {
   const [currentMessage, setCurrentMessage] = useState(messages[0]);
   const [lastProgress, setLastProgress] = useState(0);
+  const [shouldShow, setShouldShow] = useState(false);
 
+  // Gérer l'affichage de l'animation
   useEffect(() => {
-    if (!isGenerating) {
-      setLastProgress(0);
-      return;
+    if (isGenerating) {
+      setShouldShow(true);
+    } else {
+      // Petit délai avant de cacher l'animation pour une transition plus fluide
+      const timeout = setTimeout(() => {
+        setShouldShow(false);
+        setLastProgress(0);
+        setCurrentMessage(messages[0]);
+      }, 300);
+      return () => clearTimeout(timeout);
     }
+  }, [isGenerating]);
 
-    // Ne mettre à jour le message que si le progrès a significativement changé
+  // Mettre à jour les messages en fonction de la progression
+  useEffect(() => {
+    if (!isGenerating) return;
+
     const progressThreshold = Math.floor(progress / 25);
     const lastProgressThreshold = Math.floor(lastProgress / 25);
 
@@ -37,9 +50,9 @@ export const GenerationLoadingState = ({
       setLastProgress(progress);
       console.log(`Progression mise à jour: ${progress}%, Message: ${messages[messageIndex]}`);
     }
-  }, [isGenerating, progress]);
+  }, [isGenerating, progress, lastProgress]);
 
-  if (!isGenerating) return null;
+  if (!shouldShow) return null;
 
   return (
     <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center z-50">

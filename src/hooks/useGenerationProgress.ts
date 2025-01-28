@@ -20,43 +20,42 @@ export const useGenerationProgress = (
     settings
   );
 
+  // Réinitialiser le progrès quand la génération est terminée
+  useEffect(() => {
+    if (!isGenerating) {
+      setProgress(0);
+      setStatus('idle');
+      localStorage.removeItem('generation_status');
+      localStorage.removeItem('generation_progress');
+      localStorage.removeItem('generation_timestamp');
+      return;
+    }
+  }, [isGenerating]);
+
+  // Gérer la reprise d'une génération en cours
   useEffect(() => {
     if (shouldRetry && savedSettings && onRetry) {
-      console.log('Reprising generation with saved settings:', savedSettings);
+      console.log('Reprise de la génération avec les paramètres sauvegardés:', savedSettings);
       onRetry(savedSettings);
     }
   }, [shouldRetry, savedSettings, onRetry]);
 
+  // Mettre à jour la progression uniquement pendant la génération
   useEffect(() => {
-    let progressInterval: NodeJS.Timeout | null = null;
+    if (!isGenerating) return;
 
-    if (isGenerating) {
-      // Démarrer à 5% pour indiquer que la génération a commencé
-      setProgress(5);
+    const interval = setInterval(() => {
+      setProgress(current => {
+        if (current >= 95) {
+          clearInterval(interval);
+          return current;
+        }
+        const increment = Math.max(0.5, (95 - current) * 0.05);
+        return Math.min(95, current + increment);
+      });
+    }, 1000);
 
-      progressInterval = setInterval(() => {
-        setProgress(current => {
-          if (current >= 95) {
-            if (progressInterval) {
-              clearInterval(progressInterval);
-            }
-            return current;
-          }
-          // Progression plus lente et plus naturelle
-          const increment = Math.max(0.5, (95 - current) * 0.05);
-          return Math.min(95, current + increment);
-        });
-      }, 1000);
-    } else {
-      // Réinitialiser le progrès quand la génération est terminée
-      setProgress(0);
-    }
-
-    return () => {
-      if (progressInterval) {
-        clearInterval(progressInterval);
-      }
-    };
+    return () => clearInterval(interval);
   }, [isGenerating]);
 
   return { 
