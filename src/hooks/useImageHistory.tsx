@@ -25,13 +25,20 @@ export const useImageHistory = () => {
         return;
       }
 
+      console.log('Fetching history for user:', session.session.user.id);
+
       const { data: images, error } = await supabase
         .from('images')
         .select('*')
         .eq('user_id', session.session.user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching images:', error);
+        throw error;
+      }
+
+      console.log('Fetched images:', images);
 
       const formattedHistory = images.map(img => ({
         url: img.url,
@@ -77,7 +84,7 @@ export const useImageHistory = () => {
     try {
       const { data: session } = await supabase.auth.getSession();
       
-      if (!session?.user) {
+      if (!session?.session?.user) {
         console.error('No authenticated user found');
         toast({
           title: "Authentication Error",
@@ -87,11 +94,13 @@ export const useImageHistory = () => {
         return;
       }
 
+      console.log('Adding image to history for user:', session.session.user.id);
+
       const { error } = await supabase
         .from('images')
         .insert({
           url,
-          user_id: session.user.id,  // Explicitly set the user_id
+          user_id: session.session.user.id,
           settings: settings,
           prompt: settings.prompt,
           negative_prompt: settings.negative_prompt,
@@ -124,10 +133,11 @@ export const useImageHistory = () => {
     }
   };
 
+  // Fetch history when component mounts and when auth state changes
   useEffect(() => {
     fetchHistory();
 
-    const authListener = supabase.auth.onAuthStateChange((event) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_IN') {
         fetchHistory();
       } else if (event === 'SIGNED_OUT') {
@@ -136,7 +146,7 @@ export const useImageHistory = () => {
     });
 
     return () => {
-      authListener.data.subscription.unsubscribe();
+      subscription.unsubscribe();
     };
   }, []);
 

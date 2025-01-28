@@ -29,7 +29,7 @@ export const ImagePreview = ({
           <img
             src={imageUrl}
             alt={`Generated image ${index + 1}`}
-            className="w-full h-auto rounded-lg shadow-lg transition-transform duration-300 hover:scale-105"
+            className="w-full h-auto rounded-lg shadow-lg transition-all duration-300 hover:scale-105"
             loading="lazy"
           />
           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
@@ -37,7 +37,7 @@ export const ImagePreview = ({
               variant="secondary"
               size="icon"
               onClick={() => onDownload(imageUrl)}
-              className="rounded-full bg-primary hover:bg-primary/90 shadow-lg"
+              className="rounded-full bg-primary hover:bg-primary-hover shadow-lg transition-all duration-300"
             >
               <Download className="h-4 w-4 text-white" />
             </Button>
@@ -46,7 +46,7 @@ export const ImagePreview = ({
                 variant="secondary"
                 size="icon"
                 onClick={() => onTweak(settings)}
-                className="rounded-full bg-primary hover:bg-primary/90 shadow-lg"
+                className="rounded-full bg-primary hover:bg-primary-hover shadow-lg transition-all duration-300"
               >
                 <Settings className="h-4 w-4 text-white" />
               </Button>
