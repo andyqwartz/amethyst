@@ -44,9 +44,8 @@ export const MainContent = ({
   onDownload,
   onDeleteHistory
 }: MainContentProps) => {
-  // Combine generated images and history into a single array
-  const allImages = [...generatedImages, ...history.map(h => h.url)];
-  const uniqueImages = Array.from(new Set(allImages));
+  // Combine all images into a single array and remove duplicates
+  const allImages = Array.from(new Set([...generatedImages, ...history.map(h => h.url)]));
 
   return (
     <Card className="border-none glass-card shadow-xl relative">
@@ -73,10 +72,10 @@ export const MainContent = ({
           />
         )}
 
-        {!isLoading && uniqueImages.length > 0 && (
+        {!isLoading && allImages.length > 0 && (
           <ImageSection
             title="Images générées"
-            images={uniqueImages}
+            images={allImages}
             onTweak={onTweak}
             onDownload={onDownload}
             settings={settings}
