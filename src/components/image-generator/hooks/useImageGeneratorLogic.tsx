@@ -6,7 +6,7 @@ import { useImageHistory } from '@/hooks/useImageHistory';
 import { useImageGeneratorState } from './useImageGeneratorState';
 import { useImageUpload } from './useImageUpload';
 import { useGenerationHandler } from './useGenerationHandler';
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import type { GenerationSettings } from '@/types/replicate';
 
 export const useImageGeneratorLogic = () => {
@@ -37,12 +37,15 @@ export const useImageGeneratorLogic = () => {
     referenceImage,
     settings,
     (savedSettings) => {
-      toast({
-        title: "Reprise de la génération",
-        description: "La génération précédente a été interrompue, reprise en cours...",
-        className: "animate-fade-in"
-      });
-      handleGenerate(savedSettings);
+      // Only show the toast if we're actually resuming a generation
+      if (!isGenerating && savedSettings) {
+        toast({
+          title: "Reprise de la génération",
+          description: "La génération précédente a été interrompue, reprise en cours...",
+          className: "animate-fade-in"
+        });
+        handleGenerate(savedSettings);
+      }
     }
   );
   const { history, allHistory, isLoading } = useImageHistory();
