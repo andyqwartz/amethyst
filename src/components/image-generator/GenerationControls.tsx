@@ -27,8 +27,8 @@ export const GenerationControls = ({
     
     onSettingsChange({ 
       prompt: textarea.value,
-      hfLoras: [],
-      loraScales: []
+      hf_loras: [],
+      lora_scales: []
     });
   };
 
