@@ -30,17 +30,16 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger className="ml-2">
-          <HelpCircle className="h-4 w-4 text-primary/50" />
+          <HelpCircle className="h-4 w-4 text-white/50" />
         </TooltipTrigger>
         <TooltipContent>
-          <p className="max-w-xs text-sm">{description}</p>
+          <p className="max-w-xs text-sm text-white">{description}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
   );
 
   React.useEffect(() => {
-    // Set default values when component mounts
     if (!settings.aspect_ratio) {
       onSettingsChange({
         aspect_ratio: "1:1",
@@ -57,15 +56,15 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
 
   return (
     <div className="space-y-6">
-      <div className="space-y-3">
-        <Label className="flex items-center">
+      <div className="space-y-4 md:space-y-3">
+        <Label className="flex items-center text-white">
           Format {renderTooltip("Choose the dimensions for your generated image")}
         </Label>
         <Select
           value={settings.aspect_ratio}
           onValueChange={(value) => onSettingsChange({ aspect_ratio: value })}
         >
-          <SelectTrigger className="bg-popover border-primary/20">
+          <SelectTrigger className="bg-popover border-primary/20 text-white">
             <SelectValue placeholder="Select aspect ratio" />
           </SelectTrigger>
           <SelectContent className="bg-popover border-primary/20 max-h-[300px]">
@@ -75,17 +74,17 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
                 value={ratio}
                 className="flex flex-col items-start py-3"
               >
-                <span className="font-medium">{ratio}</span>
-                <span className="text-xs text-primary/70 mt-1">{description}</span>
+                <span className="font-medium text-white">{ratio}</span>
+                <span className="text-xs text-white/70 mt-1">{description}</span>
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-6 md:space-y-4">
         <div>
-          <Label className="flex items-center mb-3">
+          <Label className="flex items-center mb-4 md:mb-3 text-white">
             Prompt Strength {renderTooltip("Controls the influence of the prompt on the final image")}
           </Label>
           <div className="space-y-2">
@@ -95,14 +94,14 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
               max={1}
               min={0}
               step={0.1}
-              className="[&_[role=slider]]:bg-primary"
+              className="[&_[role=slider]]:bg-white"
             />
-            <span className="text-xs text-primary/50 block mt-2">{settings.prompt_strength}</span>
+            <span className="text-xs text-white block mt-2">{settings.prompt_strength}</span>
           </div>
         </div>
 
         <div>
-          <Label className="flex items-center mb-3">
+          <Label className="flex items-center mb-4 md:mb-3 text-white">
             Steps {renderTooltip("Number of inference steps (higher = more detail but slower)")}
           </Label>
           <div className="space-y-2">
@@ -112,9 +111,9 @@ export const BasicSettings = ({ settings, onSettingsChange }: BasicSettingsProps
               max={50}
               min={10}
               step={1}
-              className="[&_[role=slider]]:bg-primary"
+              className="[&_[role=slider]]:bg-white"
             />
-            <span className="text-xs text-primary/50 block mt-2">{settings.num_inference_steps}</span>
+            <span className="text-xs text-white block mt-2">{settings.num_inference_steps}</span>
           </div>
         </div>
       </div>
