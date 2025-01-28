@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { GenerationSettings } from '@/types/replicate';
+import { useToast } from "@/hooks/use-toast";
 import type { Json } from '@/integrations/supabase/types';
 
 export const useImageHistory = () => {
@@ -15,13 +16,25 @@ export const useImageHistory = () => {
     timestamp: number;
   }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   const fetchHistory = useCallback(async () => {
     try {
-      setIsLoading(true);
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user) {
+        console.log('No authenticated user found');
+        setHistory([]);
+        setAllHistory([]);
+        setIsLoading(false);
+        return;
+      }
+
+      console.log('Fetching history for user:', session.session.user.id);
+      
       const { data: images, error } = await supabase
         .from('images')
         .select('*')
+        .eq('user_id', session.session.user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -39,9 +52,10 @@ export const useImageHistory = () => {
           output_format: img.output_format || "webp",
           output_quality: img.output_quality || 80,
           prompt_strength: img.prompt_strength || 0.8,
-          hf_loras: [],
-          lora_scales: [],
-          disable_safety_checker: false
+          hf_loras: img.settings?.hf_loras || [],
+          lora_scales: img.settings?.lora_scales || [],
+          disable_safety_checker: img.settings?.disable_safety_checker || false,
+          reference_image_url: img.reference_image_url || null
         } as GenerationSettings,
         timestamp: new Date(img.created_at).getTime()
       }));
@@ -50,63 +64,38 @@ export const useImageHistory = () => {
       setAllHistory(formattedHistory);
     } catch (error) {
       console.error('Error fetching history:', error);
+      toast({
+        title: "Error",
+        description: "Unable to load image history",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [toast]);
 
-  useEffect(() => {
-    fetchHistory();
-
-    const channel = supabase
-      .channel('images_changes')
-      .on('postgres_changes', 
-        { event: 'INSERT', schema: 'public', table: 'images' },
-        (payload) => {
-          const newImage = payload.new as any;
-          const formattedImage = {
-            url: newImage.url,
-            settings: {
-              prompt: newImage.prompt || '',
-              negative_prompt: newImage.negative_prompt || '',
-              guidance_scale: newImage.guidance_scale || 7.5,
-              num_inference_steps: newImage.steps || 30,
-              seed: newImage.seed,
-              num_outputs: 1,
-              aspect_ratio: "1:1",
-              output_format: "webp",
-              output_quality: 80,
-              prompt_strength: 0.8,
-              hf_loras: [],
-              lora_scales: [],
-              disable_safety_checker: false
-            } as GenerationSettings,
-            timestamp: new Date(newImage.created_at).getTime()
-          };
-
-          setHistory(prev => {
-            const newHistory = [formattedImage, ...prev];
-            return newHistory.slice(0, 4);
-          });
-
-          setAllHistory(prev => [formattedImage, ...prev]);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [fetchHistory]);
-
-  const addToHistory = useCallback(async (url: string, settings: GenerationSettings) => {
+  const addToHistory = async (url: string, settings: GenerationSettings) => {
     try {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user) {
+        console.error('No authenticated user found');
+        toast({
+          title: "Authentication Error",
+          description: "Please log in to save images",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      console.log('Adding image to history for user:', session.session.user.id);
+      console.log('Settings being saved:', settings);
+
       const { error } = await supabase
         .from('images')
         .insert({
           url,
+          user_id: session.session.user.id,
           settings: settings as unknown as Json,
-          user_id: (await supabase.auth.getUser()).data.user?.id,
           prompt: settings.prompt,
           negative_prompt: settings.negative_prompt,
           guidance_scale: settings.guidance_scale,
@@ -116,19 +105,64 @@ export const useImageHistory = () => {
           aspect_ratio: settings.aspect_ratio,
           output_format: settings.output_format,
           output_quality: settings.output_quality,
-          prompt_strength: settings.prompt_strength
+          prompt_strength: settings.prompt_strength,
+          reference_image_url: settings.reference_image_url
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error adding to history:', error);
+        throw error;
+      }
+
+      await fetchHistory();
     } catch (error) {
       console.error('Error adding to history:', error);
+      toast({
+        title: "Error",
+        description: "Unable to save image to history",
+        variant: "destructive"
+      });
     }
-  }, []);
+  };
 
-  return {
-    history,
+  useEffect(() => {
+    fetchHistory();
+
+    const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_IN') {
+        fetchHistory();
+      } else if (event === 'SIGNED_OUT') {
+        setHistory([]);
+        setAllHistory([]);
+      }
+    });
+
+    const channel = supabase
+      .channel('images_changes')
+      .on(
+        'postgres_changes',
+        { 
+          event: '*',
+          schema: 'public',
+          table: 'images'
+        },
+        (payload) => {
+          console.log('Real-time update received:', payload);
+          fetchHistory();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      authSubscription.unsubscribe();
+      supabase.removeChannel(channel);
+    };
+  }, [fetchHistory]);
+
+  return { 
+    history, 
     allHistory,
-    isLoading,
-    addToHistory
+    addToHistory,
+    isLoading 
   };
 };
