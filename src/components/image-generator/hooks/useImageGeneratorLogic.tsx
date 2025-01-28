@@ -6,6 +6,7 @@ import { useImageHistory } from '@/hooks/useImageHistory';
 import { useImageGeneratorState } from './useImageGeneratorState';
 import { useImageUpload } from './useImageUpload';
 import { useGenerationHandler } from './useGenerationHandler';
+import { toast } from "@/hooks/use-toast";
 import type { GenerationSettings } from '@/types/replicate';
 
 export const useImageGeneratorLogic = () => {
@@ -19,8 +20,7 @@ export const useImageGeneratorLogic = () => {
     isGenerating,
     setIsGenerating,
     referenceImage,
-    setReferenceImage,
-    toast
+    setReferenceImage
   } = useImageGeneratorState();
 
   const { settings, updateSettings, resetSettings } = useGenerationSettings();
@@ -51,8 +51,7 @@ export const useImageGeneratorLogic = () => {
   const { handleGenerate: handleGenerateBase } = useGenerationHandler(
     generationStatus,
     setIsGenerating,
-    resetSettings,
-    toast
+    resetSettings
   );
 
   useEffect(() => {

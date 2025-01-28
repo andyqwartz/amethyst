@@ -1,11 +1,10 @@
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import type { GenerationSettings } from '@/types/replicate';
 
 export const useGenerationHandler = (
   generationStatus: string,
   setIsGenerating: (isGenerating: boolean) => void,
-  resetSettings: () => void,
-  toast: ReturnType<typeof useToast>
+  resetSettings: () => void
 ) => {
   const handleGenerate = async (
     generate: (settings: GenerationSettings) => Promise<void>,
