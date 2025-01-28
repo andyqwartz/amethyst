@@ -4,6 +4,12 @@ import type { GenerationSettings } from '@/types/replicate';
 import { useToast } from "@/hooks/use-toast";
 import type { Json } from '@/integrations/supabase/types';
 
+interface ImageSettings extends Json {
+  hf_loras?: string[];
+  lora_scales?: number[];
+  disable_safety_checker?: boolean;
+}
+
 export const useImageHistory = () => {
   const [history, setHistory] = useState<{
     url: string;
@@ -39,26 +45,29 @@ export const useImageHistory = () => {
 
       if (error) throw error;
 
-      const formattedHistory = images.map(img => ({
-        url: img.url,
-        settings: {
-          prompt: img.prompt || '',
-          negative_prompt: img.negative_prompt || '',
-          guidance_scale: img.guidance_scale || 7.5,
-          num_inference_steps: img.steps || 30,
-          seed: img.seed,
-          num_outputs: img.num_outputs || 1,
-          aspect_ratio: img.aspect_ratio || "1:1",
-          output_format: img.output_format || "webp",
-          output_quality: img.output_quality || 80,
-          prompt_strength: img.prompt_strength || 0.8,
-          hf_loras: img.settings?.hf_loras || [],
-          lora_scales: img.settings?.lora_scales || [],
-          disable_safety_checker: img.settings?.disable_safety_checker || false,
-          reference_image_url: img.reference_image_url || null
-        } as GenerationSettings,
-        timestamp: new Date(img.created_at).getTime()
-      }));
+      const formattedHistory = images.map(img => {
+        const imgSettings = img.settings as ImageSettings;
+        return {
+          url: img.url,
+          settings: {
+            prompt: img.prompt || '',
+            negative_prompt: img.negative_prompt || '',
+            guidance_scale: img.guidance_scale || 7.5,
+            num_inference_steps: img.steps || 30,
+            seed: img.seed,
+            num_outputs: img.num_outputs || 1,
+            aspect_ratio: img.aspect_ratio || "1:1",
+            output_format: img.output_format || "webp",
+            output_quality: img.output_quality || 80,
+            prompt_strength: img.prompt_strength || 0.8,
+            hf_loras: imgSettings?.hf_loras || [],
+            lora_scales: imgSettings?.lora_scales || [],
+            disable_safety_checker: imgSettings?.disable_safety_checker || false,
+            reference_image_url: img.reference_image_url || null
+          } as GenerationSettings,
+          timestamp: new Date(img.created_at).getTime()
+        };
+      });
 
       setHistory(formattedHistory.slice(0, 4));
       setAllHistory(formattedHistory);
@@ -95,7 +104,11 @@ export const useImageHistory = () => {
         .insert({
           url,
           user_id: session.session.user.id,
-          settings: settings as unknown as Json,
+          settings: {
+            hf_loras: settings.hf_loras,
+            lora_scales: settings.lora_scales,
+            disable_safety_checker: settings.disable_safety_checker
+          },
           prompt: settings.prompt,
           negative_prompt: settings.negative_prompt,
           guidance_scale: settings.guidance_scale,
