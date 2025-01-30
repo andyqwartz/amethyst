@@ -45,6 +45,11 @@ export const MainContent = ({
   onDownload,
   onDeleteHistory
 }: MainContentProps) => {
+  // Remove duplicates from history
+  const uniqueHistory = history.filter((item, index, self) =>
+    index === self.findIndex((t) => t.url === item.url)
+  );
+
   return (
     <Card className="border-none glass-card shadow-xl relative">
       <div className="p-6 space-y-8">
@@ -82,11 +87,11 @@ export const MainContent = ({
           </div>
         )}
 
-        {!isLoading && history.length > 0 && (
+        {!isLoading && uniqueHistory.length > 0 && (
           <div className="mt-8">
             <h3 className="text-lg font-semibold mb-4 text-white">Historique des générations</h3>
             <ImagePreview
-              images={history.map(h => h.url)}
+              images={uniqueHistory.map(h => h.url)}
               onTweak={(settings) => onTweak(settings)}
               onDownload={onDownload}
               settings={settings}

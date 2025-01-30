@@ -39,7 +39,12 @@ export const useImageHistory = () => {
 
       if (error) throw error;
 
-      const formattedHistory = images.map(img => {
+      // Remove duplicates based on URL
+      const uniqueImages = images.filter((item, index, self) =>
+        index === self.findIndex((t) => t.url === item.url)
+      );
+
+      const formattedHistory = uniqueImages.map(img => {
         const imgSettings = img.settings as ImageSettings | null;
         return {
           url: img.url,
@@ -164,7 +169,6 @@ export const useImageHistory = () => {
 
   return { 
     history, 
-    allHistory: history,
     addToHistory,
     isLoading 
   };
