@@ -3,11 +3,6 @@ import { supabase } from '@/integrations/supabase/client';
 import type { GenerationSettings } from '@/types/replicate';
 import { useToast } from "@/hooks/use-toast";
 
-type ImageSettings = {
-  hf_loras: string[];
-  lora_scales: number[];
-};
-
 export const useImageHistory = () => {
   const [history, setHistory] = useState<{
     url: string;
@@ -22,6 +17,7 @@ export const useImageHistory = () => {
   const fetchHistory = useCallback(async () => {
     try {
       setIsLoading(true);
+      console.log('Fetching history...');
       
       const { data: session } = await supabase.auth.getSession();
       if (!session?.session?.user) {
@@ -40,33 +36,33 @@ export const useImageHistory = () => {
       if (error) throw error;
 
       // Remove duplicates based on URL
-      const uniqueImages = images.filter((item, index, self) =>
-        index === self.findIndex((t) => t.url === item.url)
-      );
+      const uniqueImages = images.reduce((acc: any[], img: any) => {
+        if (!acc.find(item => item.url === img.url)) {
+          acc.push(img);
+        }
+        return acc;
+      }, []);
 
-      const formattedHistory = uniqueImages.map(img => {
-        const imgSettings = img.settings as ImageSettings | null;
-        return {
-          url: img.url,
-          settings: {
-            prompt: img.prompt || '',
-            negative_prompt: img.negative_prompt || '',
-            guidance_scale: img.guidance_scale || 7.5,
-            num_inference_steps: img.steps || 30,
-            seed: img.seed,
-            num_outputs: img.num_outputs || 1,
-            aspect_ratio: img.aspect_ratio || "1:1",
-            output_format: img.output_format || "webp",
-            output_quality: img.output_quality || 80,
-            prompt_strength: img.prompt_strength || 0.8,
-            hf_loras: imgSettings?.hf_loras || [],
-            lora_scales: imgSettings?.lora_scales || [],
-            disable_safety_checker: false,
-            reference_image_url: img.reference_image_url || null
-          } as GenerationSettings,
-          timestamp: new Date(img.created_at).getTime()
-        };
-      });
+      const formattedHistory = uniqueImages.map(img => ({
+        url: img.url,
+        settings: {
+          prompt: img.prompt || '',
+          negative_prompt: img.negative_prompt || '',
+          guidance_scale: img.guidance_scale || 7.5,
+          num_inference_steps: img.steps || 30,
+          seed: img.seed,
+          num_outputs: img.num_outputs || 1,
+          aspect_ratio: img.aspect_ratio || "1:1",
+          output_format: img.output_format || "webp",
+          output_quality: img.output_quality || 80,
+          prompt_strength: img.prompt_strength || 0.8,
+          hf_loras: img.settings?.hf_loras || [],
+          lora_scales: img.settings?.lora_scales || [],
+          disable_safety_checker: false,
+          reference_image_url: img.reference_image_url || null
+        } as GenerationSettings,
+        timestamp: new Date(img.created_at).getTime()
+      }));
 
       setHistory(formattedHistory);
     } catch (error) {
@@ -132,7 +128,7 @@ export const useImageHistory = () => {
         title: "Image sauvegardée",
         description: "L'image a été ajoutée à votre historique",
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error adding to history:', error);
       toast({
         title: "Erreur",
@@ -168,7 +164,7 @@ export const useImageHistory = () => {
   }, [fetchHistory]);
 
   return { 
-    history, 
+    history,
     addToHistory,
     isLoading 
   };

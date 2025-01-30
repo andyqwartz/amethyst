@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { GenerationSettings } from '@/types/replicate';
 
 const DEFAULT_SETTINGS: GenerationSettings = {
@@ -18,7 +18,14 @@ const DEFAULT_SETTINGS: GenerationSettings = {
 };
 
 export const useGenerationSettings = () => {
-  const [settings, setSettings] = useState<GenerationSettings>(DEFAULT_SETTINGS);
+  const [settings, setSettings] = useState<GenerationSettings>(() => {
+    const savedSettings = localStorage.getItem('generation_settings');
+    return savedSettings ? JSON.parse(savedSettings) : DEFAULT_SETTINGS;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('generation_settings', JSON.stringify(settings));
+  }, [settings]);
 
   const updateSettings = (newSettings: Partial<GenerationSettings>) => {
     setSettings(current => {
@@ -30,7 +37,7 @@ export const useGenerationSettings = () => {
 
   const resetSettings = () => {
     setSettings(DEFAULT_SETTINGS);
-    localStorage.removeItem('last_settings');
+    localStorage.removeItem('generation_settings');
   };
 
   return {
