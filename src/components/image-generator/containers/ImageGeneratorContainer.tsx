@@ -16,7 +16,6 @@ interface ImageGeneratorContainerProps {
   settings: GenerationSettings;
   generatedImages: string[];
   history: { url: string; settings: GenerationSettings }[];
-  allHistory: { url: string; settings: GenerationSettings }[];
   isLoading: boolean;
   progress: number;
   currentLogs?: string;
@@ -41,7 +40,6 @@ export const ImageGeneratorContainer = ({
   settings,
   generatedImages,
   history,
-  allHistory,
   isLoading,
   progress,
   currentLogs,
@@ -80,7 +78,7 @@ export const ImageGeneratorContainer = ({
           settings={settings}
           isGenerating={isGenerating}
           generatedImages={generatedImages}
-          history={allHistory}
+          history={history}
           isLoading={isLoading}
           onImageUpload={handleImageUpload}
           onImageClick={handleImageClick}
