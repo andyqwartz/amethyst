@@ -158,7 +158,7 @@ export const useImageGeneratorLogic = () => {
       });
 
       const updatedHistory = history.filter(item => item.url !== imageUrl);
-      addToHistory(updatedHistory);
+      addToHistory(updatedHistory, true); // Fixed: Added the second argument
     } catch (error) {
       console.error('Error deleting image:', error);
       toast({
