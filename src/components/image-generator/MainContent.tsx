@@ -23,7 +23,7 @@ interface MainContentProps {
   onGenerate: () => void;
   onToggleSettings: () => void;
   onTweak: (settings: GenerationSettings) => void;
-  onDownload: (imageUrl: string) => void;
+  onDownload: (imageUrl: string, outputFormat: string) => void;
   onDeleteHistory: () => void;
   onDeleteImage: (imageUrl: string) => void;
 }
