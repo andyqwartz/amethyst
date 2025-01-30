@@ -24,6 +24,7 @@ interface ImageGeneratorContainerProps {
   handleGenerate: () => void;
   handleTweak: (settings: GenerationSettings) => void;
   handleDownload: (imageUrl: string) => void;
+  handleDeleteImage: (imageUrl: string) => void;
   updateSettings: (settings: Partial<GenerationSettings>) => void;
   setReferenceImage: (image: string | null) => void;
   handleRemoveReferenceImage: () => void;
@@ -48,6 +49,7 @@ export const ImageGeneratorContainer = ({
   handleGenerate,
   handleTweak,
   handleDownload,
+  handleDeleteImage,
   updateSettings,
   setReferenceImage,
   handleRemoveReferenceImage,
@@ -88,6 +90,7 @@ export const ImageGeneratorContainer = ({
           onToggleSettings={() => setShowSettings(!showSettings)}
           onTweak={handleTweak}
           onDownload={handleDownload}
+          onDeleteImage={handleDeleteImage}
           onDeleteHistory={handleDeleteClick}
         />
       </div>

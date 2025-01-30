@@ -1,12 +1,13 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Download, Settings } from 'lucide-react';
+import { Download, Settings, Trash2 } from 'lucide-react';
 import type { GenerationSettings } from '@/types/replicate';
 
 interface ImagePreviewProps {
   images: string[];
   onDownload: (imageUrl: string) => void;
   onTweak?: (settings: GenerationSettings) => void;
+  onDelete?: (imageUrl: string) => void;
   settings?: GenerationSettings;
   className?: string;
 }
@@ -15,6 +16,7 @@ export const ImagePreview = ({
   images, 
   onDownload, 
   onTweak,
+  onDelete,
   settings,
   className = "" 
 }: ImagePreviewProps) => {
@@ -49,6 +51,16 @@ export const ImagePreview = ({
                 className="rounded-full bg-primary hover:bg-primary-hover shadow-lg transition-all duration-300 w-10 h-10"
               >
                 <Settings className="h-4 w-4 text-white" />
+              </Button>
+            )}
+            {onDelete && (
+              <Button
+                variant="secondary"
+                size="icon"
+                onClick={() => onDelete(imageUrl)}
+                className="rounded-full bg-destructive hover:bg-destructive/90 shadow-lg transition-all duration-300 w-10 h-10"
+              >
+                <Trash2 className="h-4 w-4 text-white" />
               </Button>
             )}
           </div>

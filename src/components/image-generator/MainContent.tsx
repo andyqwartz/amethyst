@@ -25,6 +25,7 @@ interface MainContentProps {
   onTweak: (settings: GenerationSettings) => void;
   onDownload: (imageUrl: string) => void;
   onDeleteHistory: () => void;
+  onDeleteImage: (imageUrl: string) => void;
 }
 
 export const MainContent = ({
@@ -43,7 +44,8 @@ export const MainContent = ({
   onToggleSettings,
   onTweak,
   onDownload,
-  onDeleteHistory
+  onDeleteHistory,
+  onDeleteImage
 }: MainContentProps) => {
   // Remove duplicates from history
   const uniqueHistory = history.filter((item, index, self) =>
@@ -82,6 +84,7 @@ export const MainContent = ({
               images={generatedImages}
               onTweak={onTweak}
               onDownload={onDownload}
+              onDelete={onDeleteImage}
               settings={settings}
             />
           </div>
@@ -94,6 +97,7 @@ export const MainContent = ({
               images={uniqueHistory.map(h => h.url)}
               onTweak={(settings) => onTweak(settings)}
               onDownload={onDownload}
+              onDelete={onDeleteImage}
               settings={settings}
             />
           </div>

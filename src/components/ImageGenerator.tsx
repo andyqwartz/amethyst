@@ -24,6 +24,7 @@ export const ImageGenerator = () => {
     handleGenerate,
     handleTweak,
     handleDownload,
+    handleDeleteImage,
     updateSettings,
     setReferenceImage,
     handleRemoveReferenceImage
@@ -83,6 +84,7 @@ export const ImageGenerator = () => {
       handleGenerate={handleGenerate}
       handleTweak={handleTweak}
       handleDownload={handleDownload}
+      handleDeleteImage={handleDeleteImage}
       updateSettings={updateSettings}
       setReferenceImage={setReferenceImage}
       handleRemoveReferenceImage={handleRemoveReferenceImage}
