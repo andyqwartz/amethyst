@@ -33,10 +33,10 @@ export const useImageGeneratorLogic = () => {
 
   const { currentLogs, progress, setProgress, status } = useProgressChecking(isGenerating);
 
-  const handleDownload = async (imageUrl: string) => {
+  const handleDownload = async (imageUrl: string, outputFormat: string) => {
     const link = document.createElement('a');
     link.href = imageUrl;
-    link.download = `generated-image-${Date.now()}.${settings.output_format || 'webp'}`;
+    link.download = `generated-image-${Date.now()}.${outputFormat}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -44,22 +44,6 @@ export const useImageGeneratorLogic = () => {
 
   const handleTweak = async (settings: GenerationSettings) => {
     try {
-      // Mise à jour des paramètres avec les LoRAs et leurs scales
-      updateSettings({
-        ...settings,
-        hf_loras: settings.hf_loras || [],
-        lora_scales: settings.lora_scales || [],
-        prompt: settings.prompt || '',
-        negative_prompt: settings.negative_prompt || '',
-        guidance_scale: settings.guidance_scale || 7.5,
-        num_inference_steps: settings.num_inference_steps || 30,
-        aspect_ratio: settings.aspect_ratio || '1:1',
-        output_format: settings.output_format || 'webp',
-        output_quality: settings.output_quality || 80,
-        prompt_strength: settings.prompt_strength || 0.8,
-      });
-
-      // Si une image de référence est fournie, la télécharger et la définir
       if (settings.reference_image_url) {
         const response = await fetch(settings.reference_image_url);
         const blob = await response.blob();
@@ -78,7 +62,20 @@ export const useImageGeneratorLogic = () => {
         setReferenceImage(publicUrl);
       }
 
-      // Afficher les paramètres avancés
+      updateSettings({
+        ...settings,
+        hf_loras: settings.hf_loras || [],
+        lora_scales: settings.lora_scales || [],
+        prompt: settings.prompt || '',
+        negative_prompt: settings.negative_prompt || '',
+        guidance_scale: settings.guidance_scale || 7.5,
+        num_inference_steps: settings.num_inference_steps || 30,
+        aspect_ratio: settings.aspect_ratio || '1:1',
+        output_format: settings.output_format || 'webp',
+        output_quality: settings.output_quality || 80,
+        prompt_strength: settings.prompt_strength || 0.8,
+      });
+
       setShowSettings(true);
 
       toast({
@@ -151,7 +148,6 @@ export const useImageGeneratorLogic = () => {
         description: "Image supprimée avec succès",
       });
 
-      // Mettre à jour l'interface sans recharger la page
       const updatedHistory = history.filter(item => item.url !== imageUrl);
       addToHistory(updatedHistory);
     } catch (error) {

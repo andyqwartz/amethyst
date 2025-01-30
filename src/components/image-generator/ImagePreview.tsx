@@ -16,7 +16,7 @@ import type { GenerationSettings } from '@/types/replicate';
 
 interface ImagePreviewProps {
   images: string[];
-  onDownload: (imageUrl: string) => void;
+  onDownload: (imageUrl: string, outputFormat: string) => void;
   onTweak?: (settings: GenerationSettings) => void;
   onDelete?: (imageUrl: string) => void;
   settings?: GenerationSettings;
@@ -49,7 +49,7 @@ export const ImagePreview = ({
             <Button
               variant="secondary"
               size="icon"
-              onClick={() => onDownload(imageUrl)}
+              onClick={() => onDownload(imageUrl, settings?.output_format || 'webp')}
               className="rounded-full bg-primary hover:bg-primary-hover shadow-lg transition-all duration-300 w-10 h-10"
             >
               <Download className="h-4 w-4 text-white" />
