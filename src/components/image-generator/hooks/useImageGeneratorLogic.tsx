@@ -34,12 +34,21 @@ export const useImageGeneratorLogic = () => {
   const { currentLogs, progress, setProgress, status } = useProgressChecking(isGenerating);
 
   const handleDownload = async (imageUrl: string, outputFormat: string) => {
-    const link = document.createElement('a');
-    link.href = imageUrl;
-    link.download = `generated-image-${Date.now()}.${outputFormat}`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      const link = document.createElement('a');
+      link.href = imageUrl;
+      link.download = `generated-image-${Date.now()}.${outputFormat}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error downloading image:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de télécharger l'image",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleTweak = async (settings: GenerationSettings) => {
