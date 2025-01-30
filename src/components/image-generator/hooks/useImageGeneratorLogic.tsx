@@ -33,43 +33,75 @@ export const useImageGeneratorLogic = () => {
 
   const { currentLogs, progress, setProgress, status } = useProgressChecking(isGenerating);
 
-  const { handleGenerate: baseHandleGenerate, handleTweak: baseTweak, handleDownload } = useGenerationHandlers(
+  const handleDownload = async (imageUrl: string) => {
+    const link = document.createElement('a');
+    link.href = imageUrl;
+    link.download = `generated-image-${Date.now()}.${settings.output_format || 'webp'}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleTweak = async (settings: GenerationSettings) => {
+    try {
+      // Mise à jour des paramètres avec les LoRAs et leurs scales
+      updateSettings({
+        ...settings,
+        hf_loras: settings.hf_loras || [],
+        lora_scales: settings.lora_scales || [],
+        prompt: settings.prompt || '',
+        negative_prompt: settings.negative_prompt || '',
+        guidance_scale: settings.guidance_scale || 7.5,
+        num_inference_steps: settings.num_inference_steps || 30,
+        aspect_ratio: settings.aspect_ratio || '1:1',
+        output_format: settings.output_format || 'webp',
+        output_quality: settings.output_quality || 80,
+        prompt_strength: settings.prompt_strength || 0.8,
+      });
+
+      // Si une image de référence est fournie, la télécharger et la définir
+      if (settings.reference_image_url) {
+        const response = await fetch(settings.reference_image_url);
+        const blob = await response.blob();
+        const file = new File([blob], `reference-${Date.now()}.${settings.output_format || 'webp'}`, { type: blob.type });
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('reference-images')
+          .upload(`reference-${Date.now()}.${settings.output_format || 'webp'}`, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('reference-images')
+          .getPublicUrl(uploadData.path);
+
+        setReferenceImage(publicUrl);
+      }
+
+      // Afficher les paramètres avancés
+      setShowSettings(true);
+
+      toast({
+        title: "Paramètres restaurés",
+        description: "Les paramètres de génération ont été restaurés avec succès",
+      });
+    } catch (error) {
+      console.error('Error in handleTweak:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de restaurer les paramètres",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const { handleGenerate: baseHandleGenerate } = useGenerationHandlers(
     setIsGenerating,
     generate,
     updateSettings,
     setShowSettings,
     setReferenceImage
   );
-
-  const handleTweak = async (settings: GenerationSettings) => {
-    // Mise à jour des paramètres avec les LoRAs et leurs scales
-    updateSettings({
-      ...settings,
-      hf_loras: settings.hf_loras || [],
-      lora_scales: settings.lora_scales || [],
-      prompt: settings.prompt || '',
-      negative_prompt: settings.negative_prompt || '',
-      guidance_scale: settings.guidance_scale || 7.5,
-      num_inference_steps: settings.num_inference_steps || 30,
-      aspect_ratio: settings.aspect_ratio || '1:1',
-      output_format: settings.output_format || 'webp',
-      output_quality: settings.output_quality || 80,
-      prompt_strength: settings.prompt_strength || 0.8,
-    });
-
-    // Afficher les paramètres avancés
-    setShowSettings(true);
-
-    // Définir l'image comme référence
-    if (settings.reference_image_url) {
-      setReferenceImage(settings.reference_image_url);
-    }
-
-    toast({
-      title: "Paramètres restaurés",
-      description: "Les paramètres de génération ont été restaurés avec succès",
-    });
-  };
 
   const handleGenerate = async () => {
     if (isGenerating) return;
@@ -118,6 +150,10 @@ export const useImageGeneratorLogic = () => {
         title: "Succès",
         description: "Image supprimée avec succès",
       });
+
+      // Mettre à jour l'interface sans recharger la page
+      const updatedHistory = history.filter(item => item.url !== imageUrl);
+      addToHistory(updatedHistory);
     } catch (error) {
       console.error('Error deleting image:', error);
       toast({

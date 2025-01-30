@@ -1,6 +1,17 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Download, Settings, Trash2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import type { GenerationSettings } from '@/types/replicate';
 
 interface ImagePreviewProps {
@@ -54,14 +65,31 @@ export const ImagePreview = ({
               </Button>
             )}
             {onDelete && (
-              <Button
-                variant="secondary"
-                size="icon"
-                onClick={() => onDelete(imageUrl)}
-                className="rounded-full bg-destructive hover:bg-destructive/90 shadow-lg transition-all duration-300 w-10 h-10"
-              >
-                <Trash2 className="h-4 w-4 text-white" />
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="rounded-full bg-destructive hover:bg-destructive/90 shadow-lg transition-all duration-300 w-10 h-10"
+                  >
+                    <Trash2 className="h-4 w-4 text-white" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Supprimer l'image</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Êtes-vous sûr de vouloir supprimer cette image ? Cette action est irréversible.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Annuler</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => onDelete(imageUrl)}>
+                      Supprimer
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
           </div>
         </div>
