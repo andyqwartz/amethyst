@@ -23,7 +23,7 @@ interface ImageGeneratorContainerProps {
   handleImageClick: () => void;
   handleGenerate: () => void;
   handleTweak: (settings: GenerationSettings) => void;
-  handleDownload: (imageUrl: string) => void;
+  handleDownload: (imageUrl: string, outputFormat: string) => void;
   handleDeleteImage: (imageUrl: string) => void;
   updateSettings: (settings: Partial<GenerationSettings>) => void;
   setReferenceImage: (image: string | null) => void;
