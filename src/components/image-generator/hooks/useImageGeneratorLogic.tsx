@@ -157,8 +157,12 @@ export const useImageGeneratorLogic = () => {
         description: "Image supprimée avec succès",
       });
 
-      const updatedHistory = history.filter(item => item.url !== imageUrl);
-      addToHistory(updatedHistory, true); // Fixed: Added the second argument
+      // Find the image settings before filtering
+      const deletedImage = history.find(item => item.url === imageUrl);
+      if (deletedImage) {
+        // Call addToHistory with the correct arguments
+        await addToHistory(deletedImage.url, deletedImage.settings);
+      }
     } catch (error) {
       console.error('Error deleting image:', error);
       toast({
