@@ -20,7 +20,7 @@ export const ImageGenerator = React.memo(() => {
   
   const generationState = useGenerationState();
   const { settings, updateSettings } = useGenerationSettings();
-  const { history, addToHistory, handleDeleteImage } = useImageHistory();
+  const { history, addToHistory, deleteImage } = useImageHistory();
 
   const handleImageUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -138,7 +138,7 @@ export const ImageGenerator = React.memo(() => {
       handleGenerate={handleGenerate}
       handleTweak={handleTweak}
       handleDownload={handleDownload}
-      handleDeleteImage={handleDeleteImage}
+      handleDeleteImage={deleteImage}
       updateSettings={updateSettings}
       setReferenceImage={setReferenceImage}
       handleRemoveReferenceImage={handleRemoveReferenceImage}
