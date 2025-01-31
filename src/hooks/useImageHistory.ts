@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { GenerationSettings } from '@/types/replicate';
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/useToast";
+import { checkSession } from '@/integrations/supabase/client';
 
 export const useImageHistory = () => {
   const [history, setHistory] = useState<{
@@ -19,11 +20,16 @@ export const useImageHistory = () => {
       setIsLoading(true);
       console.log('Fetching history...');
       
-      const { data: session } = await supabase.auth.getSession();
-      if (!session?.session?.user) {
+      let session;
+      try {
+        session = await checkSession();
+      } catch (error) {
         console.log('No authenticated user found');
         setHistory([]);
-        setIsLoading(false);
+        toast({
+          description: "Connectez-vous pour voir votre historique d'images",
+          variant: "error",
+        });
         return;
       }
 
@@ -83,20 +89,29 @@ export const useImageHistory = () => {
       return;
     }
 
+    let session;
+    try {
+      session = await checkSession();
+    } catch (error) {
+      toast({
+        description: "Veuillez vous connecter pour sauvegarder les images",
+        variant: "error",
+      });
+      return;
+    }
+
+    // Optimistically add to history
+    const newHistoryItem = {
+      url,
+      settings,
+      timestamp: Date.now()
+    };
+    
+    setHistory(prev => [newHistoryItem, ...prev]);
     isAddingToHistory.current = true;
     lastAddedUrl.current = url;
 
     try {
-      const { data: session } = await supabase.auth.getSession();
-      
-      if (!session?.session?.user) {
-        toast({
-          title: "Erreur d'authentification",
-          description: "Veuillez vous connecter pour sauvegarder les images",
-          variant: "destructive"
-        });
-        return;
-      }
 
       const { error } = await supabase
         .from('images')
@@ -121,19 +136,18 @@ export const useImageHistory = () => {
         });
 
       if (error) throw error;
-
-      await fetchHistory();
       
       toast({
-        title: "Image sauvegardée",
-        description: "L'image a été ajoutée à votre historique",
+        description: "Image sauvegardée dans votre historique",
+        variant: "success",
       });
     } catch (error) {
       console.error('Error adding to history:', error);
+      // Roll back optimistic update
+      setHistory(prev => prev.filter(item => item.url !== url));
       toast({
-        title: "Erreur",
         description: "Impossible de sauvegarder l'image dans l'historique",
-        variant: "destructive"
+        variant: "error"
       });
     } finally {
       isAddingToHistory.current = false;

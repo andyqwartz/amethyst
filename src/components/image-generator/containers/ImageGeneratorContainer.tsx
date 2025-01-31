@@ -14,8 +14,8 @@ interface ImageGeneratorContainerProps {
   isGenerating: boolean;
   referenceImage: string | null;
   settings: GenerationSettings;
-  generatedImages: string[];
-  history: { url: string; settings: GenerationSettings }[];
+  generatedImages: string[]; // Required array of strings, never undefined
+  history: Array<{ url: string; settings: GenerationSettings }>; // Required array of objects, never undefined
   isLoading: boolean;
   progress: number;
   currentLogs?: string;

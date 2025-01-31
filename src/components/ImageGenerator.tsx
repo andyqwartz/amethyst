@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useImageGeneratorLogic } from './image-generator/hooks/useImageGeneratorLogic';
 import { ImageGeneratorContainer } from './image-generator/containers/ImageGeneratorContainer';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
 
-export const ImageGenerator = () => {
+export const ImageGenerator = React.memo(() => {
   const { toast } = useToast();
   const {
     showSettings,
@@ -14,8 +14,8 @@ export const ImageGenerator = () => {
     isGenerating,
     referenceImage,
     settings,
-    generatedImages,
-    history,
+    generatedImages: rawGeneratedImages,
+    history: rawHistory,
     isLoading,
     progress,
     currentLogs,
@@ -30,7 +30,10 @@ export const ImageGenerator = () => {
     handleRemoveReferenceImage
   } = useImageGeneratorLogic();
 
-  const handleDeleteHistory = async () => {
+  const generatedImages = rawGeneratedImages ?? [];
+  const history = rawHistory ?? [];
+
+  const handleDeleteHistory = useCallback(async () => {
     try {
       const { data: session } = await supabase.auth.getSession();
       if (!session?.session?.user) {
@@ -42,6 +45,12 @@ export const ImageGenerator = () => {
         return;
       }
 
+      // Start loading state
+      const loadingToast = toast({
+        title: "Suppression en cours",
+        description: "Veuillez patienter...",
+      });
+
       const { error } = await supabase
         .from('images')
         .delete()
@@ -49,21 +58,25 @@ export const ImageGenerator = () => {
 
       if (error) throw error;
 
+      // Clear loading toast
+      loadingToast.dismiss();
+      
       toast({
         title: "Succès",
         description: "Historique supprimé avec succès",
       });
       
-      window.location.reload();
+      // Use a more controlled way to refresh the data
+      window.location.href = window.location.pathname;
     } catch (error) {
       console.error('Error deleting history:', error);
       toast({
         title: "Erreur",
-        description: "Échec de la suppression de l'historique",
+        description: error instanceof Error ? error.message : "Échec de la suppression de l'historique",
         variant: "destructive"
       });
     }
-  };
+  }, [toast]);
 
   return (
     <ImageGeneratorContainer
@@ -91,4 +104,4 @@ export const ImageGenerator = () => {
       handleDeleteHistory={handleDeleteHistory}
     />
   );
-};
+});

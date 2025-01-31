@@ -6,19 +6,21 @@ interface GenerationButtonsProps {
   onToggleSettings: () => void;
   onGenerate: () => void;
   isGenerating: boolean;
+  showSettings: boolean;
 }
 
 export const GenerationButtons = ({ 
   onToggleSettings, 
   onGenerate, 
-  isGenerating 
+  isGenerating,
+  showSettings
 }: GenerationButtonsProps) => {
   const handleGenerateClick = () => {
     if (!isGenerating) {
-      console.log('GenerationButtons - Triggering generation');
+      if (showSettings) {
+        onToggleSettings();
+      }
       onGenerate();
-    } else {
-      console.log('GenerationButtons - Generation already in progress');
     }
   };
   

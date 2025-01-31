@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import type { GenerationSettings } from '@/types/replicate';
+import { useToast } from '@/components/ui/use-toast';
 
 export const useGenerationEffects = (
   referenceImage: string | null,
@@ -10,6 +11,7 @@ export const useGenerationEffects = (
   setIsGenerating: (isGenerating: boolean) => void,
   addToHistory: (url: string, settings: GenerationSettings) => Promise<void>
 ) => {
+  const { toast } = useToast();
   // Effect for handling reference image updates
   useEffect(() => {
     if (referenceImage) {
@@ -42,9 +44,14 @@ export const useGenerationEffects = (
       } else if (generationStatus === 'error') {
         console.log('Generation failed');
         setIsGenerating(false);
+        toast({
+          variant: "destructive",
+          title: "Échec de la génération",
+          description: "La génération d'image a échoué. Veuillez réessayer."
+        });
       }
     };
 
     addImagesToHistory();
-  }, [generationStatus, generatedImages, settings, addToHistory, setIsGenerating]);
+  }, [generationStatus, generatedImages, settings, addToHistory, setIsGenerating, toast]);
 };
