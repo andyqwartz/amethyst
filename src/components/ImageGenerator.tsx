@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useImageGeneratorLogic } from './image-generator/hooks/useImageGeneratorLogic';
 import { ImageGeneratorContainer } from './image-generator/containers/ImageGeneratorContainer';
 import { useToast } from "@/hooks/use-toast";
@@ -9,29 +9,72 @@ import { useImageHistory } from '@/hooks/useImageHistory';
 
 export const ImageGenerator = React.memo(() => {
   const { toast } = useToast();
+  const [showSettings, setShowSettings] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [referenceImage, setReferenceImage] = useState<string | null>(null);
+  const [generatedImages, setGeneratedImages] = useState<string[]>([]);
+  const [progress, setProgress] = useState(0);
+  const [currentLogs, setCurrentLogs] = useState<string>();
+  
   const generationState = useGenerationState();
   const { settings, updateSettings } = useGenerationSettings();
   const { history, addToHistory, handleDeleteImage } = useImageHistory();
-  
-  const {
-    showSettings,
-    setShowSettings,
-    showHelp,
-    setShowHelp,
-    isGenerating,
-    referenceImage,
-    generatedImages,
-    isLoading,
-    progress,
-    currentLogs,
-    handleImageUpload,
-    handleImageClick,
-    handleGenerate,
-    handleTweak,
-    handleDownload,
-    setReferenceImage,
-    handleRemoveReferenceImage
-  } = useImageGeneratorLogic();
+
+  const handleImageUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setReferenceImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  }, []);
+
+  const handleImageClick = useCallback(() => {
+    // Handle image click logic here
+  }, []);
+
+  const handleGenerate = useCallback(() => {
+    setIsGenerating(true);
+    // Handle image generation logic here
+  }, []);
+
+  const handleTweak = useCallback((settings: any) => {
+    updateSettings(settings);
+  }, [updateSettings]);
+
+  const handleDownload = useCallback(async (imageUrl: string, outputFormat: string) => {
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.style.display = 'none';
+      link.href = url;
+      link.download = `generated-image-${Date.now()}.${outputFormat}`;
+      document.body.appendChild(link);
+      link.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(link);
+      toast({
+        title: "Téléchargement réussi",
+        description: "L'image a été téléchargée avec succès",
+      });
+    } catch (error) {
+      console.error('Error downloading image:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de télécharger l'image",
+        variant: "destructive"
+      });
+    }
+  }, [toast]);
+
+  const handleRemoveReferenceImage = useCallback(() => {
+    setReferenceImage(null);
+  }, []);
 
   const handleDeleteHistory = useCallback(async () => {
     try {
@@ -45,7 +88,6 @@ export const ImageGenerator = React.memo(() => {
         return;
       }
 
-      // Start loading state
       const loadingToast = toast({
         title: "Suppression en cours",
         description: "Veuillez patienter...",
@@ -58,7 +100,6 @@ export const ImageGenerator = React.memo(() => {
 
       if (error) throw error;
 
-      // Clear loading toast
       loadingToast.dismiss();
       
       toast({
@@ -66,7 +107,6 @@ export const ImageGenerator = React.memo(() => {
         description: "Historique supprimé avec succès",
       });
       
-      // Use a more controlled way to refresh the data
       window.location.href = window.location.pathname;
     } catch (error) {
       console.error('Error deleting history:', error);
@@ -89,7 +129,7 @@ export const ImageGenerator = React.memo(() => {
       settings={settings}
       generatedImages={generatedImages}
       history={history}
-      isLoading={isLoading}
+      isLoading={generationState.isLoading}
       progress={progress}
       currentLogs={currentLogs}
       handleImageUpload={handleImageUpload}
