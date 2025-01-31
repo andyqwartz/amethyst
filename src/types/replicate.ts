@@ -23,6 +23,7 @@ export interface GenerationState {
   currentLogs?: string;
   isPaused: boolean;
   isGenerating: boolean;
+  error?: string;
 }
 
 export type GenerationStatus = 'idle' | 'loading' | 'success' | 'error';
@@ -46,6 +47,36 @@ export interface ReplicateInput {
   hf_loras?: string[];
   lora_scales?: number[];
   disable_safety_checker?: boolean;
+}
+
+export interface ImageFormatsSelectorProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+export interface LoraSelectorProps {
+  value: string[];
+  onChange: (value: string[]) => void;
+}
+
+export interface NumberOfImagesSelectorProps {
+  value: number;
+  onChange: (value: number) => void;
+}
+
+export interface PromptStrengthSelectorProps {
+  value: number;
+  onChange: (value: number) => void;
+}
+
+export interface OutputFormatSelectorProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+export interface OutputQualitySelectorProps {
+  value: number;
+  onChange: (value: number) => void;
 }
 
 export interface ToastOptions {

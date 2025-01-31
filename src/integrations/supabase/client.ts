@@ -20,6 +20,7 @@ export const checkSession = async () => {
   const { data: { session }, error } = await supabase.auth.getSession();
   
   if (error) {
+    console.error('Session check error:', error);
     throw error;
   }
   
