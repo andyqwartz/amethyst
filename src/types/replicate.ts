@@ -12,7 +12,7 @@ export interface GenerationSettings {
   lora_scales: number[];
   disable_safety_checker: boolean;
   seed?: number;
-  reference_image_url?: string;
+  reference_image_url?: string | null;
 }
 
 export interface GenerationState {
@@ -83,17 +83,4 @@ export interface OutputQualitySelectorProps {
   value: number;
   onChange: (value: number) => void;
   disabled?: boolean;
-}
-
-export interface ToastOptions {
-  duration?: number;
-  variant?: 'default' | 'destructive';
-}
-
-export interface Toast {
-  id: string;
-  title?: string;
-  description?: string;
-  action?: React.ReactNode;
-  variant?: 'default' | 'destructive';
 }

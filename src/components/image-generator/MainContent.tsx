@@ -54,7 +54,6 @@ export const MainContent = ({
   onDeleteHistory,
   onDeleteImage
 }: MainContentProps) => {
-  // Remove duplicates from history and combine with generated images
   const allImages = React.useMemo(() => {
     const uniqueHistory = (history || []).filter((item, index, self) =>
       index === self.findIndex((t) => t.url === item.url)

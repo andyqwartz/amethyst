@@ -14,8 +14,8 @@ interface ImageGeneratorContainerProps {
   isGenerating: boolean;
   referenceImage: string | null;
   settings: GenerationSettings;
-  generatedImages: string[]; // Required array of strings, never undefined
-  history: Array<{ url: string; settings: GenerationSettings }>; // Required array of objects, never undefined
+  generatedImages: string[];
+  history: Array<{ url: string; settings: GenerationSettings }>;
   isLoading: boolean;
   progress: number;
   currentLogs?: string;
@@ -23,7 +23,7 @@ interface ImageGeneratorContainerProps {
   handleImageClick: () => void;
   handleGenerate: () => void;
   handleTweak: (settings: GenerationSettings) => void;
-  handleDownload: (imageUrl: string, outputFormat: string) => void;
+  handleDownload: (imageUrl: string, outputFormat: string) => Promise<void>;
   handleDeleteImage: (imageUrl: string) => void;
   updateSettings: (settings: Partial<GenerationSettings>) => void;
   setReferenceImage: (image: string | null) => void;
