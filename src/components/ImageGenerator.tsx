@@ -3,9 +3,16 @@ import { useImageGeneratorLogic } from './image-generator/hooks/useImageGenerato
 import { ImageGeneratorContainer } from './image-generator/containers/ImageGeneratorContainer';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
+import { useGenerationState } from './image-generator/hooks/useGenerationState';
+import { useGenerationSettings } from './image-generator/hooks/useGenerationSettings';
+import { useImageHistory } from '@/hooks/useImageHistory';
 
 export const ImageGenerator = React.memo(() => {
   const { toast } = useToast();
+  const generationState = useGenerationState();
+  const { settings, updateSettings } = useGenerationSettings();
+  const { history, addToHistory, handleDeleteImage } = useImageHistory();
+  
   const {
     showSettings,
     setShowSettings,
@@ -13,9 +20,7 @@ export const ImageGenerator = React.memo(() => {
     setShowHelp,
     isGenerating,
     referenceImage,
-    settings,
-    generatedImages: rawGeneratedImages,
-    history: rawHistory,
+    generatedImages,
     isLoading,
     progress,
     currentLogs,
@@ -24,14 +29,9 @@ export const ImageGenerator = React.memo(() => {
     handleGenerate,
     handleTweak,
     handleDownload,
-    handleDeleteImage,
-    updateSettings,
     setReferenceImage,
     handleRemoveReferenceImage
   } = useImageGeneratorLogic();
-
-  const generatedImages = rawGeneratedImages ?? [];
-  const history = rawHistory ?? [];
 
   const handleDeleteHistory = useCallback(async () => {
     try {
@@ -105,3 +105,5 @@ export const ImageGenerator = React.memo(() => {
     />
   );
 });
+
+ImageGenerator.displayName = 'ImageGenerator';
