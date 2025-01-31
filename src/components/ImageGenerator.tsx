@@ -34,7 +34,7 @@ export const ImageGenerator = React.memo(() => {
   const [currentLogs, setCurrentLogs] = useState<string>();
   
   const generationState = useGenerationState();
-  const { settings, updateSettings } = useGenerationSettings();
+  const { settings = defaultSettings, updateSettings } = useGenerationSettings();
   const { history, addToHistory, deleteImage } = useImageHistory();
 
   const handleImageUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -142,7 +142,7 @@ export const ImageGenerator = React.memo(() => {
       setShowHelp={setShowHelp}
       isGenerating={isGenerating}
       referenceImage={referenceImage}
-      settings={settings || defaultSettings}
+      settings={settings}
       generatedImages={generatedImages}
       history={history}
       isLoading={false}
