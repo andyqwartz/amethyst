@@ -14,7 +14,7 @@ export const GenerationControls: React.FC<GenerationControlsProps> = ({
   onStop,
   className = '',
 }) => {
-  const { isGenerating, isPaused } = useGenerationState();
+  const { isGenerating } = useGenerationState();
 
   const handleStart = () => {
     onStart?.();
@@ -28,18 +28,18 @@ export const GenerationControls: React.FC<GenerationControlsProps> = ({
     <div className={`flex items-center gap-2 ${className}`}>
       <Button
         onClick={handleStart}
-        disabled={isGenerating && !isPaused}
+        disabled={isGenerating}
         variant="default"
         size="sm"
         className="w-24"
       >
         <Play className="mr-2 h-4 w-4" />
-        {isGenerating && !isPaused ? 'Running' : 'Start'}
+        {isGenerating ? 'Running' : 'Start'}
       </Button>
 
       <Button
         onClick={handleStop}
-        disabled={!isGenerating || isPaused}
+        disabled={!isGenerating}
         variant="destructive"
         size="sm"
         className="w-24"

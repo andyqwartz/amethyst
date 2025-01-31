@@ -92,6 +92,7 @@ export const MainContent = ({
             onGenerate={handleGenerate}
             onToggleSettings={onToggleSettings}
             isGenerating={isGenerating}
+            showSettings={showSettings}
           />
         </div>
 
