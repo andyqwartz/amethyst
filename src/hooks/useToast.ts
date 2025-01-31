@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { useToast as useToastUI } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
+import type { ToastActionElement } from "@/components/ui/toast";
 
 interface ToastOptions {
   duration?: number;
@@ -25,7 +26,9 @@ export function useToast() {
       description: message,
       variant: "default",
       duration: options?.duration || defaultToastOptions.duration,
-      action: options?.action && <Button>{options.action}</Button>,
+      action: options?.action ? (
+        <Button asChild>{options.action}</Button>
+      ) : undefined,
       className: `${defaultToastOptions.className} ${options?.className || ''}`,
     });
   }, [toast]);
@@ -35,7 +38,9 @@ export function useToast() {
       description: message,
       variant: "destructive",
       duration: options?.duration || defaultToastOptions.duration + 1000,
-      action: options?.action && <Button variant="destructive">{options.action}</Button>,
+      action: options?.action ? (
+        <Button variant="destructive" asChild>{options.action}</Button>
+      ) : undefined,
       className: `${defaultToastOptions.className} ${options?.className || ''}`,
     });
   }, [toast]);
@@ -44,7 +49,9 @@ export function useToast() {
     toast({
       description: message,
       duration: options?.duration || defaultToastOptions.duration,
-      action: options?.action && <Button>{options.action}</Button>,
+      action: options?.action ? (
+        <Button asChild>{options.action}</Button>
+      ) : undefined,
       className: `${defaultToastOptions.className} ${options?.className || ''}`,
     });
   }, [toast]);
