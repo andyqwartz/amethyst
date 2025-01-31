@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useToast as useToastUI } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
-import type { ToastActionElement } from "@/components/ui/toast";
+import { ToastActionElement } from "@/components/ui/toast";
 
 interface ToastOptions {
   duration?: number;
