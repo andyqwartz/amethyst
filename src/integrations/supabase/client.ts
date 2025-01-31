@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/supabase';
 
-const supabaseUrl = 'https://hyplbzvyvbcjzpioemay.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5cGxienZ5dmJjanpwaW9lbWF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDY4OTQxNjAsImV4cCI6MjAyMjQ3MDE2MH0.0Oi0JQvmqVJYOE4Dj2zFBHUEfwEBYWV-YcNBB_5Vxmg';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl) throw new Error('Missing Supabase URL');
 if (!supabaseAnonKey) throw new Error('Missing Supabase anon key');

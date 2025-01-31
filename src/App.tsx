@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { useEffect, useState } from 'react';
 import { supabase } from './integrations/supabase/client';
 import Index from './pages/Index';
-import LoginPage from './pages/LoginPage';
+import { Auth } from './pages/Auth';
 import { AccountPage } from './pages/AccountPage';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -30,7 +30,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (!session) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/auth" />;
   }
 
   return <>{children}</>;
@@ -40,7 +40,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/auth" element={<Auth />} />
         <Route 
           path="/" 
           element={

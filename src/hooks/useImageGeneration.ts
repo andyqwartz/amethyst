@@ -1,7 +1,9 @@
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import type { GenerationSettings } from '@/types/replicate';
 
-interface GenerationParameters {
+interface GenerationParameters extends GenerationSettings {
   prompt: string;
   negativePrompt?: string;
   seed?: number;
@@ -38,11 +40,17 @@ export function useImageGeneration(): UseImageGenerationReturn {
     setParametersState((prev) => ({ ...prev, ...params }));
   }, []);
 
+  const { toast } = useToast();
+
   const uploadReferenceImage = async (file: File): Promise<string> => {
     setIsLoading(true);
     setError(null);
     
     try {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user) {
+        throw new Error("You must be logged in to upload images");
+      }
       const fileName = `reference-${Date.now()}-${file.name}`;
       const { data, error: uploadError } = await supabase.storage
         .from('reference-images')
@@ -60,6 +68,11 @@ export function useImageGeneration(): UseImageGenerationReturn {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to upload reference image';
       setError(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive"
+      });
       throw new Error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -135,9 +148,44 @@ export function useImageGeneration(): UseImageGenerationReturn {
     restoreParameters();
   }, []);
 
-  const addGeneratedImage = useCallback((imageUrl: string) => {
-    setGeneratedImages(prev => [...prev, imageUrl]);
-  }, []);
+  const addGeneratedImage = useCallback(async (imageUrl: string) => {
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to save generated images",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Save to local state
+      setGeneratedImages(prev => [...prev, imageUrl]);
+
+      // Save to database
+      const { error } = await supabase
+        .from('images')
+        .insert([
+          {
+            url: imageUrl,
+            settings: parameters,
+            user_id: session.session.user.id,
+          },
+        ]);
+
+      if (error) throw error;
+
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to save generated image';
+      setError(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive"
+      });
+    }
+  }, [parameters, toast]);
 
   const clearGeneratedImages = useCallback(() => {
     setGeneratedImages([]);
