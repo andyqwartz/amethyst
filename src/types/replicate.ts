@@ -22,10 +22,27 @@ export interface GenerationState {
   isGenerating: boolean;
 }
 
-export type ToastOptions = {
+export type GenerationStatus = 'idle' | 'loading' | 'success' | 'error';
+
+export interface ReplicateInput {
+  prompt: string;
+  negative_prompt?: string;
+  guidance_scale?: number;
+  num_inference_steps?: number;
+  seed?: number;
+  width?: number;
+  height?: number;
+  num_outputs?: number;
+  scheduler?: string;
+  safety_checker?: boolean;
+  image?: string;
+  prompt_strength?: number;
+}
+
+export interface ToastOptions {
   duration?: number;
   variant?: 'default' | 'destructive';
-};
+}
 
 export interface Toast {
   id: string;
