@@ -1,28 +1,30 @@
 import { supabase } from '@/integrations/supabase/client';
-import type { StorageError } from '@supabase/storage-js';
 
-export const handleStorageError = (error: StorageError) => {
-  if ('error' in error) {
-    return `Storage error: ${error.message}`;
-  }
-  return 'An unknown storage error occurred';
-};
+export const uploadImage = async (file: File): Promise<string> => {
+  const fileName = `${Date.now()}-${file.name}`;
+  const { data, error } = await supabase.storage
+    .from('reference-images')
+    .upload(fileName, file);
 
-export const uploadFile = async (file: File) => {
-  const { data, error } = await supabase.storage.from('uploads').upload(`public/${file.name}`, file);
   if (error) {
-    throw handleStorageError(error);
+    throw error;
   }
-  return data;
+
+  if (!data?.path) {
+    throw new Error('Failed to get upload path');
+  }
+
+  return data.path;
 };
 
-export const deleteFile = async (path: string) => {
-  const { error } = await supabase.storage.from('uploads').remove([path]);
+export const getPublicUrl = async (path: string): Promise<string> => {
+  const { data, error } = await supabase.storage
+    .from('reference-images')
+    .getPublicUrl(path);
+
   if (error) {
-    throw handleStorageError(error);
+    throw error;
   }
-};
 
-export const getFileUrl = (path: string) => {
-  return supabase.storage.from('uploads').getPublicUrl(path).publicURL;
+  return data.publicUrl;
 };

@@ -1,109 +1,91 @@
 import React from 'react';
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalCloseButton,
-  Text,
-  VStack,
-  Link,
-  Heading,
-  UnorderedList,
-  ListItem,
-} from '@chakra-ui/react';
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
 
 interface HelpAndCreditsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export const HelpAndCreditsModal: React.FC<HelpAndCreditsModalProps> = ({
-  isOpen,
-  onClose,
-}) => {
+export const HelpAndCreditsModal = ({
+  open,
+  onOpenChange
+}: HelpAndCreditsModalProps) => {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="lg" isCentered>
-      <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>Help & Credits</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody pb={6}>
-          <VStack spacing={6} align="stretch">
-            <section>
-              <Heading as="h3" size="md" mb={3}>
-                How to Use
-              </Heading>
-              <UnorderedList spacing={2}>
-                <ListItem>
-                  Enter a detailed description of the image you want to generate
-                </ListItem>
-                <ListItem>
-                  Adjust the settings to fine-tune your generation parameters
-                </ListItem>
-                <ListItem>
-                  Click "Generate" to create your image
-                </ListItem>
-                <ListItem>
-                  Use the "Advanced Settings" for more control over the generation process
-                </ListItem>
-              </UnorderedList>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
+        <DialogHeader>
+          <DialogTitle>Aide & Crédits</DialogTitle>
+          <DialogDescription>
+            Guide d'utilisation et informations sur le projet
+          </DialogDescription>
+        </DialogHeader>
+
+        <ScrollArea className="h-[500px] pr-4">
+          <div className="space-y-6">
+            <section className="space-y-4">
+              <h3 className="text-lg font-semibold">Guide d'utilisation</h3>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>Entrez une description détaillée de l'image souhaitée</li>
+                <li>Ajustez les paramètres selon vos besoins</li>
+                <li>Cliquez sur "Générer" et attendez le résultat</li>
+                <li>Téléchargez ou partagez vos créations</li>
+              </ul>
             </section>
 
-            <section>
-              <Heading as="h3" size="md" mb={3}>
-                Tips
-              </Heading>
-              <UnorderedList spacing={2}>
-                <ListItem>
-                  Be specific in your prompts for better results
-                </ListItem>
-                <ListItem>
-                  Use the reference image feature to guide the style
-                </ListItem>
-                <ListItem>
-                  Experiment with different settings to find what works best
-                </ListItem>
-              </UnorderedList>
+            <section className="space-y-4">
+              <h3 className="text-lg font-semibold">Crédits</h3>
+              <div className="space-y-2">
+                <p>
+                  Ce projet utilise les technologies suivantes :
+                </p>
+                <ul className="list-disc pl-6 space-y-2">
+                  <li>
+                    <a 
+                      href="https://replicate.com" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      Replicate
+                    </a>
+                    {' '}pour la génération d'images
+                  </li>
+                  <li>
+                    <a 
+                      href="https://supabase.com" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      Supabase
+                    </a>
+                    {' '}pour le stockage et l'authentification
+                  </li>
+                  <li>
+                    <a 
+                      href="https://ui.shadcn.com" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      shadcn/ui
+                    </a>
+                    {' '}pour l'interface utilisateur
+                  </li>
+                </ul>
+              </div>
             </section>
-
-            <section>
-              <Heading as="h3" size="md" mb={3}>
-                Credits
-              </Heading>
-              <VStack align="stretch" spacing={2}>
-                <Text>
-                  Built with ❤️ using modern web technologies:
-                </Text>
-                <UnorderedList spacing={2}>
-                  <ListItem>
-                    <Link href="https://reactjs.org" isExternal color="blue.500">
-                      React
-                    </Link>
-                  </ListItem>
-                  <ListItem>
-                    <Link href="https://chakra-ui.com" isExternal color="blue.500">
-                      Chakra UI
-                    </Link>
-                  </ListItem>
-                  <ListItem>
-                    <Link href="https://www.typescriptlang.org" isExternal color="blue.500">
-                      TypeScript
-                    </Link>
-                  </ListItem>
-                </UnorderedList>
-              </VStack>
-            </section>
-
-            <Text fontSize="sm" color="gray.500" mt={4}>
-              Version 1.0.0
-            </Text>
-          </VStack>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+          </div>
+        </ScrollArea>
+      </DialogContent>
+    </Dialog>
   );
 };
-
-export default HelpAndCreditsModal;
