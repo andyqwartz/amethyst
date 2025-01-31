@@ -52,31 +52,39 @@ export interface ReplicateInput {
 export interface ImageFormatsSelectorProps {
   value: string;
   onChange: (value: string) => void;
+  disabled?: boolean;
+  selectedFormats?: string[];
 }
 
 export interface LoraSelectorProps {
   value: string[];
   onChange: (value: string[]) => void;
+  disabled?: boolean;
+  selectedLoras?: string[];
 }
 
 export interface NumberOfImagesSelectorProps {
   value: number;
   onChange: (value: number) => void;
+  disabled?: boolean;
 }
 
 export interface PromptStrengthSelectorProps {
   value: number;
   onChange: (value: number) => void;
+  disabled?: boolean;
 }
 
 export interface OutputFormatSelectorProps {
   value: string;
   onChange: (value: string) => void;
+  disabled?: boolean;
 }
 
 export interface OutputQualitySelectorProps {
   value: number;
   onChange: (value: number) => void;
+  disabled?: boolean;
 }
 
 export interface ToastOptions {
