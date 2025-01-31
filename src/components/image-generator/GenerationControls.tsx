@@ -1,5 +1,5 @@
 import React from 'react';
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { PromptInput } from './controls/PromptInput';
 import { GenerationButtons } from './controls/GenerationButtons';
 import type { GenerationSettings } from '@/types/replicate';
@@ -10,6 +10,7 @@ interface GenerationControlsProps {
   onGenerate: () => void;
   onToggleSettings: () => void;
   isGenerating: boolean;
+  showSettings?: boolean;
 }
 
 export const GenerationControls = ({
@@ -17,7 +18,8 @@ export const GenerationControls = ({
   onSettingsChange,
   onGenerate,
   onToggleSettings,
-  isGenerating
+  isGenerating,
+  showSettings = false
 }: GenerationControlsProps) => {
   const { toast } = useToast();
 
@@ -46,6 +48,7 @@ export const GenerationControls = ({
         onToggleSettings={onToggleSettings}
         onGenerate={handleGenerate}
         isGenerating={isGenerating}
+        showSettings={showSettings}
       />
     </div>
   );

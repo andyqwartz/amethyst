@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useGenerationState } from './image-generator/hooks/useGenerationState';
 import { useGenerationSettings } from './image-generator/hooks/useGenerationSettings';
 import { useImageHistory } from '@/hooks/useImageHistory';
+import type { GenerationSettings } from '@/types/replicate';
 
 export const ImageGenerator = React.memo(() => {
   const { toast } = useToast();
@@ -41,7 +42,7 @@ export const ImageGenerator = React.memo(() => {
     // Handle image generation logic here
   }, []);
 
-  const handleTweak = useCallback((settings: any) => {
+  const handleTweak = useCallback((settings: GenerationSettings) => {
     updateSettings(settings);
   }, [updateSettings]);
 
@@ -100,7 +101,7 @@ export const ImageGenerator = React.memo(() => {
 
       if (error) throw error;
 
-      loadingToast.dismiss();
+      loadingToast.dismiss?.();
       
       toast({
         title: "Succès",
