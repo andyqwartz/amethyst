@@ -1,7 +1,6 @@
 import { useCallback } from "react";
-import { useToast as useToastUI } from "@/components/ui/use-toast";
+import { useToast as useToastUI } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { ToastActionElement } from "@/components/ui/toast";
 
 interface ToastOptions {
   duration?: number;
@@ -29,7 +28,7 @@ export function useToast() {
       action: options?.action ? (
         <Button asChild>{options.action}</Button>
       ) : undefined,
-      className: `${defaultToastOptions.className} ${options?.className || ''}`,
+      className: `${defaultToastOptions.className} ${options?.className || ""}`,
     });
   }, [toast]);
 
@@ -41,7 +40,7 @@ export function useToast() {
       action: options?.action ? (
         <Button variant="destructive" asChild>{options.action}</Button>
       ) : undefined,
-      className: `${defaultToastOptions.className} ${options?.className || ''}`,
+      className: `${defaultToastOptions.className} ${options?.className || ""}`,
     });
   }, [toast]);
 
@@ -52,7 +51,7 @@ export function useToast() {
       action: options?.action ? (
         <Button asChild>{options.action}</Button>
       ) : undefined,
-      className: `${defaultToastOptions.className} ${options?.className || ''}`,
+      className: `${defaultToastOptions.className} ${options?.className || ""}`,
     });
   }, [toast]);
 
