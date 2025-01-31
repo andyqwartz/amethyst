@@ -8,6 +8,21 @@ import { useGenerationSettings } from './image-generator/hooks/useGenerationSett
 import { useImageHistory } from '@/hooks/useImageHistory';
 import type { GenerationSettings } from '@/types/replicate';
 
+const defaultSettings: GenerationSettings = {
+  prompt: '',
+  negative_prompt: '',
+  guidance_scale: 7.5,
+  num_inference_steps: 28,
+  num_outputs: 1,
+  aspect_ratio: '1:1',
+  output_format: 'webp',
+  output_quality: 90,
+  prompt_strength: 0.8,
+  hf_loras: [],
+  lora_scales: [],
+  disable_safety_checker: false
+};
+
 export const ImageGenerator = React.memo(() => {
   const { toast } = useToast();
   const [showSettings, setShowSettings] = useState(false);
@@ -127,10 +142,10 @@ export const ImageGenerator = React.memo(() => {
       setShowHelp={setShowHelp}
       isGenerating={isGenerating}
       referenceImage={referenceImage}
-      settings={settings}
+      settings={settings || defaultSettings}
       generatedImages={generatedImages}
       history={history}
-      isLoading={generationState.isLoading}
+      isLoading={false}
       progress={progress}
       currentLogs={currentLogs}
       handleImageUpload={handleImageUpload}
