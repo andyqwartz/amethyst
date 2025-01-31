@@ -11,13 +11,16 @@ export interface GenerationSettings {
   hf_loras: string[];
   lora_scales: number[];
   disable_safety_checker: boolean;
-  reference_image_url?: string | null;
   seed?: number;
+  reference_image_url?: string;
 }
 
 export interface GenerationState {
-  status: 'idle' | 'loading' | 'success' | 'error';
-  error: string | null;
+  status: GenerationStatus;
+  predictionId: string | null;
+  generatedImages: string[];
+  progress: number;
+  currentLogs?: string;
   isPaused: boolean;
   isGenerating: boolean;
 }
@@ -37,6 +40,12 @@ export interface ReplicateInput {
   safety_checker?: boolean;
   image?: string;
   prompt_strength?: number;
+  aspect_ratio?: string;
+  output_format?: string;
+  output_quality?: number;
+  hf_loras?: string[];
+  lora_scales?: number[];
+  disable_safety_checker?: boolean;
 }
 
 export interface ToastOptions {
@@ -50,12 +59,4 @@ export interface Toast {
   description?: string;
   action?: React.ReactNode;
   variant?: 'default' | 'destructive';
-}
-
-export interface ToasterToast extends Toast {
-  id: string;
-  title?: string;
-  description?: string;
-  action?: React.ReactNode;
-  dismiss: () => void;
 }
