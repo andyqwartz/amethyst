@@ -53,14 +53,12 @@ export interface ImageFormatsSelectorProps {
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;
-  selectedFormats?: string[];
 }
 
 export interface LoraSelectorProps {
   value: string[];
   onChange: (value: string[]) => void;
   disabled?: boolean;
-  selectedLoras?: string[];
 }
 
 export interface NumberOfImagesSelectorProps {

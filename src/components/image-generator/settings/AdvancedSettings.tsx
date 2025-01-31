@@ -1,75 +1,92 @@
 import React from 'react';
-import { Box, Stack } from '@mui/material';
-import ImageFormatsSelector from './ImageFormatsSelector';
-import LoraSelector from './LoraSelector';
-import NumberOfImagesSelector from './NumberOfImagesSelector';
-import PromptStrengthSelector from './PromptStrengthSelector';
-import OutputFormatSelector from './OutputFormatSelector';
-import OutputQualitySelector from './OutputQualitySelector';
-import { AdvancedSettingsProps } from '../../../types/imageGenerator';
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
+import type { GenerationSettings } from '@/types/replicate';
 
-const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
+interface AdvancedSettingsProps {
+  settings: GenerationSettings;
+  onSettingsChange: (settings: Partial<GenerationSettings>) => void;
+  disabled?: boolean;
+}
+
+export const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
   settings,
   onSettingsChange,
-  disabled = false,
+  disabled = false
 }) => {
   return (
-    <Box sx={{ width: '100%' }}>
-      <Stack spacing={2}>
-        {/* Image Formats */}
-        <ImageFormatsSelector
-          selectedFormats={settings.imageFormats}
-          onChange={(formats) =>
-            onSettingsChange({ ...settings, imageFormats: formats })
-          }
+    <Card className="p-6 space-y-6">
+      <div className="space-y-4">
+        <Label>Format</Label>
+        <Select
+          value={settings.output_format}
+          onValueChange={(value) => onSettingsChange({ output_format: value })}
           disabled={disabled}
-        />
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select output format" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="webp">WebP</SelectItem>
+            <SelectItem value="png">PNG</SelectItem>
+            <SelectItem value="jpg">JPEG</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
-        {/* Loras */}
-        <LoraSelector
-          selectedLoras={settings.loras}
-          onChange={(loras) => onSettingsChange({ ...settings, loras })}
-          disabled={disabled}
-        />
+      <Separator />
 
-        {/* Number of Images */}
-        <NumberOfImagesSelector
-          value={settings.numberOfImages}
-          onChange={(numberOfImages) =>
-            onSettingsChange({ ...settings, numberOfImages })
-          }
+      <div className="space-y-4">
+        <Label>Number of Images</Label>
+        <Input
+          type="number"
+          min={1}
+          max={4}
+          value={settings.num_outputs}
+          onChange={(e) => onSettingsChange({ num_outputs: parseInt(e.target.value) })}
           disabled={disabled}
         />
+      </div>
 
-        {/* Prompt Strength */}
-        <PromptStrengthSelector
-          value={settings.promptStrength}
-          onChange={(promptStrength) =>
-            onSettingsChange({ ...settings, promptStrength })
-          }
-          disabled={disabled}
-        />
+      <Separator />
 
-        {/* Output Format */}
-        <OutputFormatSelector
-          value={settings.outputFormat}
-          onChange={(outputFormat) =>
-            onSettingsChange({ ...settings, outputFormat })
-          }
+      <div className="space-y-4">
+        <Label>Prompt Strength</Label>
+        <Slider
+          value={[settings.prompt_strength]}
+          min={0}
+          max={1}
+          step={0.1}
+          onValueChange={([value]) => onSettingsChange({ prompt_strength: value })}
           disabled={disabled}
         />
+        <div className="text-sm text-muted-foreground">
+          {settings.prompt_strength.toFixed(1)}
+        </div>
+      </div>
 
-        {/* Output Quality */}
-        <OutputQualitySelector
-          value={settings.outputQuality}
-          onChange={(outputQuality) =>
-            onSettingsChange({ ...settings, outputQuality })
-          }
+      <Separator />
+
+      <div className="space-y-4">
+        <Label>Output Quality</Label>
+        <Slider
+          value={[settings.output_quality]}
+          min={1}
+          max={100}
+          step={1}
+          onValueChange={([value]) => onSettingsChange({ output_quality: value })}
           disabled={disabled}
         />
-      </Stack>
-    </Box>
+        <div className="text-sm text-muted-foreground">
+          {settings.output_quality}%
+        </div>
+      </div>
+    </Card>
   );
 };
-
-export default AdvancedSettings;
