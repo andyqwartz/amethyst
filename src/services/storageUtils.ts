@@ -1,30 +1,27 @@
 import { supabase } from '@/integrations/supabase/client';
 
-export const uploadImage = async (file: File): Promise<string> => {
+export async function uploadToStorage(file: File, bucket: string): Promise<string> {
   const fileName = `${Date.now()}-${file.name}`;
+  
   const { data, error } = await supabase.storage
-    .from('reference-images')
+    .from(bucket)
     .upload(fileName, file);
 
   if (error) {
-    throw error;
+    throw new Error(`Failed to upload file: ${error.message}`);
   }
 
   if (!data?.path) {
     throw new Error('Failed to get upload path');
   }
 
-  return data.path;
-};
+  const { data: urlData } = await supabase.storage
+    .from(bucket)
+    .getPublicUrl(data.path);
 
-export const getPublicUrl = async (path: string): Promise<string> => {
-  const { data, error } = await supabase.storage
-    .from('reference-images')
-    .getPublicUrl(path);
-
-  if (error) {
-    throw error;
+  if (!urlData?.publicUrl) {
+    throw new Error('Failed to get public URL');
   }
 
-  return data.publicUrl;
-};
+  return urlData.publicUrl;
+}

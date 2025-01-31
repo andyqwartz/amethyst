@@ -6,13 +6,17 @@ import type { GenerationSettings } from '@/types/replicate';
 export function useImageHistory() {
   const [history, setHistory] = useState<{ url: string; settings: GenerationSettings; timestamp: number; }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const { error: showError } = useToast();
+  const { toast } = useToast();
 
   const addToHistory = useCallback(async (url: string, settings: GenerationSettings) => {
     try {
       const { data: session } = await supabase.auth.getSession();
       if (!session?.session?.user) {
-        showError("You must be logged in to save images");
+        toast({
+          title: "Error",
+          description: "You must be logged in to save images",
+          variant: "destructive"
+        });
         return;
       }
 
@@ -35,15 +39,23 @@ export function useImageHistory() {
       }, ...prev]);
 
     } catch (err) {
-      showError(err instanceof Error ? err.message : "Failed to save image to history");
+      toast({
+        title: "Error",
+        description: err instanceof Error ? err.message : "Failed to save image to history",
+        variant: "destructive"
+      });
     }
-  }, [showError]);
+  }, [toast]);
 
   const deleteImage = useCallback(async (url: string) => {
     try {
       const { data: session } = await supabase.auth.getSession();
       if (!session?.session?.user) {
-        showError("You must be logged in to delete images");
+        toast({
+          title: "Error",
+          description: "You must be logged in to delete images",
+          variant: "destructive"
+        });
         return;
       }
 
@@ -57,9 +69,13 @@ export function useImageHistory() {
 
       setHistory(prev => prev.filter(item => item.url !== url));
     } catch (err) {
-      showError(err instanceof Error ? err.message : "Failed to delete image");
+      toast({
+        title: "Error",
+        description: err instanceof Error ? err.message : "Failed to delete image",
+        variant: "destructive"
+      });
     }
-  }, [showError]);
+  }, [toast]);
 
   return {
     history,
