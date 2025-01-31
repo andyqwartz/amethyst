@@ -57,8 +57,8 @@ export const ImageGenerator = React.memo(() => {
     // Handle image generation logic here
   }, []);
 
-  const handleTweak = useCallback((settings: GenerationSettings) => {
-    updateSettings(settings);
+  const handleTweak = useCallback((tweakSettings: GenerationSettings) => {
+    updateSettings(tweakSettings);
   }, [updateSettings]);
 
   const handleDownload = useCallback(async (imageUrl: string, outputFormat: string) => {

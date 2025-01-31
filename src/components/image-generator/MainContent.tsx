@@ -59,7 +59,6 @@ export const MainContent = ({
       index === self.findIndex((t) => t.url === item.url)
     );
     
-    // Add new generated images at the beginning
     const newImages = (generatedImages || []).map(url => ({
       url,
       settings,
@@ -69,7 +68,6 @@ export const MainContent = ({
     return [...newImages, ...uniqueHistory] as ImageItem[];
   }, [history, generatedImages, settings]);
 
-  // Fonction pour gérer la génération et fermer les paramètres avancés
   const handleGenerate = () => {
     if (showSettings) {
       onToggleSettings();
@@ -110,7 +108,7 @@ export const MainContent = ({
           <div className="mt-8">
             <ImagePreview
               images={allImages.map(img => img.url)}
-              onDownload={(url) => onDownload(url, settings.output_format || 'webp')}
+              onDownload={async (url) => await onDownload(url, settings.output_format || 'webp')}
               onTweak={(settings) => onTweak(settings)}
               onDelete={onDeleteImage}
               settings={settings}
