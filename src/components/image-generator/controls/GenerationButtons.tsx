@@ -1,33 +1,27 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Settings, Sparkles } from 'lucide-react';
+import { useImageGeneratorStore } from '@/state/imageGeneratorStore';
 
-interface GenerationButtonsProps {
-  onToggleSettings: () => void;
-  onGenerate: () => void;
-  isGenerating: boolean;
-  showSettings: boolean;
-}
+export const GenerationButtons = () => {
+  const isGenerating = useImageGeneratorStore((state) => state.ui.isGenerating);
+  const isSettingsModalOpen = useImageGeneratorStore((state) => state.ui.isSettingsModalOpen);
+  const setIsSettingsModalOpen = useImageGeneratorStore((state) => state.setIsSettingsModalOpen);
+  const setIsGenerating = useImageGeneratorStore((state) => state.setIsGenerating);
 
-export const GenerationButtons = ({ 
-  onToggleSettings, 
-  onGenerate, 
-  isGenerating,
-  showSettings
-}: GenerationButtonsProps) => {
   const handleGenerateClick = () => {
     if (!isGenerating) {
-      if (showSettings) {
-        onToggleSettings();
+      if (isSettingsModalOpen) {
+        setIsSettingsModalOpen(false);
       }
-      onGenerate();
+      setIsGenerating(true);
     }
   };
   
   return (
     <div className="flex flex-col gap-3 px-4">
       <Button
-        onClick={onToggleSettings}
+        onClick={() => setIsSettingsModalOpen(!isSettingsModalOpen)}
         className="w-full bg-card hover:bg-card/80 text-foreground border border-primary/20 rounded-full transition-all duration-200"
         variant="secondary"
         disabled={isGenerating}

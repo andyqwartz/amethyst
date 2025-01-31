@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Toaster } from "@/components/ui/toaster";
 import { useEffect, useState } from 'react';
 import { supabase } from './integrations/supabase/client';
+import { ModalProvider } from '@/components/providers/ModalProvider';
 import Index from './pages/Index';
 import { Auth } from './pages/Auth';
 import { AccountPage } from './pages/AccountPage';
@@ -38,7 +39,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   return (
-    <Router>
+    <ModalProvider>
+      <Router>
       <Routes>
         <Route path="/auth" element={<Auth />} />
         <Route 
@@ -61,6 +63,7 @@ function App() {
       </Routes>
       <Toaster />
     </Router>
+    </ModalProvider>
   );
 }
 

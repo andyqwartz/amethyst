@@ -1,11 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/supabase';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl) throw new Error('Missing Supabase URL');
-if (!supabaseAnonKey) throw new Error('Missing Supabase anon key');
+if (!supabaseUrl) throw new Error('Missing environment variable: VITE_SUPABASE_URL');
+if (!supabaseAnonKey) throw new Error('Missing environment variable: VITE_SUPABASE_ANON_KEY');
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
@@ -16,7 +16,7 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   }
 });
 
-export const checkSession = async () => {
+export const checkSession = async (): Promise<{ session: NonNullable<Awaited<ReturnType<typeof supabase.auth.getSession>>['data']['session']> }> => {
   const { data: { session }, error } = await supabase.auth.getSession();
   
   if (error) {

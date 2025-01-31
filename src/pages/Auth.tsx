@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from "@/components/ui/card";
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Github, Sparkles } from "lucide-react";
@@ -25,7 +26,11 @@ const GithubButton = ({ onClick, disabled }: { onClick: () => void, disabled: bo
     onClick={onClick}
     disabled={disabled}
   >
-    <Github className="mr-2 h-4 w-4" />
+    {disabled ? (
+      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+    ) : (
+      <Github className="mr-2 h-4 w-4" />
+    )}
     Continuer avec Github
   </Button>
 );
@@ -128,7 +133,59 @@ export const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-  const { loading, handleEmailAuth, handleGithubAuth } = useAuth();
+  const { isLoading, handleEmailAuth, handleGithubAuth } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        navigate('/dashboard');
+      }
+    });
+
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
+  }, [navigate]);
+
+  const handleGithubSignIn = async () => {
+    try {
+      const { error } = await handleGithubAuth();
+      if (error) {
+        toast({
+          title: "Erreur d'authentification",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erreur inattendue",
+        description: "Une erreur s'est produite lors de la connexion",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleAuthAction = async (type: 'login' | 'signup') => {
+    try {
+      const { error } = await handleEmailAuth(email, password, type === 'signup');
+      if (error) {
+        toast({
+          title: "Erreur d'authentification",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erreur inattendue",
+        description: "Une erreur s'est produite lors de l'authentification",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-primary/20 to-secondary/20">
@@ -136,7 +193,7 @@ export const Auth = () => {
         <AuthHeader />
         
         <div className="space-y-4">
-          <GithubButton onClick={handleGithubAuth} disabled={loading} />
+          <GithubButton onClick={handleGithubSignIn} disabled={isLoading} />
           <Divider />
           <AuthForm
             email={email}
@@ -149,9 +206,9 @@ export const Auth = () => {
         </div>
 
         <AuthButtons
-          onLogin={() => handleEmailAuth('login', { email, password, rememberMe })}
-          onSignup={() => handleEmailAuth('signup', { email, password, rememberMe })}
-          disabled={loading}
+          onLogin={() => handleAuthAction('login')}
+          onSignup={() => handleAuthAction('signup')}
+          disabled={isLoading || !email || !password}
         />
       </Card>
     </div>

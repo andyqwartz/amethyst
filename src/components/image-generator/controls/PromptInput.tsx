@@ -1,22 +1,9 @@
 import React, { useRef, useEffect } from 'react';
 import { Textarea } from "@/components/ui/textarea";
-import type { GenerationSettings } from '@/types/replicate';
+import { useImageGeneratorStore } from '@/state/imageGeneratorStore';
 
-interface PromptInputProps {
-  settings: GenerationSettings;
-  onSettingsChange: (settings: Partial<GenerationSettings>) => void;
-  onGenerate: () => void;
-  showSettings?: boolean;
-  onToggleSettings?: () => void;
-}
-
-export const PromptInput = ({
-  settings,
-  onSettingsChange,
-  onGenerate,
-  showSettings,
-  onToggleSettings
-}: PromptInputProps) => {
+export const PromptInput = () => {
+  const { settings, updateSettings, setIsSettingsModalOpen, ui } = useImageGeneratorStore();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -42,10 +29,10 @@ export const PromptInput = ({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      if (showSettings && onToggleSettings) {
-        onToggleSettings();
+      if (ui.isSettingsModalOpen) {
+        setIsSettingsModalOpen(false);
       }
-      onGenerate();
+      // Note: The actual generate action will be handled by the parent component
     }
   };
 
@@ -54,8 +41,8 @@ export const PromptInput = ({
       <Textarea
         ref={textareaRef}
         placeholder="Décrivez l'image que vous souhaitez générer..."
-        value={settings.prompt || ''}
-        onChange={(e) => onSettingsChange({ prompt: e.target.value })}
+        value={settings.prompt}
+        onChange={(e) => updateSettings({ prompt: e.target.value })}
         onKeyDown={handleKeyDown}
         className="prompt-input resize-none min-h-[3rem] py-2 px-4"
         rows={1}

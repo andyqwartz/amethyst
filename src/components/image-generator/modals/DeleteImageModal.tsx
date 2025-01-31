@@ -8,22 +8,26 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import useModalStore from '@/state/modalStore';
 
-interface DeleteImageModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onConfirm: () => void;
+interface DeleteImageModalData {
   imageUrl?: string;
+  onConfirm: () => void;
 }
 
-export const DeleteImageModal = ({
-  open,
-  onOpenChange,
-  onConfirm,
-  imageUrl
-}: DeleteImageModalProps) => {
+export const DeleteImageModal = () => {
+  const { getModalState, getModalData, closeModal } = useModalStore();
+  const isOpen = getModalState('delete-image');
+  const modalData = getModalData('delete-image') as DeleteImageModalData;
+
+  const handleClose = () => closeModal('delete-image');
+  const handleConfirm = () => {
+    modalData?.onConfirm();
+    handleClose();
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Confirmer la suppression</DialogTitle>
@@ -32,10 +36,10 @@ export const DeleteImageModal = ({
           </DialogDescription>
         </DialogHeader>
         
-        {imageUrl && (
+        {modalData?.imageUrl && (
           <div className="mt-4">
             <img 
-              src={imageUrl} 
+              src={modalData.imageUrl} 
               alt="Image to delete" 
               className="w-full h-48 object-cover rounded-md"
             />
@@ -45,16 +49,13 @@ export const DeleteImageModal = ({
         <DialogFooter className="gap-2">
           <Button
             variant="outline"
-            onClick={() => onOpenChange(false)}
+            onClick={handleClose}
           >
             Annuler
           </Button>
           <Button
             variant="destructive"
-            onClick={() => {
-              onConfirm();
-              onOpenChange(false);
-            }}
+            onClick={handleConfirm}
           >
             Supprimer
           </Button>
