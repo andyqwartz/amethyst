@@ -53,12 +53,6 @@ export const ImageGenerator = React.memo(() => {
     handleTweak
   } = useUIState(updateSettings);
 
-  // Ensure settings is never undefined by using defaultSettings as fallback
-  const currentSettings: GenerationSettings = {
-    ...defaultSettings,
-    ...settings
-  };
-
   return (
     <ImageGeneratorContainer
       showSettings={showSettings}
