@@ -1,68 +1,52 @@
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
-import type { GenerationSettings } from '@/types/replicate'
-import { ImageSettings } from '@/types/generation'
-
-type ImageSettings = Omit<GenerationSettings, 'aspect_ratio'> & {
-  width: number
-  height: number
-  steps: number
-  img2img: boolean
-  strength: number
-  initImage: string | null
-}
-
-interface GeneratedImage {
-  id: string
-  url: string
-  timestamp: number
-  settings: ImageSettings
-}
+import type { GenerationSettings, ImageSettings, GeneratedImage } from '@/types/generation'
 
 interface UIState {
-  isGenerating: boolean
-  showSettings: boolean
-  isSaving: boolean
-  currentTab: string
+  isGenerating: boolean;
+  showSettings: boolean;
+  isSaving: boolean;
+  currentTab: string;
 }
 
 interface ErrorState {
-  hasError: boolean
-  errorMessage: string
+  hasError: boolean;
+  errorMessage: string;
 }
 
 interface ImageGeneratorState {
-  settings: ImageSettings
-  currentImage: GeneratedImage | null
-  generatedImages: GeneratedImage[]
-  history: GeneratedImage[]
-  ui: UIState
-  error: ErrorState
+  settings: ImageSettings;
+  currentImage: GeneratedImage | null;
+  generatedImages: GeneratedImage[];
+  history: GenerationHistoryItem[];
+  ui: UIState;
+  error: ErrorState;
   
   // Settings actions
-  setSettings: (settings: ImageSettings | ((prev: ImageSettings) => ImageSettings)) => void
+  setSettings: (settings: ImageSettings | ((prev: ImageSettings) => ImageSettings)) => void;
+  updateSettings: (settings: Partial<ImageSettings>) => void;
   
   // Image generation actions
-  setCurrentImage: (image: GeneratedImage | null) => void
-  addGeneratedImage: (image: GeneratedImage) => void
-  clearGeneratedImages: () => void
+  setCurrentImage: (image: GeneratedImage | null) => void;
+  addGeneratedImage: (image: GeneratedImage) => void;
+  clearGeneratedImages: () => void;
   
   // History actions
-  addToHistory: (image: GeneratedImage) => void
-  clearHistory: () => void
+  addToHistory: (image: GenerationHistoryItem) => void;
+  clearHistory: () => void;
   
   // UI state actions
-  setIsGenerating: (isGenerating: boolean) => void
-  setShowSettings: (show: boolean) => void
-  setIsSaving: (isSaving: boolean) => void
-  setCurrentTab: (tab: string) => void
+  setIsGenerating: (isGenerating: boolean) => void;
+  setShowSettings: (show: boolean) => void;
+  setIsSaving: (isSaving: boolean) => void;
+  setCurrentTab: (tab: string) => void;
   
   // Error handling
-  setError: (message: string) => void
-  clearError: () => void
+  setError: (message: string) => void;
+  clearError: () => void;
   
   // Reset all state
-  resetState: () => void
+  resetState: () => void;
 }
 
 const initialSettings: ImageSettings = {
@@ -71,33 +55,32 @@ const initialSettings: ImageSettings = {
   width: 512,
   height: 512,
   steps: 20,
-  seed: -1,
   guidance_scale: 7.5,
+  num_inference_steps: 28,
+  seed: -1,
   img2img: false,
   strength: 0.75,
   initImage: null,
   output_format: 'webp',
   output_quality: 90,
   num_outputs: 1,
-  num_inference_steps: 28,
   prompt_strength: 0.8,
-  disable_safety_checker: false,
   hf_loras: ["AndyVampiro/fog"],
   lora_scales: [1.0],
-  aspect_ratio: '1:1'
-}
+  disable_safety_checker: false
+};
 
 const initialUIState: UIState = {
   isGenerating: false,
   showSettings: false,
   isSaving: false,
   currentTab: 'generate'
-}
+};
 
 const initialErrorState: ErrorState = {
   hasError: false,
   errorMessage: ''
-}
+};
 
 export const useImageGeneratorStore = create<ImageGeneratorState>()(
   devtools(
@@ -116,6 +99,10 @@ export const useImageGeneratorStore = create<ImageGeneratorState>()(
           settings: typeof newSettings === 'function' 
             ? newSettings(state.settings)
             : newSettings
+        })),
+      updateSettings: (newSettings) =>
+        set((state) => ({
+          settings: { ...state.settings, ...newSettings }
         })),
 
       // Image generation actions
@@ -183,4 +170,4 @@ export const useImageGeneratorStore = create<ImageGeneratorState>()(
     }),
     { name: 'ImageGeneratorStore' }
   )
-)
+);
