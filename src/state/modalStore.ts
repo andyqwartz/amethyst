@@ -11,61 +11,29 @@ export interface HelpModalData {
 }
 
 export enum ModalId {
-  DELETE_IMAGE = 'delete-image',
+  DELETE_IMAGE = 'delete_image',
   HELP = 'help'
 }
 
-export type ModalData = {
-  type: ModalId.DELETE_IMAGE;
-  data: DeleteImageModalData;
-} | {
-  type: ModalId.HELP;
-  data: HelpModalData;
-};
+interface ModalData {
+  type: ModalId;
+  data: Record<string, any>;
+}
 
 interface ModalState {
-  activeModals: {
-    [key in ModalId]?: {
-      isOpen: boolean;
-      data?: any;
-    };
-  };
-  openModal: (modalId: ModalId, data: ModalData) => void;
-  closeModal: (modalId: ModalId) => void;
-  getModalState: (modalId: ModalId) => boolean;
-  getModalData: (modalId: ModalId) => ModalData | undefined;
+  activeModal: ModalId | null;
+  modalData: ModalData | null;
+  openModal: (id: ModalId, data: ModalData) => void;
+  closeModal: () => void;
+  isOpen: (id: ModalId) => boolean;
 }
 
 const useModalStore = create<ModalState>((set, get) => ({
-  activeModals: {},
-
-  openModal: (modalId: ModalId, data: DeleteImageModalData | HelpModalData) =>
-    set((state) => ({
-      activeModals: {
-        ...state.activeModals,
-        [modalId]: {
-          isOpen: true,
-          data,
-        },
-      },
-    })),
-
-  closeModal: (modalId: ModalId) =>
-    set((state) => ({
-      activeModals: {
-        ...state.activeModals,
-        [modalId]: {
-          isOpen: false,
-          data: undefined,
-        },
-      },
-    })),
-
-  getModalState: (modalId: ModalId) =>
-    get().activeModals[modalId]?.isOpen || false,
-
-  getModalData: (modalId: ModalId) =>
-    get().activeModals[modalId]?.data,
+  activeModal: null,
+  modalData: null,
+  openModal: (id, data) => set({ activeModal: id, modalData: data }),
+  closeModal: () => set({ activeModal: null, modalData: null }),
+  isOpen: (id) => get().activeModal === id
 }));
 
 export default useModalStore;

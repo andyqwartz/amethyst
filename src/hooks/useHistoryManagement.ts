@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { supabase, checkSession } from '@/integrations/supabase/client';
+import { supabase, checkSession } from '@/lib/supabase/client';
 
 interface HistoryImage {
   id: string;

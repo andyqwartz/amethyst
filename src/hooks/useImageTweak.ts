@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import type { GenerationSettings } from '@/types/replicate';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase/client';
 
 const DEFAULT_SETTINGS: Partial<GenerationSettings> = {
   hf_loras: [],

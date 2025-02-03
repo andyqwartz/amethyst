@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { useImageGeneratorStore } from '@/state/imageGeneratorStore'
-import { checkSession } from '@/integrations/supabase/client'
+import { checkSession } from '@/lib/supabase/client'
 import { useImageStorage } from './useImageStorage'
 import { useAuth } from './useAuth'
 import type { GenerationParameters } from '@/types/generation'
@@ -60,11 +60,11 @@ export const useImageHandling = () => {
       // Convertir les paramètres au nouveau format
       const generationParams: GenerationParameters = {
         prompt: settings.prompt,
-        negative_prompt: settings.negativePrompt,
+        negative_prompt: settings.negative_prompt,
         width: settings.width,
         height: settings.height,
         num_inference_steps: settings.steps,
-        guidance_scale: settings.guidanceScale,
+        guidance_scale: settings.guidance_scale,
         seed: settings.seed,
         strength: settings.strength,
         reference_image_id: settings.initImage || undefined,

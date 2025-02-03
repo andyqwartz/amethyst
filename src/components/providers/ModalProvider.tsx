@@ -1,33 +1,32 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { DeleteImageModal } from '@/components/image-generator/modals/DeleteImageModal';
 import { HelpModal } from '@/components/image-generator/modals/HelpModal';
+import useModalStore, { ModalId } from '@/state/modalStore';
 
 interface ModalProviderProps {
   children: React.ReactNode;
 }
 
 export const ModalProvider: React.FC<ModalProviderProps> = ({ children }) => {
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
-  const [selectedImageUrl, setSelectedImageUrl] = useState('');
+  const { isOpen, closeModal, modalData } = useModalStore();
 
-  const handleConfirmDelete = async () => {
-    // Implement delete logic here
-    setIsDeleteModalOpen(false);
+  const handleModalClose = async () => {
+    closeModal();
+    return Promise.resolve();
   };
 
   return (
     <>
       {children}
       <DeleteImageModal 
-        open={isDeleteModalOpen}
-        onOpenChange={setIsDeleteModalOpen}
-        onConfirm={handleConfirmDelete}
-        imageUrl={selectedImageUrl}
+        open={isOpen(ModalId.DELETE_IMAGE)}
+        onOpenChange={(open) => !open && closeModal()}
+        onConfirm={handleModalClose}
+        imageUrl={modalData?.data?.imageUrl || ''}
       />
       <HelpModal 
-        open={isHelpModalOpen}
-        onOpenChange={setIsHelpModalOpen}
+        open={isOpen(ModalId.HELP)}
+        onOpenChange={(open) => !open && closeModal()}
       />
     </>
   );

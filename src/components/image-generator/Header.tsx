@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { HelpCircle, Sparkles, User as UserIcon, LogIn } from 'lucide-react';
 import { ProfileModal } from './modals/ProfileModal';
 import { HelpModal } from './modals/HelpModal';
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase/client";
 import useModalStore, { ModalId } from '@/state/modalStore';
 import type { User } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
@@ -46,7 +46,9 @@ export const Header = () => {
   const handleHelpClick = () => {
     openModal(ModalId.HELP, {
       type: ModalId.HELP,
-      data: { section: 'usage' }
+      data: {
+        section: 'usage'
+      }
     });
   };
 

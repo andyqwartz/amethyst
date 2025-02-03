@@ -10,6 +10,7 @@ import { useImageGeneratorStore } from '@/state/imageGeneratorStore';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { HelpCircle } from 'lucide-react';
 import { LoraSettings } from './LoraSettings';
+import type { GenerationSettings } from '@/types/replicate';
 
 interface AdvancedSettingsProps {
   disabled?: boolean;
@@ -33,12 +34,39 @@ export const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
 }) => {
   const { settings, updateSettings } = useImageGeneratorStore();
 
+  // Convertir les paramètres du store en GenerationSettings
+  const generationSettings: GenerationSettings = {
+    prompt: settings.prompt,
+    negative_prompt: settings.negative_prompt,
+    guidance_scale: settings.guidance_scale,
+    num_inference_steps: settings.num_inference_steps,
+    num_outputs: settings.num_outputs,
+    aspect_ratio: '1:1', // Valeur fixe car non utilisée dans le store
+    output_format: settings.output_format as 'webp' | 'jpg' | 'png',
+    output_quality: settings.output_quality,
+    prompt_strength: settings.prompt_strength,
+    hf_loras: settings.hf_loras,
+    lora_scales: settings.lora_scales,
+    disable_safety_checker: settings.disable_safety_checker,
+    seed: settings.seed
+  };
+
+  const handleSettingsChange = (newSettings: Partial<GenerationSettings>) => {
+    // Convertir les paramètres de GenerationSettings en ImageSettings
+    const imageSettings: Partial<typeof settings> = {
+      ...newSettings,
+      // Ignorer aspect_ratio car non utilisé dans le store
+      output_format: newSettings.output_format as 'webp' | 'jpg' | 'png'
+    };
+    updateSettings(imageSettings);
+  };
+
   useEffect(() => {
-    console.log('AdvancedSettings monté');
+    console.log('AdvancedSettings monté, settings:', settings);
     return () => {
       console.log('AdvancedSettings démonté');
     };
-  }, []);
+  }, [settings]);
 
   return (
     <Card className="p-6 space-y-6 bg-card/95 backdrop-blur-sm border border-primary/10 shadow-lg animate-in slide-in-from-top duration-300">
@@ -131,16 +159,16 @@ export const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
           Guidance Scale {renderTooltip("Contrôle l'adhérence au prompt (plus = plus fidèle mais moins créatif)")}
         </Label>
         <Slider
-          value={[settings.guidanceScale]}
+          value={[settings.guidance_scale]}
           min={1}
           max={20}
           step={0.1}
-          onValueChange={([value]) => updateSettings({ guidanceScale: value })}
+          onValueChange={([value]) => updateSettings({ guidance_scale: value })}
           disabled={disabled}
           className="[&_[role=slider]]:bg-primary"
         />
         <div className="text-sm text-primary/70">
-          {settings.guidanceScale.toFixed(1)}
+          {settings.guidance_scale.toFixed(1)}
         </div>
       </div>
 
@@ -183,7 +211,11 @@ export const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
       <Separator className="bg-primary/10" />
 
       {/* LoRA Settings */}
-      <LoraSettings disabled={disabled} />
+      <LoraSettings 
+        settings={generationSettings}
+        onSettingsChange={handleSettingsChange}
+        disabled={disabled}
+      />
     </Card>
   );
 };

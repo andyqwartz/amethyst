@@ -1,5 +1,5 @@
 import type { ReplicateInput } from '@/types/replicate';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase/client';
 
 interface GenerationResponse {
   status: 'starting' | 'started' | 'succeeded' | 'failed' | 'canceled';

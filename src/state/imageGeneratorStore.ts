@@ -1,25 +1,14 @@
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
+import type { GenerationSettings } from '@/types/replicate'
 
-interface ImageSettings {
-  prompt: string
-  negativePrompt: string
+type ImageSettings = Omit<GenerationSettings, 'aspect_ratio'> & {
   width: number
   height: number
   steps: number
-  seed: number
-  guidanceScale: number
   img2img: boolean
   strength: number
   initImage: string | null
-  output_format: 'webp' | 'jpg' | 'png'
-  output_quality: number
-  num_outputs: number
-  num_inference_steps: number
-  prompt_strength: number
-  disable_safety_checker: boolean
-  hf_loras: string[]
-  lora_scales: number[]
 }
 
 interface GeneratedImage {
@@ -78,12 +67,12 @@ interface ImageGeneratorState {
 
 const initialSettings: ImageSettings = {
   prompt: '',
-  negativePrompt: '',
+  negative_prompt: '',
   width: 512,
   height: 512,
   steps: 20,
   seed: -1,
-  guidanceScale: 7.5,
+  guidance_scale: 7.5,
   img2img: false,
   strength: 0.75,
   initImage: null,
@@ -93,8 +82,8 @@ const initialSettings: ImageSettings = {
   num_inference_steps: 28,
   prompt_strength: 0.8,
   disable_safety_checker: false,
-  hf_loras: ["AndyVampiro/joa"],
-  lora_scales: [0.8]
+  hf_loras: ["AndyVampiro/fog"],
+  lora_scales: [1.0]
 }
 
 const initialUIState: UIState = {

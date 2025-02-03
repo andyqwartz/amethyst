@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { Database } from '../types/supabase';
+import { supabase } from '@/lib/supabase/client';
 
 interface GenerationResponse {
   id: string;
@@ -27,7 +28,7 @@ export class ImageService {
     this.supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
     this.supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
     this.replicateApiKey = process.env.REPLICATE_API_TOKEN || '';
-    this.supabase = createClient<Database>(this.supabaseUrl, this.supabaseKey);
+    this.supabase = supabase;
   }
 
   private async getAuthHeaders(): Promise<Headers> {

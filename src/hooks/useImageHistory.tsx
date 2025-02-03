@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { supabase, checkSession } from '@/integrations/supabase/client';
+import { supabase, checkSession } from '@/lib/supabase/client';
 import type { GenerationSettings } from '@/types/replicate';
 import { useToast } from "@/hooks/use-toast";
 

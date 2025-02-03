@@ -5,7 +5,7 @@ export interface GenerationSettings {
   num_inference_steps: number;
   num_outputs: number;
   aspect_ratio: string;
-  output_format: string;
+  output_format: 'webp' | 'jpg' | 'png';
   output_quality: number;
   prompt_strength: number;
   hf_loras: string[];

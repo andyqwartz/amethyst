@@ -1,4 +1,4 @@
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase/client';
 
 export async function uploadToStorage(file: File, bucket: string): Promise<string> {
   const fileName = `${Date.now()}-${file.name}`;

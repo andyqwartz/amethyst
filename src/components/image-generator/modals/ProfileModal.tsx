@@ -7,7 +7,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { X } from 'lucide-react';
 import { UserProfile } from "@/components/ui/user-profile";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase/client";
 
 interface ProfileModalProps {
   open: boolean;
