@@ -1,90 +1,37 @@
-import React, { useCallback, useEffect } from 'react';
+import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Settings, Sparkles } from 'lucide-react';
-import { useImageGeneratorStore } from '@/state/imageGeneratorStore';
+import { Settings2, Wand2 } from "lucide-react";
 
-interface GenerationButtonsProps {
-  onGenerationStart?: () => void;
+export interface GenerationButtonsProps {
+  onToggleSettings: () => void;
+  onGenerate: () => void;
+  isGenerating: boolean;
+  showSettings: boolean;
 }
 
-export const GenerationButtons: React.FC<GenerationButtonsProps> = ({
-  onGenerationStart
-}) => {
-  const isGenerating = useImageGeneratorStore((state) => state.ui.isGenerating);
-  const showSettings = useImageGeneratorStore((state) => state.ui.showSettings);
-  const setShowSettings = useImageGeneratorStore((state) => state.setShowSettings);
-  const setIsGenerating = useImageGeneratorStore((state) => state.setIsGenerating);
-
-  // Log l'état du bouton à chaque changement
-  useEffect(() => {
-    console.log('État du bouton paramètres:', { showSettings, isGenerating });
-  }, [showSettings, isGenerating]);
-
-  const handleGenerateClick = useCallback(async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (isGenerating) return;
-    
-    try {
-      console.log('Démarrage de la génération...');
-      onGenerationStart?.();
-      setIsGenerating(true);
-    } catch (error) {
-      console.error('Erreur lors du démarrage de la génération:', error);
-      setIsGenerating(false);
-    }
-  }, [isGenerating, setIsGenerating, onGenerationStart]);
-
-  const handleSettingsClick = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (isGenerating) return;
-    
-    const newState = !showSettings;
-    console.log('Toggle des paramètres avancés:', newState);
-    setShowSettings(newState);
-  }, [isGenerating, showSettings, setShowSettings]);
-  
+export const GenerationButtons = ({
+  onToggleSettings,
+  onGenerate,
+  isGenerating,
+  showSettings
+}: GenerationButtonsProps) => {
   return (
-    <div className="flex flex-col gap-3" role="group" aria-label="Contrôles de génération">
+    <div className="flex items-center gap-2">
       <Button
-        onClick={handleSettingsClick}
-        className={`w-full bg-card hover:bg-card/80 text-foreground border transition-all duration-200 ${
-          showSettings 
-            ? 'border-primary bg-primary/5' 
-            : 'border-primary/20'
-        } rounded-full`}
-        variant="secondary"
-        disabled={isGenerating}
-        type="button"
-        data-state={showSettings ? 'active' : 'inactive'}
-        data-show-settings={showSettings}
-        aria-expanded={showSettings}
-        aria-controls="advanced-settings-panel"
-        aria-pressed={showSettings}
+        variant="outline"
+        size="icon"
+        onClick={onToggleSettings}
+        className={`transition-colors duration-200 ${showSettings ? 'bg-primary/10' : ''}`}
       >
-        <Settings 
-          className={`h-4 w-4 mr-2 transition-transform duration-200 ${
-            showSettings ? 'rotate-180 text-primary' : ''
-          }`} 
-          aria-hidden="true"
-        />
-        Paramètres avancés
+        <Settings2 className="h-4 w-4" />
       </Button>
-
       <Button
-        onClick={handleGenerateClick}
+        onClick={onGenerate}
         disabled={isGenerating}
-        className="w-full bg-primary hover:bg-primary-hover text-primary-foreground rounded-full transition-all duration-200"
-        type="button"
+        className="flex-1"
       >
-        <Sparkles 
-          className={`h-4 w-4 mr-2 ${isGenerating ? 'animate-spin' : ''}`} 
-          aria-hidden="true"
-        />
-        {isGenerating ? 'Génération en cours...' : 'Générer'}
+        <Wand2 className="mr-2 h-4 w-4" />
+        {isGenerating ? 'Generating...' : 'Generate'}
       </Button>
     </div>
   );

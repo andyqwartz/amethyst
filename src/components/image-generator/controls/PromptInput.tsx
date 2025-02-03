@@ -3,7 +3,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useImageGeneratorStore } from '@/state/imageGeneratorStore';
 
 export const PromptInput = () => {
-  const { settings, updateSettings, setIsSettingsModalOpen, ui } = useImageGeneratorStore();
+  const { settings, updateSettings, ui } = useImageGeneratorStore();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -29,10 +29,9 @@ export const PromptInput = () => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      if (ui.isSettingsModalOpen) {
-        setIsSettingsModalOpen(false);
+      if (ui.showSettings) {
+        updateSettings({ showSettings: false });
       }
-      // Note: The actual generate action will be handled by the parent component
     }
   };
 

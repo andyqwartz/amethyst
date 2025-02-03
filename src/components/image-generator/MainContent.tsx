@@ -75,6 +75,10 @@ export const MainContent = ({
     onGenerate();
   };
 
+  const handleDeleteImage = async (url: string) => {
+    await onDeleteImage(url);
+  };
+
   return (
     <Card className="border-none glass-card shadow-xl relative">
       <div className="p-6 space-y-6">
@@ -111,7 +115,7 @@ export const MainContent = ({
               images={allImages.map(img => img.url)}
               onDownload={async (url) => await onDownload(url, settings.output_format || 'webp')}
               onTweak={(settings) => onTweak(settings)}
-              onDelete={onDeleteImage}
+              onDelete={handleDeleteImage}
               settings={settings}
               className="gap-4"
             />
