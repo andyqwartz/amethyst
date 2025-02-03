@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import type { User, Session, AuthError } from '@supabase/supabase-js';
+import type { User, Session } from '@supabase/supabase-js';
+import { useNavigate } from 'react-router-dom';
 
 interface AuthResponse {
   success: boolean;
@@ -10,69 +11,206 @@ interface AuthResponse {
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const navigate = useNavigate();
 
+  const checkAdminStatus = async (userId: string | undefined): Promise<boolean> => {
+    if (!userId) return false;
+    console.log("Vérification admin pour:", userId);
+
+    try {
+      const { data, error } = await supabase
+        .rpc('check_admin_status', {
+          user_id: userId
+        });
+
+      if (error) {
+        console.error('Erreur check_admin_status:', error);
+        return false;
+      }
+
+      console.log("Résultat check_admin_status:", data);
+      return !!data;
+    } catch (err) {
+      console.error('Erreur check_admin_status:', err);
+      return false;
+    }
+  };
+
+  // Effet pour initialiser l'authentification
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user);
-      setIsLoading(false);
-    });
+    let mounted = true;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+    const initializeAuth = async () => {
+      try {
+        console.log("Initialisation de l'auth...");
+        const { data: { session } } = await supabase.auth.getSession();
+        const currentUser = session?.user ?? null;
+        
+        if (mounted) {
+          console.log("Session récupérée:", currentUser?.id);
+          setUser(currentUser);
+          
+          if (currentUser) {
+            const adminStatus = await checkAdminStatus(currentUser.id);
+            console.log("Statut admin initial:", adminStatus);
+            setIsAdmin(adminStatus);
+            if (adminStatus) {
+              navigate('/admin');
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Erreur initialisation auth:', error);
+      } finally {
+        if (mounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    initializeAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!mounted) return;
+
+      const currentUser = session?.user ?? null;
+      console.log("Changement d'état auth:", currentUser?.id);
+      setUser(currentUser);
+      
+      if (currentUser) {
+        const adminStatus = await checkAdminStatus(currentUser.id);
+        console.log("Nouveau statut admin:", adminStatus);
+        setIsAdmin(adminStatus);
+        if (adminStatus) {
+          navigate('/admin');
+        } else {
+          navigate('/');
+        }
+      } else {
+        setIsAdmin(false);
+        navigate('/auth');
+      }
       setIsLoading(false);
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [navigate]);
 
   const handleEmailAuth = async (
     email: string, 
     password: string, 
-    isSignUp: boolean,
-    isAdmin: boolean = false
+    isSignUp: boolean
   ): Promise<AuthResponse> => {
     try {
+      console.log(`Tentative de ${isSignUp ? 'création de compte' : 'connexion'} pour:`, email);
+      
       let response;
       if (isSignUp) {
+        // Vérifier si l'email existe déjà
+        const { data: existingUser } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('email', email)
+          .single();
+
+        if (existingUser) {
+          return {
+            success: false,
+            error: "Un compte existe déjà avec cet email"
+          };
+        }
+
+        // Créer l'utilisateur
         response = await supabase.auth.signUp({ 
           email, 
           password,
           options: {
             data: {
-              is_admin: isAdmin
-            }
+              full_name: email.split('@')[0],
+              avatar_url: null,
+              language: 'Français',
+              theme: 'light'
+            },
+            emailRedirectTo: `${window.location.origin}/auth/callback`
           }
         });
-      } else {
-        response = await supabase.auth.signInWithPassword({ email, password });
-      }
-
-      if (response.error) {
-        return {
-          success: false,
-          error: response.error.message
-        };
-      }
-
-      // Si c'est une connexion, vérifier si l'utilisateur est admin
-      if (!isSignUp && isAdmin) {
-        const isActuallyAdmin = await checkAdminStatus(response.data.user?.id);
-        if (!isActuallyAdmin) {
-          await supabase.auth.signOut();
+        
+        console.log('Réponse création de compte:', response);
+        
+        if (response.error) {
+          console.error('Erreur création de compte:', response.error);
           return {
             success: false,
-            error: "Accès non autorisé : vous n'êtes pas administrateur"
+            error: response.error.message
           };
         }
-      }
 
-      return {
-        success: true,
-        error: null
-      };
+        // Si la création a réussi, on attend que le trigger crée le profil
+        if (response.data?.user) {
+          console.log('Utilisateur créé avec succès:', response.data.user);
+          
+          // Attendre que le profil soit créé
+          await new Promise(resolve => setTimeout(resolve, 2000));
+
+          // Vérifier que le profil a bien été créé
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', response.data.user.id)
+            .single();
+
+          if (profileError) {
+            console.error('Erreur vérification profil:', profileError);
+            // On continue quand même car le trigger pourrait être juste lent
+          } else {
+            console.log('Profil créé:', profile);
+          }
+
+          return {
+            success: true,
+            error: "Un email de confirmation vous a été envoyé. Veuillez vérifier votre boîte de réception."
+          };
+        }
+
+        return {
+          success: true,
+          error: null
+        };
+      } else {
+        response = await supabase.auth.signInWithPassword({ email, password });
+        
+        console.log('Réponse connexion:', response);
+        
+        if (response.error) {
+          console.error('Erreur connexion:', response.error);
+          return {
+            success: false,
+            error: response.error.message
+          };
+        }
+
+        if (response.data?.user) {
+          const adminStatus = await checkAdminStatus(response.data.user.id);
+          console.log('Statut admin après connexion:', adminStatus);
+          setIsAdmin(adminStatus);
+          if (adminStatus) {
+            navigate('/admin');
+          } else {
+            navigate('/');
+          }
+        }
+
+        return {
+          success: true,
+          error: null
+        };
+      }
     } catch (err) {
+      console.error('Erreur inattendue:', err);
       return {
         success: false,
         error: err instanceof Error ? err.message : "Une erreur s'est produite"
@@ -83,7 +221,10 @@ export const useAuth = () => {
   const handleGithubAuth = async (): Promise<AuthResponse> => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'github'
+        provider: 'github',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`
+        }
       });
 
       if (error) {
@@ -105,35 +246,17 @@ export const useAuth = () => {
     }
   };
 
-  const checkAdminStatus = async (userId: string | undefined): Promise<boolean> => {
-    if (!userId) return false;
-
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('is_admin')
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        console.error('Error checking admin status:', error);
-        return false;
-      }
-
-      return data?.is_admin || false;
-    } catch (err) {
-      console.error('Error checking admin status:', err);
-      return false;
-    }
-  };
-
   const signOut = async () => {
     await supabase.auth.signOut();
+    setUser(null);
+    setIsAdmin(false);
+    navigate('/auth');
   };
 
   return {
     user,
     isLoading,
+    isAdmin,
     isAuthenticated: !!user,
     handleEmailAuth,
     handleGithubAuth,

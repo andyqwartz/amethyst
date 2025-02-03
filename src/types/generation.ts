@@ -1,15 +1,14 @@
-export interface GenerationParameters {
+export interface ImageSettings {
   prompt: string;
   negative_prompt?: string;
   width: number;
   height: number;
-  num_inference_steps: number;
+  steps: number;
   guidance_scale: number;
   seed?: number;
   scheduler?: string;
-  strength?: number;
+  strength: number;
   num_outputs?: number;
-  aspect_ratio?: string;
   output_format?: string;
   output_quality?: number;
   prompt_strength?: number;
@@ -18,6 +17,30 @@ export interface GenerationParameters {
   disable_safety_checker?: boolean;
   reference_image_id?: string;
   reference_image_strength?: number;
+  model_version?: string;
+}
+
+export interface GenerationParameters {
+  prompt: string;
+  negative_prompt: string;
+  width: number;
+  height: number;
+  num_inference_steps: number;
+  guidance_scale: number;
+  seed: number;
+  scheduler: string;
+  strength: number;
+  num_outputs: number;
+  aspect_ratio: string;
+  output_format: string;
+  output_quality: number;
+  prompt_strength: number;
+  hf_loras: string[];
+  lora_scales: number[];
+  disable_safety_checker: boolean;
+  reference_image_id?: string;
+  reference_image_strength: number;
+  model_version: string;
 }
 
 export interface GeneratedImage {

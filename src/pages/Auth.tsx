@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { Checkbox } from "@/components/ui/checkbox";
-import { Github, Sparkles, Shield } from "lucide-react";
+import { Github, Sparkles } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
@@ -52,7 +52,6 @@ export const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const { isLoading, handleEmailAuth, handleGithubAuth, checkAdminStatus } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -110,22 +109,49 @@ export const Auth = () => {
       return;
     }
 
+    if (password.length < 6) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Le mot de passe doit contenir au moins 6 caractères"
+      });
+      return;
+    }
+
     try {
-      const response = await handleEmailAuth(email, password, type === 'signup', isAdmin);
+      console.log(`Tentative de ${type === 'signup' ? 'création de compte' : 'connexion'}`);
+      const response = await handleEmailAuth(email, password, type === 'signup');
+      
       if (!response.success) {
+        let errorMessage = response.error || "Une erreur s'est produite";
+        
+        // Traduire les messages d'erreur courants
+        if (response.error?.includes('Email not confirmed')) {
+          errorMessage = "Veuillez confirmer votre email avant de vous connecter";
+        } else if (response.error?.includes('Invalid login credentials')) {
+          errorMessage = "Email ou mot de passe incorrect";
+        } else if (response.error?.includes('User already registered')) {
+          errorMessage = "Un compte existe déjà avec cet email";
+        }
+        
         toast({
           variant: "destructive",
           title: "Erreur",
-          description: response.error || "Une erreur s'est produite"
+          description: errorMessage
+        });
+      } else if (type === 'signup') {
+        toast({
+          title: "Compte créé",
+          description: "Votre compte a été créé avec succès"
         });
       }
     } catch (err) {
+      console.error('Erreur authentification:', err);
       toast({
         variant: "destructive",
         title: "Erreur",
         description: "Une erreur s'est produite lors de l'authentification"
       });
-      console.error('Email auth error:', err);
     }
   };
 
@@ -159,34 +185,18 @@ export const Auth = () => {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="remember" 
-                  checked={rememberMe}
-                  onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-                />
-                <label
-                  htmlFor="remember"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Se souvenir de moi
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="admin" 
-                  checked={isAdmin}
-                  onCheckedChange={(checked) => setIsAdmin(checked as boolean)}
-                />
-                <label
-                  htmlFor="admin"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center"
-                >
-                  <Shield className="h-4 w-4 mr-1" />
-                  Admin
-                </label>
-              </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="remember" 
+                checked={rememberMe}
+                onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+              />
+              <label
+                htmlFor="remember"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Se souvenir de moi
+              </label>
             </div>
           </div>
         </div>
@@ -202,18 +212,16 @@ export const Auth = () => {
             ) : (
               <Sparkles className="mr-2 h-4 w-4" />
             )}
-            {isAdmin ? "Accès Administration" : "Entrer dans le portail Amethyst"}
+            Entrer dans le portail Amethyst
           </Button>
-          {!isAdmin && (
-            <Button 
-              className="w-full" 
-              variant="outline"
-              onClick={() => handleAuthAction('signup')}
-              disabled={isLoading || !email || !password}
-            >
-              Créer un compte
-            </Button>
-          )}
+          <Button 
+            className="w-full" 
+            variant="outline"
+            onClick={() => handleAuthAction('signup')}
+            disabled={isLoading || !email || !password}
+          >
+            Créer un compte
+          </Button>
         </div>
       </Card>
     </div>

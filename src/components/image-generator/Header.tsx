@@ -1,47 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { HelpCircle, Sparkles, User as UserIcon, LogIn } from 'lucide-react';
 import { ProfileModal } from './modals/ProfileModal';
 import { HelpModal } from './modals/HelpModal';
-import { supabase } from "@/lib/supabase/client";
 import useModalStore, { ModalId } from '@/state/modalStore';
-import type { User } from '@supabase/supabase-js';
+import { useAuth } from '@/hooks/use-auth';
 import { useNavigate } from 'react-router-dom';
 
 export const Header = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const { user } = useAuth();
   const { openModal } = useModalStore();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const handleSignIn = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin
-      }
-    });
-  };
-
-  const handleLogoClick = () => {
-    window.location.reload();
-  };
 
   const handleHelpClick = () => {
     openModal(ModalId.HELP, {
@@ -56,7 +26,7 @@ export const Header = () => {
     if (user) {
       setShowProfileModal(true);
     } else {
-      handleSignIn();
+      navigate('/auth');
     }
   };
 
@@ -80,7 +50,7 @@ export const Header = () => {
 
         <div 
           className="flex items-center gap-3 sm:gap-4 cursor-pointer hover:scale-[1.02] transition-all duration-500 group"
-          onClick={handleLogoClick}
+          onClick={() => window.location.reload()}
         >
           <div className="relative">
             <div className="absolute inset-0 bg-primary/20 blur-xl animate-pulse rounded-full group-hover:scale-110 transition-transform duration-500"></div>

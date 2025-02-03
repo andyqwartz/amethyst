@@ -41,57 +41,76 @@ export const useImageHandling = () => {
 
   const generateImage = useCallback(async (): Promise<GenerateImageResponse> => {
     if (!user) {
-      handleError('Authentication required')
-      return { success: false, error: 'Authentication required' }
+      handleError('Authentification requise')
+      return { success: false, error: 'Authentification requise' }
     }
 
     try {
       setIsGenerating(true)
       clearError()
 
-      // TODO: Replace with actual API call
-      const response = await mockImageGeneration()
-
-      if (!response.success) {
-        handleError(response.error || 'Failed to generate image')
-        return response
-      }
-
-      // Convertir les paramètres au nouveau format
+      // Préparer les paramètres de génération
       const generationParams: GenerationParameters = {
         prompt: settings.prompt,
-        negative_prompt: settings.negative_prompt,
-        width: settings.width,
-        height: settings.height,
-        num_inference_steps: settings.steps,
-        guidance_scale: settings.guidance_scale,
-        seed: settings.seed,
-        strength: settings.strength,
-        reference_image_id: settings.initImage || undefined,
-        reference_image_strength: settings.strength,
-        output_format: 'png',
-        output_quality: 100,
-        num_outputs: 1
+        negative_prompt: settings.negative_prompt || '',
+        width: settings.width || 512,
+        height: settings.height || 512,
+        num_inference_steps: settings.steps || 20,
+        guidance_scale: settings.guidance_scale || 7.5,
+        seed: settings.seed || Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
+        scheduler: settings.scheduler || 'DPMSolverMultistep',
+        strength: settings.strength || 1.0,
+        num_outputs: settings.num_outputs || 1,
+        aspect_ratio: `${settings.width}:${settings.height}`,
+        output_format: settings.output_format || 'png',
+        output_quality: settings.output_quality || 100,
+        prompt_strength: settings.prompt_strength || 0.8,
+        hf_loras: settings.hf_loras || [],
+        lora_scales: settings.lora_scales || [],
+        disable_safety_checker: settings.disable_safety_checker || false,
+        reference_image_id: settings.reference_image_id,
+        reference_image_strength: settings.reference_image_strength || 0.75,
+        model_version: settings.model_version || 'SDXL 1.0'
       }
+
+      // Appel à l'API de génération (à implémenter)
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(generationParams),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || 'Erreur lors de la génération')
+      }
+
+      const result = await response.json()
 
       // Stocker l'image générée
       const generatedImage = await storeGeneratedImage(
-        response.imageUrl!,
+        result.imageUrl,
         generationParams,
         user.id
       )
 
       // Mettre à jour l'interface
-      setCurrentImage({
+      const newImage = {
         id: generatedImage.id,
         url: generatedImage.public_url!,
         timestamp: new Date(generatedImage.created_at).getTime(),
         settings: settings
-      })
+      }
+
+      setCurrentImage(newImage)
+      addGeneratedImage(newImage)
+      addToHistory(newImage)
 
       return { success: true, imageUrl: generatedImage.public_url }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue'
       handleError(errorMessage)
       return { success: false, error: errorMessage }
     } finally {
@@ -104,7 +123,9 @@ export const useImageHandling = () => {
     setIsGenerating,
     clearError,
     handleError,
-    storeGeneratedImage
+    storeGeneratedImage,
+    addGeneratedImage,
+    addToHistory
   ])
 
   const setGeneratedImage = useCallback((imageUrl: string) => {

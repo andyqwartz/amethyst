@@ -16,7 +16,10 @@ import {
   Image as ImageIcon,
   Mail,
   Palette,
-  Sparkles
+  Sparkles,
+  User,
+  Youtube,
+  AlertCircle
 } from 'lucide-react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +27,7 @@ import { Switch } from "@/components/ui/switch";
 import { useAuth } from '@/hooks/use-auth';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { Progress } from "@/components/ui/progress";
 
 interface UserProfileProps {
   user?: {
@@ -39,8 +43,15 @@ interface UserProfileProps {
       language?: string;
       notifications?: boolean;
       newsletter?: boolean;
+      ads_enabled?: boolean;
     };
+    auth_provider?: string;
+    ads_watched_today?: number;
+    daily_ads_limit?: number;
+    ads_credits_earned?: number;
   };
+  onWatchAd?: () => void;
+  canWatchAd?: boolean;
 }
 
 const defaultUser = {
@@ -54,11 +65,15 @@ const defaultUser = {
   preferences: {
     language: 'Français',
     notifications: false,
-    newsletter: false
-  }
+    newsletter: false,
+    ads_enabled: true
+  },
+  ads_watched_today: 0,
+  daily_ads_limit: 10,
+  ads_credits_earned: 0
 };
 
-export const UserProfile = ({ user: providedUser }: UserProfileProps) => {
+export const UserProfile = ({ user: providedUser, onWatchAd, canWatchAd }: UserProfileProps) => {
   const user = { ...defaultUser, ...providedUser, preferences: { ...defaultUser.preferences, ...providedUser?.preferences } };
   const [isDarkMode, setIsDarkMode] = React.useState(true);
   const [showEmail, setShowEmail] = React.useState(false);
@@ -68,19 +83,18 @@ export const UserProfile = ({ user: providedUser }: UserProfileProps) => {
 
   const handleSignOut = async () => {
     try {
-      const { error } = await signOut();
-      if (error) throw error;
-      
+      await signOut();
+      navigate('/auth');
       toast({
         title: "Déconnexion réussie",
-        description: "Vous avez été déconnecté avec succès",
+        description: "À bientôt !"
       });
-      navigate('/auth');
     } catch (error) {
+      console.error('Error signing out:', error);
       toast({
+        variant: "destructive",
         title: "Erreur",
-        description: "Une erreur s'est produite lors de la déconnexion",
-        variant: "destructive"
+        description: "Impossible de se déconnecter"
       });
     }
   };
@@ -93,6 +107,19 @@ export const UserProfile = ({ user: providedUser }: UserProfileProps) => {
       return `${username[0]}${'.'.repeat(Math.max(0, username.length - 2))}${username.slice(-1)}@${domain}`;
     } catch {
       return 'email@exemple.com';
+    }
+  };
+
+  const getAuthProviderBadge = () => {
+    switch (user.auth_provider) {
+      case 'google':
+        return <Badge variant="outline" className="ml-2">Google</Badge>;
+      case 'github':
+        return <Badge variant="outline" className="ml-2">GitHub</Badge>;
+      case 'apple':
+        return <Badge variant="outline" className="ml-2">Apple</Badge>;
+      default:
+        return <Badge variant="outline" className="ml-2">Email</Badge>;
     }
   };
 
@@ -109,21 +136,25 @@ export const UserProfile = ({ user: providedUser }: UserProfileProps) => {
       title: "Sécurité",
       description: "Changez votre mot de passe et vos paramètres de sécurité",
       onClick: undefined,
-      badge: <Badge variant="outline" className="ml-2">2FA Activé</Badge>
+      badge: getAuthProviderBadge()
     },
     {
       icon: <CreditCard className="w-5 h-5" />,
       title: "Abonnements et crédits",
       description: `${user.credits} crédits disponibles`,
       onClick: undefined,
-      badge: <Badge className="bg-primary/10 text-primary ml-2">Gratuit</Badge>
+      badge: <Badge className="bg-primary/10 text-primary ml-2">{user.membershipType}</Badge>
     },
     {
-      icon: <Bell className="w-5 h-5" />,
-      title: "Notifications",
-      description: "Gérez vos préférences de notification",
-      onClick: undefined,
-      badge: null
+      icon: <Youtube className="w-5 h-5" />,
+      title: "Gagner des crédits",
+      description: `${user.ads_watched_today}/${user.daily_ads_limit} publicités vues aujourd'hui`,
+      onClick: canWatchAd ? onWatchAd : undefined,
+      badge: canWatchAd ? (
+        <Badge variant="outline" className="ml-2 bg-primary/10 text-primary">+5 crédits</Badge>
+      ) : (
+        <Badge variant="secondary" className="ml-2">Limite atteinte</Badge>
+      )
     },
     {
       icon: <History className="w-5 h-5" />,
@@ -154,8 +185,8 @@ export const UserProfile = ({ user: providedUser }: UserProfileProps) => {
     },
     {
       icon: <Gift className="w-4 h-4" />,
-      value: "2",
-      label: "Récompenses"
+      value: (user.ads_credits_earned ?? 0).toString(),
+      label: "Crédits gagnés"
     },
     {
       icon: <Globe className="w-4 h-4" />,
@@ -171,10 +202,13 @@ export const UserProfile = ({ user: providedUser }: UserProfileProps) => {
         <div className="flex items-center gap-6">
           <div className="relative">
             <Avatar className="w-24 h-24">
-              <AvatarImage src={user.avatarUrl} />
-              <AvatarFallback className="text-2xl bg-primary/10">
-                {user.name.charAt(0).toUpperCase()}
-              </AvatarFallback>
+              {user.avatarUrl ? (
+                <AvatarImage src={user.avatarUrl} alt={user.name} />
+              ) : (
+                <AvatarFallback>
+                  <User className="h-10 w-10" />
+                </AvatarFallback>
+              )}
             </Avatar>
             <div className="absolute -bottom-2 -right-2 p-1.5 rounded-full bg-primary/10 text-primary">
               <Mail className="w-4 h-4" />
@@ -200,7 +234,7 @@ export const UserProfile = ({ user: providedUser }: UserProfileProps) => {
         </div>
 
         {/* Statistiques */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {statsItems.map((stat, index) => (
             <Card key={index} className="p-4 text-center">
               <div className="flex items-center justify-center gap-2 text-primary mb-2">
@@ -211,6 +245,31 @@ export const UserProfile = ({ user: providedUser }: UserProfileProps) => {
             </Card>
           ))}
         </div>
+
+        {/* Progression des publicités */}
+        {user.preferences.ads_enabled && (
+          <Card className="p-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <Youtube className="w-4 h-4 text-primary" />
+                <span className="font-medium">Progression des publicités</span>
+              </div>
+              <span className="text-sm text-muted-foreground">
+                {user.ads_watched_today}/{user.daily_ads_limit}
+              </span>
+            </div>
+            <Progress 
+              value={(user.ads_watched_today / user.daily_ads_limit) * 100} 
+              className="h-2"
+            />
+            {!canWatchAd && (
+              <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
+                <AlertCircle className="w-4 h-4" />
+                <span>Limite quotidienne atteinte. Revenez demain !</span>
+              </div>
+            )}
+          </Card>
+        )}
 
         {/* Menu principal */}
         <div className="grid gap-4">
@@ -282,6 +341,16 @@ export const UserProfile = ({ user: providedUser }: UserProfileProps) => {
                 disabled
               />
             </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Youtube className="w-4 h-4 text-primary" />
+                <span>Publicités récompensées</span>
+              </div>
+              <Switch
+                checked={user.preferences.ads_enabled}
+                disabled
+              />
+            </div>
           </div>
         </Card>
 
@@ -293,7 +362,7 @@ export const UserProfile = ({ user: providedUser }: UserProfileProps) => {
             onClick={handleSignOut}
           >
             <LogOut className="w-4 h-4 mr-2" />
-            Déconnexion
+            Se déconnecter
           </Button>
           <Button
             variant="destructive"
