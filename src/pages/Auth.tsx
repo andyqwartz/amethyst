@@ -1,87 +1,49 @@
-import React, { useState } from 'react';
-import { useAuth } from '@/hooks/use-auth';
-import { useToast } from "@/hooks/use-toast";
+import React from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { AuthError } from '@supabase/supabase-js';
+import { useToast } from '@/hooks/use-toast';
 
-const Auth = () => {
-  const { handleEmailAuth } = useAuth();
+export default function Auth() {
+  const { signInWithEmail } = useAuth();
   const { toast } = useToast();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isRegistering, setIsRegistering] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
     try {
-      const response = await handleEmailAuth(email, password, isRegistering);
-      if (response.success) {
-        toast({
-          title: "Success",
-          description: `Successfully ${isRegistering ? 'registered' : 'logged in'}!`,
-          variant: "default"
-        });
-      } else {
+      const { error } = await signInWithEmail(email, password);
+      if (error) {
         toast({
           title: "Error",
-          description: response.error || "An error occurred",
+          description: error instanceof AuthError ? error.message : 'An error occurred',
           variant: "destructive"
         });
       }
     } catch (error) {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
+        description: error instanceof AuthError ? error.message : 'An error occurred',
         variant: "destructive"
       });
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="w-full max-w-md space-y-8 p-8 bg-card rounded-lg shadow-lg">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold">{isRegistering ? 'Register' : 'Login'}</h1>
+    <div className="container mx-auto px-4 py-8">
+      <form onSubmit={handleSubmit} className="max-w-md mx-auto">
+        <div className="mb-4">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+          <input type="email" name="email" id="email" required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-opacity-50" />
         </div>
-        
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            />
-          </div>
-          
-          <div>
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            />
-          </div>
-          
-          <button 
-            type="submit"
-            className="w-full py-2 px-4 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-          >
-            {isRegistering ? 'Register' : 'Login'}
-          </button>
-        </form>
-        
-        <button 
-          onClick={() => setIsRegistering(!isRegistering)}
-          className="w-full text-sm text-muted-foreground hover:text-primary"
-        >
-          {isRegistering ? 'Already have an account? Login' : 'Need an account? Register'}
-        </button>
-      </div>
+        <div className="mb-4">
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+          <input type="password" name="password" id="password" required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-opacity-50" />
+        </div>
+        <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600">Sign In</button>
+      </form>
     </div>
   );
-};
-
-export default Auth;
+}
