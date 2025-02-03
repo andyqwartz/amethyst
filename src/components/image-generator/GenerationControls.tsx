@@ -13,14 +13,14 @@ interface GenerationControlsProps {
   showSettings?: boolean;
 }
 
-export const GenerationControls = ({
+export const GenerationControls: React.FC<GenerationControlsProps> = ({
   settings,
   onSettingsChange,
   onGenerate,
   onToggleSettings,
   isGenerating,
   showSettings = false
-}: GenerationControlsProps) => {
+}) => {
   const { toast } = useToast();
 
   const handleGenerate = () => {
@@ -38,18 +38,20 @@ export const GenerationControls = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 w-full">
       <PromptInput
         settings={settings}
         onSettingsChange={onSettingsChange}
         onGenerate={handleGenerate}
       />
-      <GenerationButtons
-        onToggleSettings={onToggleSettings}
-        onGenerate={handleGenerate}
-        isGenerating={isGenerating}
-        showSettings={showSettings}
-      />
+      <div className="flex justify-center">
+        <GenerationButtons
+          onToggleSettings={onToggleSettings}
+          onGenerate={handleGenerate}
+          isGenerating={isGenerating}
+          showSettings={showSettings}
+        />
+      </div>
     </div>
   );
 };

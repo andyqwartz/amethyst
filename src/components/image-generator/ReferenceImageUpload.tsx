@@ -9,13 +9,19 @@ interface ReferenceImageUploadProps {
   onRemoveImage: () => void;
 }
 
-export const ReferenceImageUpload = ({
+export const ReferenceImageUpload: React.FC<ReferenceImageUploadProps> = ({
   referenceImage,
   onImageUpload,
   onImageClick,
   onRemoveImage
-}: ReferenceImageUploadProps) => {
+}) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
 
   return (
     <div className="relative">
@@ -44,7 +50,7 @@ export const ReferenceImageUpload = ({
         </div>
       ) : (
         <button
-          onClick={onImageClick}
+          onClick={handleClick}
           className="w-full p-6 border-2 border-dashed border-primary/30 rounded-xl hover:bg-primary/5 transition-colors"
         >
           <div className="flex flex-col items-center gap-2 text-primary/70">
