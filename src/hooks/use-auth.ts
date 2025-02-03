@@ -1,115 +1,72 @@
-import { useState } from 'react'
-import { AuthError, Provider, AuthResponse as SupabaseAuthResponse } from '@supabase/supabase-js'
-import { supabase } from '@/integrations/supabase/client'
-
-interface AuthResponse {
-  success: boolean
-  error: string | null
-  data?: SupabaseAuthResponse['data']
-}
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import type { User } from '@supabase/supabase-js';
 
 export const useAuth = () => {
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleEmailAuth = async (
-    email: string,
-    password: string,
-    isSignUp: boolean
-  ): Promise<AuthResponse> => {
-    setIsLoading(true)
-    setError(null)
+  useEffect(() => {
+    // Get initial session
+    const initAuth = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          // Try to get profile data
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .maybeSingle();
 
-    try {
-      const { data, error } = isSignUp
-        ? await supabase.auth.signUp({
-            email,
-            password,
-          })
-        : await supabase.auth.signInWithPassword({
-            email,
-            password,
-          })
+          if (error && error.code !== 'PGRST116') {
+            console.error('Error fetching profile:', error);
+          }
 
-      if (error) throw error
+          // If no profile exists, create one
+          if (!profile) {
+            const { error: createError } = await supabase
+              .from('profiles')
+              .insert([
+                { 
+                  id: user.id,
+                  username: user.email?.split('@')[0] || 'user',
+                  full_name: user.user_metadata.full_name,
+                  avatar_url: user.user_metadata.avatar_url
+                }
+              ]);
 
-      return {
-        success: true,
-        error: null,
-        data: data
+            if (createError) {
+              console.error('Error creating profile:', createError);
+            }
+          }
+        }
+        
+        setUser(user);
+      } catch (error) {
+        console.error('Auth error:', error);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      const error = err as AuthError
-      setError(error.message)
-      return {
-        success: false,
-        error: error.message,
-      }
-    } finally {
-      setIsLoading(false)
-    }
-  }
+    };
 
-  const handleGithubAuth = async (): Promise<AuthResponse> => {
-    setIsLoading(true)
-    setError(null)
+    initAuth();
 
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'github' as Provider,
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
-      })
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
 
-      if (error) throw error
-
-      return {
-        success: true,
-        error: null,
-        data: data
-      }
-    } catch (err) {
-      const error = err as AuthError
-      setError(error.message)
-      return {
-        success: false,
-        error: error.message,
-      }
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const signOut = async (): Promise<AuthResponse> => {
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      const { error } = await supabase.auth.signOut()
-      if (error) throw error
-
-      return {
-        success: true,
-        error: null,
-      }
-    } catch (err) {
-      const error = err as AuthError
-      setError(error.message)
-      return {
-        success: false,
-        error: error.message,
-      }
-    } finally {
-      setIsLoading(false)
-    }
-  }
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   return {
-    isLoading,
-    error,
-    handleEmailAuth,
-    handleGithubAuth,
-    signOut,
-  }
-}
+    user,
+    loading,
+    isAuthenticated: !!user
+  };
+};

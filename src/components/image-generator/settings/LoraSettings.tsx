@@ -1,155 +1,90 @@
 import React from 'react';
+import type { GenerationSettings } from '@/types/replicate';
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Plus, Minus } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { HelpCircle } from 'lucide-react';
-import { useImageGeneratorStore } from '@/state/imageGeneratorStore';
 
-const DEFAULT_LORAS = [
-  { 
-    id: "AndyVampiro/joa", 
-    name: "JOA Style", 
-    description: "Style artistique unique avec des couleurs vibrantes" 
-  },
-  { 
-    id: "AndyVampiro/andy", 
-    name: "Andy Style", 
-    description: "Style graphique moderne et épuré" 
-  },
-  { 
-    id: "AndyVampiro/ilenana", 
-    name: "Ilenana Style", 
-    description: "Style fantaisiste et onirique" 
-  },
-  { 
-    id: "AndyVampiro/fog", 
-    name: "Fog Effect", 
-    description: "Ajoute des effets atmosphériques et brumeux" 
-  }
-];
-
-interface LoraSettingsProps {
-  disabled?: boolean;
+export interface LoraSettingsProps {
+  settings: GenerationSettings;
+  onSettingsChange: (settings: Partial<GenerationSettings>) => void;
 }
 
-const renderTooltip = (description: string) => (
-  <TooltipProvider>
-    <Tooltip>
-      <TooltipTrigger className="ml-2">
-        <HelpCircle className="h-4 w-4 text-primary/50" />
-      </TooltipTrigger>
-      <TooltipContent>
-        <p className="max-w-xs text-sm">{description}</p>
-      </TooltipContent>
-    </Tooltip>
-  </TooltipProvider>
-);
-
-export const LoraSettings: React.FC<LoraSettingsProps> = ({
-  disabled = false
-}) => {
-  const { settings, updateSettings } = useImageGeneratorStore();
-
-  const addLora = () => {
-    const newHfLoras = [...(settings.hf_loras || []), DEFAULT_LORAS[0].id];
-    const newLoraScales = [...(settings.lora_scales || []), 0.8];
-    updateSettings({ 
-      hf_loras: newHfLoras,
-      lora_scales: newLoraScales
+export const LoraSettings: React.FC<LoraSettingsProps> = ({ settings, onSettingsChange }) => {
+  const handleAddLora = () => {
+    const newLoras = [...(settings.hf_loras || []), ''];
+    const newScales = [...(settings.lora_scales || []), 0.8];
+    onSettingsChange({
+      hf_loras: newLoras,
+      lora_scales: newScales
     });
   };
 
-  const removeLora = (index: number) => {
-    const newHfLoras = settings.hf_loras?.filter((_, i) => i !== index) || [];
-    const newLoraScales = settings.lora_scales?.filter((_, i) => i !== index) || [];
-    updateSettings({ 
-      hf_loras: newHfLoras,
-      lora_scales: newLoraScales
+  const handleRemoveLora = (index: number) => {
+    const newLoras = settings.hf_loras?.filter((_, i) => i !== index) || [];
+    const newScales = settings.lora_scales?.filter((_, i) => i !== index) || [];
+    onSettingsChange({
+      hf_loras: newLoras,
+      lora_scales: newScales
     });
   };
 
-  const updateLoraId = (index: number, value: string) => {
-    const newHfLoras = [...(settings.hf_loras || [])];
-    newHfLoras[index] = value;
-    updateSettings({ hf_loras: newHfLoras });
+  const handleLoraChange = (index: number, value: string) => {
+    const newLoras = [...(settings.hf_loras || [])];
+    newLoras[index] = value;
+    onSettingsChange({ hf_loras: newLoras });
   };
 
-  const updateLoraScale = (index: number, value: number) => {
-    const newLoraScales = [...(settings.lora_scales || [])];
-    newLoraScales[index] = value;
-    updateSettings({ lora_scales: newLoraScales });
+  const handleScaleChange = (index: number, value: string) => {
+    const newScales = [...(settings.lora_scales || [])];
+    newScales[index] = parseFloat(value) || 0;
+    onSettingsChange({ lora_scales: newScales });
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Label className="flex items-center">
-          LoRAs {renderTooltip("Modèles LoRA pour personnaliser la génération")}
-        </Label>
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-medium">LoRA Settings</h3>
         <Button
           variant="outline"
           size="sm"
-          onClick={addLora}
-          disabled={disabled || (settings.hf_loras?.length || 0) >= 3}
-          className="border-primary/20"
+          onClick={handleAddLora}
+          className="flex items-center gap-2"
         >
           <Plus className="h-4 w-4" />
+          Add LoRA
         </Button>
       </div>
 
-      {settings.hf_loras?.map((loraId, index) => (
-        <div key={index} className="space-y-3 pt-2">
-          <div className="flex items-center justify-between gap-2">
-            <Select
-              value={loraId}
-              onValueChange={(value) => updateLoraId(index, value)}
-              disabled={disabled}
-            >
-              <SelectTrigger className="bg-popover border-primary/20">
-                <SelectValue placeholder="Sélectionner un LoRA" />
-              </SelectTrigger>
-              <SelectContent className="bg-popover border-primary/20">
-                {DEFAULT_LORAS.map((lora) => (
-                  <SelectItem 
-                    key={lora.id} 
-                    value={lora.id}
-                    className="flex flex-col items-start py-3"
-                  >
-                    <span className="font-medium">{lora.name}</span>
-                    <span className="text-xs text-primary/70 mt-1">{lora.description}</span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => removeLora(index)}
-              disabled={disabled || index === 0}
-              className="text-destructive hover:text-destructive/80"
-            >
-              <Minus className="h-4 w-4" />
-            </Button>
-          </div>
-
+      {settings.hf_loras?.map((lora, index) => (
+        <div key={index} className="grid grid-cols-[1fr,100px,40px] gap-2 items-end">
           <div className="space-y-2">
-            <Label className="text-sm text-primary/70">Force du LoRA</Label>
-            <Slider
-              value={[settings.lora_scales?.[index] || 0.8]}
-              onValueChange={([value]) => updateLoraScale(index, value)}
-              min={0}
-              max={1}
-              step={0.1}
-              disabled={disabled}
-              className="[&_[role=slider]]:bg-primary"
+            <Label>LoRA {index + 1}</Label>
+            <Input
+              value={lora}
+              onChange={(e) => handleLoraChange(index, e.target.value)}
+              placeholder="Enter LoRA path"
             />
-            <span className="text-xs text-primary/50 block">
-              {(settings.lora_scales?.[index] || 0.8).toFixed(1)}
-            </span>
           </div>
+          <div className="space-y-2">
+            <Label>Scale</Label>
+            <Input
+              type="number"
+              value={settings.lora_scales?.[index] || 0.8}
+              onChange={(e) => handleScaleChange(index, e.target.value)}
+              min={0}
+              max={2}
+              step={0.1}
+            />
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleRemoveLora(index)}
+            className="mb-[2px]"
+          >
+            <Minus className="h-4 w-4" />
+          </Button>
         </div>
       ))}
     </div>
