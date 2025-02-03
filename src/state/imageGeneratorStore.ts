@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import type { GenerationSettings } from '@/types/replicate'
+import { ImageSettings } from '@/types/generation'
 
 type ImageSettings = Omit<GenerationSettings, 'aspect_ratio'> & {
   width: number
@@ -39,8 +40,7 @@ interface ImageGeneratorState {
   error: ErrorState
   
   // Settings actions
-  updateSettings: (settings: Partial<ImageSettings>) => void
-  resetSettings: () => void
+  setSettings: (settings: ImageSettings | ((prev: ImageSettings) => ImageSettings)) => void
   
   // Image generation actions
   setCurrentImage: (image: GeneratedImage | null) => void
@@ -83,7 +83,8 @@ const initialSettings: ImageSettings = {
   prompt_strength: 0.8,
   disable_safety_checker: false,
   hf_loras: ["AndyVampiro/fog"],
-  lora_scales: [1.0]
+  lora_scales: [1.0],
+  aspect_ratio: '1:1'
 }
 
 const initialUIState: UIState = {
@@ -110,13 +111,11 @@ export const useImageGeneratorStore = create<ImageGeneratorState>()(
       error: initialErrorState,
 
       // Settings actions
-      updateSettings: (newSettings) =>
+      setSettings: (newSettings) =>
         set((state) => ({
-          settings: { ...state.settings, ...newSettings }
-        })),
-      resetSettings: () =>
-        set(() => ({
-          settings: initialSettings
+          settings: typeof newSettings === 'function' 
+            ? newSettings(state.settings)
+            : newSettings
         })),
 
       // Image generation actions

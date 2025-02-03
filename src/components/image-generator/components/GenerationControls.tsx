@@ -2,44 +2,43 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useGenerationState } from '../hooks/useGenerationState';
 import { Play, Square } from 'lucide-react';
+import { GenerationButtonsProps } from '@/types/generation';
 
-interface GenerationControlsProps {
-  onStart?: () => void;
-  onStop?: () => void;
-  className?: string;
+interface Props extends GenerationButtonsProps {
+  onGenerationStart: () => void;
 }
 
-export const GenerationControls: React.FC<GenerationControlsProps> = ({
-  onStart,
-  onStop,
-  className = '',
+export const GenerationControls: React.FC<Props> = ({
+  onGenerate,
+  onGenerationStart,
+  isGenerating
 }) => {
-  const { isGenerating } = useGenerationState();
+  const { isGenerating: stateGenerating } = useGenerationState();
 
   const handleStart = () => {
-    onStart?.();
+    onGenerationStart();
   };
 
   const handleStop = () => {
-    onStop?.();
+    onGenerate();
   };
 
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
+    <div className={`flex items-center gap-2`}>
       <Button
         onClick={handleStart}
-        disabled={isGenerating}
+        disabled={stateGenerating}
         variant="default"
         size="sm"
         className="w-24"
       >
         <Play className="mr-2 h-4 w-4" />
-        {isGenerating ? 'Running' : 'Start'}
+        {stateGenerating ? 'Running' : 'Start'}
       </Button>
 
       <Button
         onClick={handleStop}
-        disabled={!isGenerating}
+        disabled={!stateGenerating}
         variant="destructive"
         size="sm"
         className="w-24"

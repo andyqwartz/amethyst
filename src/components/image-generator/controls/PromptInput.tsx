@@ -1,9 +1,18 @@
 import React, { useRef, useEffect } from 'react';
 import { Textarea } from "@/components/ui/textarea";
 import { useImageGeneratorStore } from '@/state/imageGeneratorStore';
+import { ImageSettings } from '@/types/generation';
 
-export const PromptInput = () => {
-  const { settings, updateSettings, ui } = useImageGeneratorStore();
+interface PromptInputProps {
+  settings: ImageSettings;
+  updateSettings: (settings: Partial<ImageSettings>) => void;
+}
+
+export const PromptInput: React.FC<PromptInputProps> = ({
+  settings,
+  updateSettings
+}) => {
+  const { ui } = useImageGeneratorStore();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -35,13 +44,17 @@ export const PromptInput = () => {
     }
   };
 
+  const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    updateSettings({ prompt: e.target.value });
+  };
+
   return (
     <div className="w-full">
       <Textarea
         ref={textareaRef}
         placeholder="Décrivez l'image que vous souhaitez générer..."
-        value={settings.prompt}
-        onChange={(e) => updateSettings({ prompt: e.target.value })}
+        value={settings.prompt || ''}
+        onChange={onChange}
         onKeyDown={handleKeyDown}
         className="prompt-input resize-none min-h-[3rem] py-2 px-4"
         rows={1}

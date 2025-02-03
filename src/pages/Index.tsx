@@ -1,6 +1,6 @@
 import { ImageGenerator } from "@/components/ImageGenerator";
 
-const Index = () => {
+export const Index = () => {
   return <ImageGenerator />;
 };
 
