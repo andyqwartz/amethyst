@@ -23,6 +23,8 @@ export interface ImageSettings extends Omit<GenerationSettings, 'aspect_ratio'> 
   img2img: boolean;
   strength: number;
   initImage: string | null;
+  scheduler?: string;
+  model_version?: string;
 }
 
 export interface GenerationParameters extends GenerationSettings {
@@ -30,12 +32,16 @@ export interface GenerationParameters extends GenerationSettings {
   height: number;
   scheduler?: string;
   model_version?: string;
+  strength?: number;
+  reference_image_id?: string;
 }
 
 export interface GeneratedImage {
   id: string;
   url: string;
+  public_url: string;
   timestamp: number;
+  created_at: string;
   settings: ImageSettings;
 }
 
@@ -45,4 +51,15 @@ export interface ReferenceImage {
   filename: string;
   width: number;
   height: number;
+}
+
+export interface GenerationButtonsProps {
+  onGenerate: () => void;
+  isGenerating: boolean;
+  onGenerationStart?: () => void;
+}
+
+export interface PromptInputProps {
+  settings: ImageSettings;
+  updateSettings: (settings: Partial<ImageSettings>) => void;
 }
