@@ -1,3 +1,3 @@
-export * from './useAuth';
-export * from './useProfile';
-export * from './useSupabase'; 
+export { useAuth } from './useAuth';
+export { useProfile } from './useProfile';
+export { useSupabase } from './useSupabase';

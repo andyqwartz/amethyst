@@ -9,3 +9,11 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+
+export const checkSession = async () => {
+  const { data: { session }, error } = await supabase.auth.getSession();
+  if (error || !session) {
+    throw new Error('No active session');
+  }
+  return session;
+};

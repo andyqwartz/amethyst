@@ -4,17 +4,19 @@ import type { ImageSettings } from '@/types/generation';
 const defaultSettings: ImageSettings = {
   prompt: '',
   negative_prompt: '',
-  guidance_scale: 7.5,
-  steps: 20,
   width: 512,
   height: 512,
-  seed: -1,
+  steps: 20,
+  guidance_scale: 7.5,
   num_outputs: 1,
-  aspect_ratio: '1:1',
+  seed: -1,
+  img2img: false,
+  strength: 0.75,
+  initImage: null,
   output_format: 'webp',
   output_quality: 90,
   prompt_strength: 0.8,
-  hf_loras: ['AndyVampiro/fog'],
+  hf_loras: ["AndyVampiro/fog"],
   lora_scales: [1.0],
   disable_safety_checker: false
 };
@@ -29,9 +31,11 @@ export const useGenerationSettings = () => {
     }));
   };
 
+  const resetSettings = () => setSettings(defaultSettings);
+
   return {
     settings,
     updateSettings,
-    resetSettings: () => setSettings(defaultSettings)
+    resetSettings
   };
 };
