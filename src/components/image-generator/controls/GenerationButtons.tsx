@@ -5,6 +5,7 @@ import { Settings2, Wand2 } from 'lucide-react';
 export interface GenerationButtonsProps {
   onToggleSettings: () => void;
   onGenerate: () => void;
+  onGenerationStart?: () => void;
   isGenerating: boolean;
   showSettings?: boolean;
 }
@@ -12,9 +13,15 @@ export interface GenerationButtonsProps {
 export const GenerationButtons: React.FC<GenerationButtonsProps> = ({
   onToggleSettings,
   onGenerate,
+  onGenerationStart,
   isGenerating,
   showSettings = false
 }) => {
+  const handleGenerate = () => {
+    onGenerationStart?.();
+    onGenerate();
+  };
+
   return (
     <div className="flex gap-2 justify-end">
       <Button
@@ -26,7 +33,7 @@ export const GenerationButtons: React.FC<GenerationButtonsProps> = ({
         <Settings2 className="h-5 w-5" />
       </Button>
       <Button
-        onClick={onGenerate}
+        onClick={handleGenerate}
         disabled={isGenerating}
         className="flex items-center gap-2"
       >

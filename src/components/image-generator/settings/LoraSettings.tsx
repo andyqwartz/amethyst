@@ -1,92 +1,61 @@
 import React from 'react';
 import type { GenerationSettings } from '@/types/replicate';
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Plus, Minus } from 'lucide-react';
 
 export interface LoraSettingsProps {
   settings: GenerationSettings;
   onSettingsChange: (settings: Partial<GenerationSettings>) => void;
+  disabled?: boolean;
 }
 
-export const LoraSettings: React.FC<LoraSettingsProps> = ({ settings, onSettingsChange }) => {
-  const handleAddLora = () => {
-    const newLoras = [...(settings.hf_loras || []), ''];
-    const newScales = [...(settings.lora_scales || []), 0.8];
-    onSettingsChange({
-      hf_loras: newLoras,
-      lora_scales: newScales
-    });
-  };
-
-  const handleRemoveLora = (index: number) => {
-    const newLoras = settings.hf_loras?.filter((_, i) => i !== index) || [];
-    const newScales = settings.lora_scales?.filter((_, i) => i !== index) || [];
-    onSettingsChange({
-      hf_loras: newLoras,
-      lora_scales: newScales
-    });
-  };
-
+export const LoraSettings: React.FC<LoraSettingsProps> = ({
+  settings,
+  onSettingsChange,
+  disabled = false
+}) => {
   const handleLoraChange = (index: number, value: string) => {
-    const newLoras = [...(settings.hf_loras || [])];
-    newLoras[index] = value;
-    onSettingsChange({ hf_loras: newLoras });
+    const updatedLoras = [...settings.hf_loras];
+    updatedLoras[index] = value;
+    onSettingsChange({ hf_loras: updatedLoras });
   };
 
-  const handleScaleChange = (index: number, value: string) => {
-    const newScales = [...(settings.lora_scales || [])];
-    newScales[index] = parseFloat(value) || 0;
-    onSettingsChange({ lora_scales: newScales });
+  const handleLoraScaleChange = (index: number, value: number) => {
+    const updatedScales = [...settings.lora_scales];
+    updatedScales[index] = value;
+    onSettingsChange({ lora_scales: updatedScales });
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">LoRA Settings</h3>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleAddLora}
-          className="flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Add LoRA
-        </Button>
-      </div>
-
-      {settings.hf_loras?.map((lora, index) => (
-        <div key={index} className="grid grid-cols-[1fr,100px,40px] gap-2 items-end">
-          <div className="space-y-2">
-            <Label>LoRA {index + 1}</Label>
-            <Input
-              value={lora}
-              onChange={(e) => handleLoraChange(index, e.target.value)}
-              placeholder="Enter LoRA path"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Scale</Label>
-            <Input
-              type="number"
-              value={settings.lora_scales?.[index] || 0.8}
-              onChange={(e) => handleScaleChange(index, e.target.value)}
-              min={0}
-              max={2}
-              step={0.1}
-            />
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleRemoveLora(index)}
-            className="mb-[2px]"
-          >
-            <Minus className="h-4 w-4" />
-          </Button>
+      <h3 className="text-lg font-semibold">LoRA Settings</h3>
+      {settings.hf_loras.map((lora, index) => (
+        <div key={index} className="flex items-center space-x-2">
+          <input
+            type="text"
+            value={lora}
+            onChange={(e) => handleLoraChange(index, e.target.value)}
+            disabled={disabled}
+            className="border rounded p-2"
+            placeholder="LoRA model path"
+          />
+          <input
+            type="number"
+            value={settings.lora_scales[index] || 1}
+            onChange={(e) => handleLoraScaleChange(index, parseFloat(e.target.value))}
+            disabled={disabled}
+            className="border rounded p-2 w-20"
+            placeholder="Scale"
+            min={0}
+            step={0.1}
+          />
         </div>
       ))}
+      <button
+        onClick={() => onSettingsChange({ hf_loras: [...settings.hf_loras, ''], lora_scales: [...settings.lora_scales, 1] })}
+        disabled={disabled}
+        className="mt-2 bg-blue-500 text-white rounded p-2"
+      >
+        Add LoRA
+      </button>
     </div>
   );
 };
