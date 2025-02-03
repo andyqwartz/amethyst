@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from './integrations/supabase/client';
 import { ModalProvider } from '@/components/providers/ModalProvider';
 import Index from './pages/Index';
-import { Auth } from './pages/Auth';
+import Auth from './pages/Auth';
 import { AccountPage } from './pages/AccountPage';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -41,28 +41,28 @@ function App() {
   return (
     <ModalProvider>
       <Router>
-      <Routes>
-        <Route path="/auth" element={<Auth />} />
-        <Route 
-          path="/" 
-          element={
-            <ProtectedRoute>
-              <Index />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/account" 
-          element={
-            <ProtectedRoute>
-              <AccountPage />
-            </ProtectedRoute>
-          } 
-        />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-      <Toaster />
-    </Router>
+        <Routes>
+          <Route path="/auth" element={<Auth />} />
+          <Route 
+            path="/" 
+            element={
+              <ProtectedRoute>
+                <Index />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/account" 
+            element={
+              <ProtectedRoute>
+                <AccountPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+        <Toaster />
+      </Router>
     </ModalProvider>
   );
 }
