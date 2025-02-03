@@ -6,11 +6,13 @@ import { HelpModal } from './modals/HelpModal';
 import { supabase } from "@/integrations/supabase/client";
 import useModalStore, { ModalId } from '@/state/modalStore';
 import type { User } from '@supabase/supabase-js';
+import { useNavigate } from 'react-router-dom';
 
 export const Header = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const { openModal } = useModalStore();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Get initial session
@@ -48,32 +50,30 @@ export const Header = () => {
     });
   };
 
+  const handleProfileClick = () => {
+    if (user) {
+      setShowProfileModal(true);
+    } else {
+      handleSignIn();
+    }
+  };
+
   return (
     <>
       <div className="relative p-4 sm:p-6 flex justify-center items-center">
-        <div className="absolute left-4 sm:left-6 opacity-0 hover:opacity-100 focus-within:opacity-100 transition-opacity duration-500 group">
-          <div className="absolute inset-[-1rem] bg-transparent"></div>
-          {user ? (
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => setShowProfileModal(true)}
-              className="relative hover:bg-primary/10 active:bg-primary/20 transition-all duration-300 hover-scale touch-manipulation rounded-xl"
-            >
-              <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 group-active:bg-primary/20 blur transition-all duration-300 rounded-xl"></div>
-              <UserIcon className="h-5 w-5 text-primary relative z-10" />
-            </Button>
-          ) : (
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={handleSignIn}
-              className="relative hover:bg-primary/10 active:bg-primary/20 transition-all duration-300 hover-scale touch-manipulation rounded-xl"
-            >
-              <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 group-active:bg-primary/20 blur transition-all duration-300 rounded-xl"></div>
-              <LogIn className="h-5 w-5 text-primary relative z-10" />
-            </Button>
-          )}
+        <div className="absolute left-4 sm:left-6">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={handleProfileClick}
+            className="relative hover:bg-primary/10 active:bg-primary/20 transition-all duration-300 hover-scale touch-manipulation rounded-xl"
+          >
+            {user ? (
+              <UserIcon className="h-5 w-5 text-primary" />
+            ) : (
+              <LogIn className="h-5 w-5 text-primary" />
+            )}
+          </Button>
         </div>
 
         <div 
@@ -91,16 +91,14 @@ export const Header = () => {
           </div>
         </div>
         
-        <div className="absolute right-4 sm:right-6 opacity-0 hover:opacity-100 focus-within:opacity-100 transition-opacity duration-500 group">
-          <div className="absolute inset-[-1rem] bg-transparent"></div>
+        <div className="absolute right-4 sm:right-6">
           <Button 
             variant="ghost" 
             size="icon"
             onClick={handleHelpClick}
             className="relative hover:bg-primary/10 active:bg-primary/20 transition-all duration-300 hover-scale touch-manipulation rounded-xl"
           >
-            <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 group-active:bg-primary/20 blur transition-all duration-300 rounded-xl"></div>
-            <HelpCircle className="h-5 w-5 text-primary relative z-10" />
+            <HelpCircle className="h-5 w-5 text-primary" />
           </Button>
         </div>
       </div>
@@ -108,6 +106,11 @@ export const Header = () => {
       <ProfileModal
         open={showProfileModal}
         onOpenChange={setShowProfileModal}
+      />
+      
+      <HelpModal 
+        open={false} 
+        onOpenChange={() => {}} 
       />
     </>
   );
