@@ -1,43 +1,37 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import type { GenerationSettings } from '@/types/replicate';
+import type { ImageSettings } from '@/types/generation';
 
 export interface HistoryItem {
+  id: string;
   url: string;
-  settings: GenerationSettings;
+  settings: ImageSettings;
+  created_at: string;
 }
 
 export const useGenerationHistory = () => {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    fetchHistory();
+  }, []);
+
   const fetchHistory = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
       const { data, error } = await supabase
         .from('generated_images')
         .select('*')
-        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-
-      setHistory(data.map(item => ({
-        url: item.url,
-        settings: item.settings
-      })));
-    } catch (error) {
-      console.error('Error fetching history:', error);
+      setHistory(data || []);
+    } catch (err) {
+      console.error('Error fetching history:', err);
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchHistory();
-  }, []);
 
   return { history, loading, fetchHistory };
 };
