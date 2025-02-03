@@ -1,40 +1,51 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { useGenerationState } from '@/hooks/useGenerationState';
+import { useGenerationState } from '../hooks/useGenerationState';
 import { Play, Square } from 'lucide-react';
 
-export interface GenerationButtonsProps {
-  onToggleSettings: () => void;
-  onGenerate: () => void;
-  isGenerating: boolean;
-  showSettings?: boolean;
+interface GenerationControlsProps {
+  onStart?: () => void;
+  onStop?: () => void;
+  className?: string;
 }
 
-export const GenerationControls: React.FC<GenerationButtonsProps> = ({
-  onToggleSettings,
-  onGenerate,
-  isGenerating,
-  showSettings = false
+export const GenerationControls: React.FC<GenerationControlsProps> = ({
+  onStart,
+  onStop,
+  className = '',
 }) => {
-  const { isGenerating: generating } = useGenerationState();
+  const { isGenerating } = useGenerationState();
+
+  const handleStart = () => {
+    onStart?.();
+  };
+
+  const handleStop = () => {
+    onStop?.();
+  };
 
   return (
-    <div className="flex flex-col gap-2 w-full">
+    <div className={`flex items-center gap-2 ${className}`}>
       <Button
-        onClick={onGenerate}
+        onClick={handleStart}
         disabled={isGenerating}
-        className="w-full flex items-center gap-2"
+        variant="default"
+        size="sm"
+        className="w-24"
       >
-        <Play className="h-5 w-5" />
-        {isGenerating ? 'Generating...' : 'Generate'}
+        <Play className="mr-2 h-4 w-4" />
+        {isGenerating ? 'Running' : 'Start'}
       </Button>
+
       <Button
-        variant="outline"
-        size="icon"
-        onClick={onToggleSettings}
-        className={`mx-auto transition-all duration-200 ${showSettings ? 'bg-primary/10' : ''}`}
+        onClick={handleStop}
+        disabled={!isGenerating}
+        variant="destructive"
+        size="sm"
+        className="w-24"
       >
-        <Square className="h-5 w-5" />
+        <Square className="mr-2 h-4 w-4" />
+        Stop
       </Button>
     </div>
   );
