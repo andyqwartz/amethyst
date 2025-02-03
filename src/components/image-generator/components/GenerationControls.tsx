@@ -1,51 +1,40 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { useGenerationState } from '../hooks/useGenerationState';
+import { useGenerationState } from '@/hooks/useGenerationState';
 import { Play, Square } from 'lucide-react';
 
-interface GenerationControlsProps {
-  onStart?: () => void;
-  onStop?: () => void;
-  className?: string;
+export interface GenerationButtonsProps {
+  onToggleSettings: () => void;
+  onGenerate: () => void;
+  isGenerating: boolean;
+  showSettings?: boolean;
 }
 
-export const GenerationControls: React.FC<GenerationControlsProps> = ({
-  onStart,
-  onStop,
-  className = '',
+export const GenerationControls: React.FC<GenerationButtonsProps> = ({
+  onToggleSettings,
+  onGenerate,
+  isGenerating,
+  showSettings = false
 }) => {
-  const { isGenerating } = useGenerationState();
-
-  const handleStart = () => {
-    onStart?.();
-  };
-
-  const handleStop = () => {
-    onStop?.();
-  };
+  const { isGenerating: generating } = useGenerationState();
 
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
+    <div className="flex flex-col gap-2 w-full">
       <Button
-        onClick={handleStart}
+        onClick={onGenerate}
         disabled={isGenerating}
-        variant="default"
-        size="sm"
-        className="w-24"
+        className="w-full flex items-center gap-2"
       >
-        <Play className="mr-2 h-4 w-4" />
-        {isGenerating ? 'Running' : 'Start'}
+        <Play className="h-5 w-5" />
+        {isGenerating ? 'Generating...' : 'Generate'}
       </Button>
-
       <Button
-        onClick={handleStop}
-        disabled={!isGenerating}
-        variant="destructive"
-        size="sm"
-        className="w-24"
+        variant="outline"
+        size="icon"
+        onClick={onToggleSettings}
+        className={`mx-auto transition-all duration-200 ${showSettings ? 'bg-primary/10' : ''}`}
       >
-        <Square className="mr-2 h-4 w-4" />
-        Stop
+        <Square className="h-5 w-5" />
       </Button>
     </div>
   );
