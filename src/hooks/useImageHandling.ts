@@ -1,6 +1,9 @@
 import { useCallback } from 'react'
 import { useImageGeneratorStore } from '@/state/imageGeneratorStore'
 import { checkSession } from '@/integrations/supabase/client'
+import { useImageStorage } from './useImageStorage'
+import { useAuth } from './useAuth'
+import type { GenerationParameters } from '@/types/generation'
 
 interface GenerateImageResponse {
   success: boolean
@@ -19,6 +22,9 @@ export const useImageHandling = () => {
     addToHistory
   } = useImageGeneratorStore()
 
+  const { user } = useAuth()
+  const { storeGeneratedImage } = useImageStorage()
+
   const checkAuthStatus = useCallback(async (): Promise<boolean> => {
     try {
       await checkSession()
@@ -34,8 +40,7 @@ export const useImageHandling = () => {
   }, [setError, setIsGenerating])
 
   const generateImage = useCallback(async (): Promise<GenerateImageResponse> => {
-    const isAuthenticated = await checkAuthStatus()
-    if (!isAuthenticated) {
+    if (!user) {
       handleError('Authentication required')
       return { success: false, error: 'Authentication required' }
     }
@@ -52,18 +57,39 @@ export const useImageHandling = () => {
         return response
       }
 
-      const newImage = {
-        id: Date.now().toString(),
-        url: response.imageUrl!,
-        timestamp: Date.now(),
-        settings: { ...settings }
+      // Convertir les paramètres au nouveau format
+      const generationParams: GenerationParameters = {
+        prompt: settings.prompt,
+        negative_prompt: settings.negativePrompt,
+        width: settings.width,
+        height: settings.height,
+        num_inference_steps: settings.steps,
+        guidance_scale: settings.guidanceScale,
+        seed: settings.seed,
+        strength: settings.strength,
+        reference_image_id: settings.initImage || undefined,
+        reference_image_strength: settings.strength,
+        output_format: 'png',
+        output_quality: 100,
+        num_outputs: 1
       }
 
-      setCurrentImage(newImage)
-      addGeneratedImage(newImage)
-      addToHistory(newImage)
+      // Stocker l'image générée
+      const generatedImage = await storeGeneratedImage(
+        response.imageUrl!,
+        generationParams,
+        user.id
+      )
 
-      return { success: true, imageUrl: response.imageUrl }
+      // Mettre à jour l'interface
+      setCurrentImage({
+        id: generatedImage.id,
+        url: generatedImage.public_url!,
+        timestamp: new Date(generatedImage.created_at).getTime(),
+        settings: settings
+      })
+
+      return { success: true, imageUrl: generatedImage.public_url }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
       handleError(errorMessage)
@@ -72,14 +98,13 @@ export const useImageHandling = () => {
       setIsGenerating(false)
     }
   }, [
+    user,
     settings,
     setCurrentImage,
     setIsGenerating,
     clearError,
     handleError,
-    addGeneratedImage,
-    addToHistory,
-    checkAuthStatus
+    storeGeneratedImage
   ])
 
   const setGeneratedImage = useCallback((imageUrl: string) => {

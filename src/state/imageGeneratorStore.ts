@@ -1,4 +1,4 @@
-import create from 'zustand'
+import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 
 interface ImageSettings {
@@ -12,6 +12,14 @@ interface ImageSettings {
   img2img: boolean
   strength: number
   initImage: string | null
+  output_format: 'webp' | 'jpg' | 'png'
+  output_quality: number
+  num_outputs: number
+  num_inference_steps: number
+  prompt_strength: number
+  disable_safety_checker: boolean
+  hf_loras: string[]
+  lora_scales: number[]
 }
 
 interface GeneratedImage {
@@ -23,7 +31,7 @@ interface GeneratedImage {
 
 interface UIState {
   isGenerating: boolean
-  isSettingsModalOpen: boolean
+  showSettings: boolean
   isSaving: boolean
   currentTab: string
 }
@@ -56,7 +64,7 @@ interface ImageGeneratorState {
   
   // UI state actions
   setIsGenerating: (isGenerating: boolean) => void
-  setIsSettingsModalOpen: (isOpen: boolean) => void
+  setShowSettings: (show: boolean) => void
   setIsSaving: (isSaving: boolean) => void
   setCurrentTab: (tab: string) => void
   
@@ -78,12 +86,20 @@ const initialSettings: ImageSettings = {
   guidanceScale: 7.5,
   img2img: false,
   strength: 0.75,
-  initImage: null
+  initImage: null,
+  output_format: 'webp',
+  output_quality: 90,
+  num_outputs: 1,
+  num_inference_steps: 28,
+  prompt_strength: 0.8,
+  disable_safety_checker: false,
+  hf_loras: ["AndyVampiro/joa"],
+  lora_scales: [0.8]
 }
 
 const initialUIState: UIState = {
   isGenerating: false,
-  isSettingsModalOpen: false,
+  showSettings: false,
   isSaving: false,
   currentTab: 'generate'
 }
@@ -143,9 +159,9 @@ export const useImageGeneratorStore = create<ImageGeneratorState>()(
         set((state) => ({
           ui: { ...state.ui, isGenerating }
         })),
-      setIsSettingsModalOpen: (isOpen) =>
+      setShowSettings: (show) =>
         set((state) => ({
-          ui: { ...state.ui, isSettingsModalOpen: isOpen }
+          ui: { ...state.ui, showSettings: show }
         })),
       setIsSaving: (isSaving) =>
         set((state) => ({

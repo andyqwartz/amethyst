@@ -1,20 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { HelpCircle, Sparkles, User, LogIn } from 'lucide-react';
+import { HelpCircle, Sparkles, User as UserIcon, LogIn } from 'lucide-react';
 import { ProfileModal } from './modals/ProfileModal';
+import { HelpModal } from './modals/HelpModal';
 import { supabase } from "@/integrations/supabase/client";
+import useModalStore, { ModalId } from '@/state/modalStore';
+import type { User } from '@supabase/supabase-js';
 
-interface HeaderProps {
-  onSettingsClick: () => void;
-  onHelpClick: () => void;
-}
-
-export const Header = ({
-  onSettingsClick,
-  onHelpClick
-}: HeaderProps) => {
+export const Header = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const { openModal } = useModalStore();
 
   useEffect(() => {
     // Get initial session
@@ -45,6 +41,13 @@ export const Header = ({
     window.location.reload();
   };
 
+  const handleHelpClick = () => {
+    openModal(ModalId.HELP, {
+      type: ModalId.HELP,
+      data: { section: 'usage' }
+    });
+  };
+
   return (
     <>
       <div className="relative p-4 sm:p-6 flex justify-center items-center">
@@ -58,7 +61,7 @@ export const Header = ({
               className="relative hover:bg-primary/10 active:bg-primary/20 transition-all duration-300 hover-scale touch-manipulation rounded-xl"
             >
               <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 group-active:bg-primary/20 blur transition-all duration-300 rounded-xl"></div>
-              <User className="h-5 w-5 text-primary relative z-10" />
+              <UserIcon className="h-5 w-5 text-primary relative z-10" />
             </Button>
           ) : (
             <Button 
@@ -93,7 +96,7 @@ export const Header = ({
           <Button 
             variant="ghost" 
             size="icon"
-            onClick={onHelpClick}
+            onClick={handleHelpClick}
             className="relative hover:bg-primary/10 active:bg-primary/20 transition-all duration-300 hover-scale touch-manipulation rounded-xl"
           >
             <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 group-active:bg-primary/20 blur transition-all duration-300 rounded-xl"></div>

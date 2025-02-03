@@ -21,6 +21,9 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { useAuth } from '@/hooks/use-auth';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 
 interface UserProfileProps {
   user?: {
@@ -59,6 +62,28 @@ export const UserProfile = ({ user: providedUser }: UserProfileProps) => {
   const user = { ...defaultUser, ...providedUser, preferences: { ...defaultUser.preferences, ...providedUser?.preferences } };
   const [isDarkMode, setIsDarkMode] = React.useState(true);
   const [showEmail, setShowEmail] = React.useState(false);
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await signOut();
+      if (error) throw error;
+      
+      toast({
+        title: "Déconnexion réussie",
+        description: "Vous avez été déconnecté avec succès",
+      });
+      navigate('/auth');
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Une erreur s'est produite lors de la déconnexion",
+        variant: "destructive"
+      });
+    }
+  };
 
   const protectEmail = (email: string) => {
     if (!email) return 'email@exemple.com';
@@ -265,10 +290,10 @@ export const UserProfile = ({ user: providedUser }: UserProfileProps) => {
           <Button
             variant="outline"
             className="w-full justify-start"
-            disabled
+            onClick={handleSignOut}
           >
             <LogOut className="w-4 h-4 mr-2" />
-            Déconnexion (Non disponible)
+            Déconnexion
           </Button>
           <Button
             variant="destructive"

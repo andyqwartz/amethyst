@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import ModalComponent from "@/components/ModalComponent";
+import {
+  Dialog,
+  DialogContent,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { X } from 'lucide-react';
 import { UserProfile } from "@/components/ui/user-profile";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -14,7 +20,7 @@ export const ProfileModal = ({
 }: ProfileModalProps) => {
   const [userData, setUserData] = useState<any>(null);
 
-  // Mock user data matching UserProfile interface
+  // Mock user data match
   const mockUser = {
     name: "Utilisateur",
     email: "utilisateur@example.com",
@@ -66,15 +72,29 @@ export const ProfileModal = ({
   }, []);
 
   return (
-    <ModalComponent
-      open={open}
-      onClose={() => onOpenChange(false)}
-      fullScreen
-      disableBackdropClick={false}
-    >
-      <div className="max-w-4xl w-full mx-auto pt-12">
-        <UserProfile user={userData || mockUser} />
-      </div>
-    </ModalComponent>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent 
+        className="w-screen h-screen max-w-none m-0 p-0 bg-black/30 backdrop-blur-xl"
+      >
+        <div className="max-w-4xl mx-auto h-full flex flex-col bg-background rounded-xl relative overflow-hidden">
+          <DialogClose asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-4 top-4 z-50 rounded-full opacity-70 hover:opacity-100 hover:bg-primary/20 transition-all duration-200"
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Fermer</span>
+            </Button>
+          </DialogClose>
+
+          <div className="flex-grow h-full overflow-auto">
+            <div className="p-6">
+              <UserProfile user={userData || mockUser} />
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }; 
