@@ -5,17 +5,17 @@ import { Settings2, Wand2 } from 'lucide-react';
 export interface GenerationButtonsProps {
   onToggleSettings: () => void;
   onGenerate: () => void;
-  onGenerationStart?: () => void;
   isGenerating: boolean;
   showSettings?: boolean;
+  onGenerationStart?: () => void;
 }
 
 export const GenerationButtons: React.FC<GenerationButtonsProps> = ({
   onToggleSettings,
   onGenerate,
-  onGenerationStart,
   isGenerating,
-  showSettings = false
+  showSettings = false,
+  onGenerationStart
 }) => {
   const handleGenerate = () => {
     onGenerationStart?.();

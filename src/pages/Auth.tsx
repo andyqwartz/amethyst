@@ -1,85 +1,108 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
-import { useToast } from "@/hooks/use-toast";
+import { AuthError } from '@supabase/supabase-js';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
+import { Github } from 'lucide-react';
 
-const Auth = () => {
-  const { handleEmailAuth } = useAuth();
-  const { toast } = useToast();
+export const Auth = () => {
+  const { handleEmailAuth, handleGithubAuth, isLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isRegistering, setIsRegistering] = useState(false);
+  const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, isSignUp: boolean) => {
     e.preventDefault();
     try {
-      const response = await handleEmailAuth(email, password, isRegistering);
-      if (response.success) {
+      const response = await handleEmailAuth(email, password, isSignUp);
+      if (response.error) {
         toast({
-          title: "Success",
-          description: `Successfully ${isRegistering ? 'registered' : 'logged in'}!`,
-          variant: "default"
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: response.error || "An error occurred",
+          title: "Authentication Error",
+          description: response.error.message,
           variant: "destructive"
         });
       }
     } catch (error) {
+      const message = error instanceof AuthError ? error.message : 'An error occurred';
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
+        description: message,
         variant: "destructive"
       });
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="w-full max-w-md space-y-8 p-8 bg-card rounded-lg shadow-lg">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold">{isRegistering ? 'Register' : 'Login'}</h1>
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <Card className="w-full max-w-md p-6 space-y-6 bg-card/95 backdrop-blur-xl border border-primary/10">
+        <div className="space-y-2 text-center">
+          <h1 className="text-2xl font-bold">Welcome</h1>
+          <p className="text-muted-foreground">Sign in to your account</p>
         </div>
-        
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <input
+
+        <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-4">
+          <div className="space-y-2">
+            <Input
               type="email"
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               required
             />
           </div>
-          
-          <div>
-            <input
+          <div className="space-y-2">
+            <Input
               type="password"
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               required
             />
           </div>
-          
-          <button 
+          <Button
             type="submit"
-            className="w-full py-2 px-4 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+            className="w-full"
+            disabled={isLoading}
           >
-            {isRegistering ? 'Register' : 'Login'}
-          </button>
+            {isLoading ? 'Loading...' : 'Sign In'}
+          </Button>
         </form>
-        
-        <button 
-          onClick={() => setIsRegistering(!isRegistering)}
-          className="w-full text-sm text-muted-foreground hover:text-primary"
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-primary/10" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">
+              Or continue with
+            </span>
+          </div>
+        </div>
+
+        <Button
+          variant="outline"
+          type="button"
+          className="w-full"
+          onClick={handleGithubAuth}
+          disabled={isLoading}
         >
-          {isRegistering ? 'Already have an account? Login' : 'Need an account? Register'}
-        </button>
-      </div>
+          <Github className="mr-2 h-4 w-4" />
+          Github
+        </Button>
+
+        <p className="text-center text-sm text-muted-foreground">
+          Don't have an account?{' '}
+          <button
+            onClick={(e) => handleSubmit(e, true)}
+            className="underline hover:text-primary"
+            disabled={isLoading}
+          >
+            Sign up
+          </button>
+        </p>
+      </Card>
     </div>
   );
 };
