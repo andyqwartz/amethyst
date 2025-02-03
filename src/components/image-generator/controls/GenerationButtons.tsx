@@ -7,25 +7,18 @@ export interface GenerationButtonsProps {
   onGenerate: () => void;
   isGenerating: boolean;
   showSettings?: boolean;
-  onGenerationStart?: () => void;
 }
 
 export const GenerationButtons: React.FC<GenerationButtonsProps> = ({
   onToggleSettings,
   onGenerate,
   isGenerating,
-  showSettings = false,
-  onGenerationStart
+  showSettings = false
 }) => {
-  const handleGenerate = () => {
-    onGenerationStart?.();
-    onGenerate();
-  };
-
   return (
-    <div className="flex flex-col gap-2 w-full">
+    <div className="flex flex-col gap-2 w-full max-w-[600px]">
       <Button
-        onClick={handleGenerate}
+        onClick={onGenerate}
         disabled={isGenerating}
         className="w-full flex items-center gap-2"
       >
