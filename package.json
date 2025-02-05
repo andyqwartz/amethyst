@@ -16,7 +16,10 @@
     "@hookform/resolvers": "^3.3.4",
     "@mui/icons-material": "^6.4.2",
     "@mui/material": "^6.4.2",
+<<<<<<< HEAD
     "@octokit/rest": "^21.1.0",
+=======
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-aspect-ratio": "^1.1.0",
@@ -56,12 +59,17 @@
     "express": "^4.21.2",
     "framer-motion": "^12.0.6",
     "gh": "^2.8.9",
+<<<<<<< HEAD
     "handlebars": "^4.7.8",
     "input-otp": "^1.2.4",
     "lodash": "^4.17.21",
     "lucide-react": "^0.462.0",
     "minimist": "^1.2.8",
     "moment": "^2.30.1",
+=======
+    "input-otp": "^1.2.4",
+    "lucide-react": "^0.462.0",
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
     "next-themes": "^0.3.0",
     "openai": "^4.82.0",
     "react": "^18.3.1",
@@ -74,12 +82,18 @@
     "react-router-dom": "^6.26.2",
     "recharts": "^2.12.7",
     "replicate": "^1.0.1",
+<<<<<<< HEAD
     "request": "^2.88.2",
+=======
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
     "sonner": "^1.5.0",
     "styled-components": "^6.1.14",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
+<<<<<<< HEAD
     "tough-cookie": "^5.1.0",
+=======
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
     "vaul": "^0.9.3",
     "zod": "^3.22.4",
     "zustand": "^5.0.3"
@@ -88,6 +102,7 @@
     "@eslint/js": "^9.9.0",
     "@svgr/cli": "^8.1.0",
     "@tailwindcss/typography": "^0.5.15",
+<<<<<<< HEAD
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@types/jest": "^29.5.14",
@@ -95,20 +110,32 @@
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.4",
+=======
+    "@types/node": "^22.5.5",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
     "@vitejs/plugin-react-swc": "^3.5.0",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.9.0",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.9",
     "globals": "^15.9.0",
+<<<<<<< HEAD
     "jsdom": "^26.0.0",
+=======
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
     "lovable-tagger": "^1.0.19",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.11",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
+<<<<<<< HEAD
     "vite": "^5.4.1",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.0.5"
+=======
+    "vite": "^5.4.1"
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
   }
 }

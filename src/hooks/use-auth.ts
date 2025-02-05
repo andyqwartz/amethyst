@@ -125,8 +125,13 @@ export const useAuth = () => {
         }
 
         // Créer l'utilisateur
+<<<<<<< HEAD
         response = await supabase.auth.signUp({
           email,
+=======
+        response = await supabase.auth.signUp({ 
+          email, 
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
           password,
           options: {
             data: {
@@ -138,6 +143,7 @@ export const useAuth = () => {
             emailRedirectTo: `${window.location.origin}/auth/callback`
           }
         });
+<<<<<<< HEAD
 
         // Check if the user is banned
         const { data: bannedUser } = await supabase
@@ -154,6 +160,11 @@ export const useAuth = () => {
         }
         console.log('Réponse création de compte:', response);
 
+=======
+        
+        console.log('Réponse création de compte:', response);
+        
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
         if (response.error) {
           console.error('Erreur création de compte:', response.error);
           return {
@@ -162,6 +173,7 @@ export const useAuth = () => {
           };
         }
 
+<<<<<<< HEAD
         if (response.data?.user) {
           console.log('Utilisateur créé avec succès:', response.data.user);
 
@@ -183,6 +195,27 @@ export const useAuth = () => {
               success: false,
               error: profileError.message
             };
+=======
+        // Si la création a réussi, on attend que le trigger crée le profil
+        if (response.data?.user) {
+          console.log('Utilisateur créé avec succès:', response.data.user);
+          
+          // Attendre que le profil soit créé
+          await new Promise(resolve => setTimeout(resolve, 2000));
+
+          // Vérifier que le profil a bien été créé
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', response.data.user.id)
+            .single();
+
+          if (profileError) {
+            console.error('Erreur vérification profil:', profileError);
+            // On continue quand même car le trigger pourrait être juste lent
+          } else {
+            console.log('Profil créé:', profile);
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
           }
 
           return {
@@ -192,8 +225,13 @@ export const useAuth = () => {
         }
 
         return {
+<<<<<<< HEAD
           success: false,
           error: "Erreur inconnue lors de la création de l'utilisateur."
+=======
+          success: true,
+          error: null
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
         };
       } else {
         response = await supabase.auth.signInWithPassword({ email, password });
@@ -261,6 +299,7 @@ export const useAuth = () => {
     }
   };
 
+<<<<<<< HEAD
   const handleGoogleAuth = async (): Promise<AuthResponse> => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -289,6 +328,8 @@ export const useAuth = () => {
     }
   };
 
+=======
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
   const signOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
@@ -303,8 +344,15 @@ export const useAuth = () => {
     isAuthenticated: !!user,
     handleEmailAuth,
     handleGithubAuth,
+<<<<<<< HEAD
     handleGoogleAuth,
     checkAdminStatus,
     signOut
   };
 };
+=======
+    checkAdminStatus,
+    signOut
+  };
+};
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402

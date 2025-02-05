@@ -41,7 +41,11 @@ export const GenerationControls: React.FC<GenerationControlsProps> = ({
     <div className="space-y-4 w-full">
       <PromptInput
         settings={settings}
+<<<<<<< HEAD
         updateSettings={onSettingsChange}
+=======
+        onSettingsChange={onSettingsChange}
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
         onGenerate={handleGenerate}
       />
       <div className="flex justify-center">
@@ -54,4 +58,8 @@ export const GenerationControls: React.FC<GenerationControlsProps> = ({
       </div>
     </div>
   );
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402

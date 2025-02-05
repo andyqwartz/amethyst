@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 export interface ImageSettings {
   prompt: string;
   negative_prompt: string;
@@ -61,18 +62,53 @@ export interface GenerationParameters {
   num_outputs: number;
   aspect_ratio: string;
   output_format: string;
+=======
+export interface GenerationSettings {
+  prompt: string;
+  negative_prompt: string;
+  guidance_scale: number;
+  num_inference_steps: number;
+  num_outputs: number;
+  aspect_ratio: string;
+  output_format: 'webp' | 'jpg' | 'png';
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
   output_quality: number;
   prompt_strength: number;
   hf_loras: string[];
   lora_scales: number[];
   disable_safety_checker: boolean;
+<<<<<<< HEAD
   reference_image_id?: string;
   reference_image_strength: number;
   model_version: string;
+=======
+  seed?: number;
+  reference_image_url?: string | null;
+  reference_image_strength?: number;
+  model_version?: string;
+  scheduler?: string;
+}
+
+export interface ImageSettings extends Omit<GenerationSettings, 'aspect_ratio'> {
+  width: number;
+  height: number;
+  steps: number;
+  img2img: boolean;
+  strength: number;
+  initImage: string | null;
+}
+
+export interface GenerationParameters extends GenerationSettings {
+  width: number;
+  height: number;
+  strength?: number;
+  reference_image_id?: string;
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
 }
 
 export interface GeneratedImage {
   id: string;
+<<<<<<< HEAD
   user_id: string;
   image_id: string;
   prompt: string;
@@ -123,3 +159,31 @@ export const defaultSettings: ImageSettings = {
   hf_loras: ['AndyVampiro/fog'],
   lora_scales: [1.0]
 }; 
+=======
+  url: string;
+  public_url: string;
+  timestamp: number;
+  created_at: string;
+  settings: ImageSettings;
+}
+
+export interface GenerationHistoryItem {
+  id: string;
+  url: string;
+  settings: GenerationSettings;
+  timestamp: number;
+}
+
+export interface GenerationButtonsProps {
+  onGenerate: () => void;
+  isGenerating: boolean;
+  onGenerationStart?: () => void;
+}
+
+export interface PromptInputProps {
+  settings: ImageSettings;
+  updateSettings: (settings: Partial<ImageSettings>) => void;
+}
+
+export type GenerationStatus = 'idle' | 'loading' | 'success' | 'error';
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState, useRef } from 'react';
 import type { GenerationStatus } from '@/types/replicate';
 
@@ -19,10 +20,19 @@ export const useGenerationState = () => {
     generationInProgressRef.current = false;
     setIsGenerating(false);
   };
+=======
+import { useState } from 'react';
+
+export const useGenerationState = () => {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
 
   return {
     isGenerating,
     setIsGenerating,
+<<<<<<< HEAD
     status,
     setStatus,
     generatedImages,
@@ -33,5 +43,11 @@ export const useGenerationState = () => {
     pollIntervalRef,
     generationInProgressRef,
     cleanupGeneration
+=======
+    progress,
+    setProgress,
+    error,
+    setError
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
   };
 };

@@ -9,6 +9,94 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+<<<<<<< HEAD
+=======
+      ad_views: {
+        Row: {
+          ad_id: string
+          completed: boolean | null
+          created_at: string | null
+          credits_earned: number | null
+          id: string
+          metadata: Json | null
+          profile_id: string | null
+          view_duration: number | null
+        }
+        Insert: {
+          ad_id: string
+          completed?: boolean | null
+          created_at?: string | null
+          credits_earned?: number | null
+          id?: string
+          metadata?: Json | null
+          profile_id?: string | null
+          view_duration?: number | null
+        }
+        Update: {
+          ad_id?: string
+          completed?: boolean | null
+          created_at?: string | null
+          credits_earned?: number | null
+          id?: string
+          metadata?: Json | null
+          profile_id?: string | null
+          view_duration?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_views_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ads_history: {
+        Row: {
+          ad_id: string
+          completed: boolean | null
+          credits_earned: number
+          id: string
+          metadata: Json | null
+          platform: string | null
+          profile_id: string | null
+          watched_at: string | null
+          watched_duration: number | null
+        }
+        Insert: {
+          ad_id: string
+          completed?: boolean | null
+          credits_earned: number
+          id?: string
+          metadata?: Json | null
+          platform?: string | null
+          profile_id?: string | null
+          watched_at?: string | null
+          watched_duration?: number | null
+        }
+        Update: {
+          ad_id?: string
+          completed?: boolean | null
+          credits_earned?: number
+          id?: string
+          metadata?: Json | null
+          platform?: string | null
+          profile_id?: string | null
+          watched_at?: string | null
+          watched_duration?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ads_history_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
       Amethyst: {
         Row: {
           created_at: string
@@ -57,6 +145,85 @@ export type Database = {
           },
         ]
       }
+<<<<<<< HEAD
+=======
+      credit_sources: {
+        Row: {
+          amount: number
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          metadata: Json | null
+          profile_id: string | null
+          type: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          metadata?: Json | null
+          profile_id?: string | null
+          type: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          metadata?: Json | null
+          profile_id?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_sources_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      credits_transactions: {
+        Row: {
+          amount: number
+          created_at: string | null
+          description: string | null
+          id: string
+          metadata: Json | null
+          profile_id: string | null
+          type: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          profile_id?: string | null
+          type: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          profile_id?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credits_transactions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
       generated_images: {
         Row: {
           aspect_ratio: string | null
@@ -305,6 +472,7 @@ export type Database = {
         }
         Relationships: []
       }
+<<<<<<< HEAD
       profiles: {
         Row: {
           avatar_url: string | null
@@ -344,6 +512,202 @@ export type Database = {
           total_generations?: number | null
           updated_at?: string
           username?: string | null
+=======
+      oauth_tokens: {
+        Row: {
+          access_token: string | null
+          expires_at: string | null
+          profile_id: string | null
+          provider: string
+          refresh_token: string | null
+          scope: string[] | null
+        }
+        Insert: {
+          access_token?: string | null
+          expires_at?: string | null
+          profile_id?: string | null
+          provider: string
+          refresh_token?: string | null
+          scope?: string[] | null
+        }
+        Update: {
+          access_token?: string | null
+          expires_at?: string | null
+          profile_id?: string | null
+          provider?: string
+          refresh_token?: string | null
+          scope?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oauth_tokens_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          ads_credits_earned: number | null
+          ads_enabled: boolean | null
+          ads_last_watched: string | null
+          ads_watched_today: number | null
+          apple_id: string | null
+          auth_provider: string | null
+          avatar_url: string | null
+          created_at: string
+          credits_balance: number | null
+          daily_ads_limit: number | null
+          email: string | null
+          email_verified: boolean | null
+          full_name: string | null
+          github_id: string | null
+          google_id: string | null
+          id: string
+          is_admin: boolean | null
+          is_banned: boolean | null
+          language: string | null
+          last_credit_update: string | null
+          last_sign_in_at: string
+          lifetime_credits: number | null
+          marketing_emails_enabled: boolean | null
+          notifications_enabled: boolean | null
+          phone_number: string | null
+          phone_verified: boolean | null
+          provider_id: string | null
+          stripe_customer_id: string | null
+          subscription_end_date: string | null
+          subscription_status: string | null
+          subscription_tier: string | null
+          theme: string | null
+        }
+        Insert: {
+          ads_credits_earned?: number | null
+          ads_enabled?: boolean | null
+          ads_last_watched?: string | null
+          ads_watched_today?: number | null
+          apple_id?: string | null
+          auth_provider?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          credits_balance?: number | null
+          daily_ads_limit?: number | null
+          email?: string | null
+          email_verified?: boolean | null
+          full_name?: string | null
+          github_id?: string | null
+          google_id?: string | null
+          id: string
+          is_admin?: boolean | null
+          is_banned?: boolean | null
+          language?: string | null
+          last_credit_update?: string | null
+          last_sign_in_at?: string
+          lifetime_credits?: number | null
+          marketing_emails_enabled?: boolean | null
+          notifications_enabled?: boolean | null
+          phone_number?: string | null
+          phone_verified?: boolean | null
+          provider_id?: string | null
+          stripe_customer_id?: string | null
+          subscription_end_date?: string | null
+          subscription_status?: string | null
+          subscription_tier?: string | null
+          theme?: string | null
+        }
+        Update: {
+          ads_credits_earned?: number | null
+          ads_enabled?: boolean | null
+          ads_last_watched?: string | null
+          ads_watched_today?: number | null
+          apple_id?: string | null
+          auth_provider?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          credits_balance?: number | null
+          daily_ads_limit?: number | null
+          email?: string | null
+          email_verified?: boolean | null
+          full_name?: string | null
+          github_id?: string | null
+          google_id?: string | null
+          id?: string
+          is_admin?: boolean | null
+          is_banned?: boolean | null
+          language?: string | null
+          last_credit_update?: string | null
+          last_sign_in_at?: string
+          lifetime_credits?: number | null
+          marketing_emails_enabled?: boolean | null
+          notifications_enabled?: boolean | null
+          phone_number?: string | null
+          phone_verified?: boolean | null
+          provider_id?: string | null
+          stripe_customer_id?: string | null
+          subscription_end_date?: string | null
+          subscription_status?: string | null
+          subscription_tier?: string | null
+          theme?: string | null
+        }
+        Relationships: []
+      }
+      prompts: {
+        Row: {
+          aspect_ratio: string
+          created_at: string
+          guidance_scale: number
+          hf_loras: string[]
+          id: string
+          lora_scales: number[]
+          negative_prompt: string | null
+          num_outputs: number
+          output_format: string
+          output_quality: number
+          prompt: string
+          prompt_strength: number
+          safety_checker: boolean
+          seed: number
+          steps: number
+          user_id: string | null
+        }
+        Insert: {
+          aspect_ratio?: string
+          created_at?: string
+          guidance_scale?: number
+          hf_loras?: string[]
+          id?: string
+          lora_scales?: number[]
+          negative_prompt?: string | null
+          num_outputs?: number
+          output_format?: string
+          output_quality?: number
+          prompt: string
+          prompt_strength?: number
+          safety_checker?: boolean
+          seed?: number
+          steps?: number
+          user_id?: string | null
+        }
+        Update: {
+          aspect_ratio?: string
+          created_at?: string
+          guidance_scale?: number
+          hf_loras?: string[]
+          id?: string
+          lora_scales?: number[]
+          negative_prompt?: string | null
+          num_outputs?: number
+          output_format?: string
+          output_quality?: number
+          prompt?: string
+          prompt_strength?: number
+          safety_checker?: boolean
+          seed?: number
+          steps?: number
+          user_id?: string | null
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
         }
         Relationships: []
       }
@@ -391,6 +755,56 @@ export type Database = {
           },
         ]
       }
+<<<<<<< HEAD
+=======
+      subscription_history: {
+        Row: {
+          amount: number | null
+          currency: string | null
+          end_date: string | null
+          id: string
+          metadata: Json | null
+          payment_method: string | null
+          profile_id: string | null
+          start_date: string | null
+          status: string
+          tier: string
+        }
+        Insert: {
+          amount?: number | null
+          currency?: string | null
+          end_date?: string | null
+          id?: string
+          metadata?: Json | null
+          payment_method?: string | null
+          profile_id?: string | null
+          start_date?: string | null
+          status: string
+          tier: string
+        }
+        Update: {
+          amount?: number | null
+          currency?: string | null
+          end_date?: string | null
+          id?: string
+          metadata?: Json | null
+          payment_method?: string | null
+          profile_id?: string | null
+          start_date?: string | null
+          status?: string
+          tier?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_history_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
     }
     Views: {
       active_reference_images: {
@@ -431,6 +845,18 @@ export type Database = {
       }
     }
     Functions: {
+<<<<<<< HEAD
+=======
+      award_ad_credits: {
+        Args: {
+          profile_id: string
+          ad_id: string
+          view_duration: number
+          completed: boolean
+        }
+        Returns: undefined
+      }
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
       binary_quantize:
         | {
             Args: {
@@ -444,6 +870,35 @@ export type Database = {
             }
             Returns: unknown
           }
+<<<<<<< HEAD
+=======
+      check_admin_status: {
+        Args: {
+          user_id: string
+        }
+        Returns: boolean
+      }
+      check_daily_ad_credits_limit: {
+        Args: {
+          profile_id: string
+        }
+        Returns: boolean
+      }
+      check_expired_subscriptions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      daily_maintenance: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      get_user_profile: {
+        Args: {
+          user_id: string
+        }
+        Returns: Json
+      }
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
       gtrgm_compress: {
         Args: {
           "": unknown
@@ -522,6 +977,13 @@ export type Database = {
         }
         Returns: unknown
       }
+<<<<<<< HEAD
+=======
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
       ivfflat_bit_support: {
         Args: {
           "": unknown
@@ -572,6 +1034,22 @@ export type Database = {
             }
             Returns: unknown
           }
+<<<<<<< HEAD
+=======
+      purchase_credits: {
+        Args: {
+          profile_id: string
+          amount: number
+          stripe_payment_id: string
+          price_paid: number
+        }
+        Returns: undefined
+      }
+      reset_daily_ads: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
       set_limit: {
         Args: {
           "": number
@@ -606,6 +1084,27 @@ export type Database = {
         }
         Returns: number
       }
+<<<<<<< HEAD
+=======
+      update_credits_balance: {
+        Args: {
+          profile_id: string
+          amount: number
+          type: string
+          description?: string
+        }
+        Returns: undefined
+      }
+      update_subscription: {
+        Args: {
+          profile_id: string
+          tier: string
+          status: string
+          end_date?: string
+        }
+        Returns: undefined
+      }
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
       vector_avg: {
         Args: {
           "": number[]
@@ -649,6 +1148,18 @@ export type Database = {
         }
         Returns: number
       }
+<<<<<<< HEAD
+=======
+      watch_ad: {
+        Args: {
+          profile_id: string
+          ad_id: string
+          duration: number
+          platform?: string
+        }
+        Returns: boolean
+      }
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
     }
     Enums: {
       image_status: "pending" | "processing" | "completed" | "failed"

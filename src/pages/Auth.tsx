@@ -8,7 +8,11 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { Checkbox } from "@/components/ui/checkbox";
+<<<<<<< HEAD
 import { Github, Sparkles, Globe } from "lucide-react";
+=======
+import { Github, Sparkles } from "lucide-react";
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
@@ -35,6 +39,7 @@ const GithubButton = ({ onClick, disabled }: { onClick: () => void, disabled: bo
   </Button>
 );
 
+<<<<<<< HEAD
 const GoogleButton = ({ onClick, disabled }: { onClick: () => void, disabled: boolean }) => (
   <Button 
     variant="outline" 
@@ -51,6 +56,8 @@ const GoogleButton = ({ onClick, disabled }: { onClick: () => void, disabled: bo
   </Button>
 );
 
+=======
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
 const Divider = () => (
   <div className="relative">
     <div className="absolute inset-0 flex items-center">
@@ -68,7 +75,11 @@ export const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+<<<<<<< HEAD
   const { isLoading, handleEmailAuth, handleGithubAuth, handleGoogleAuth, checkAdminStatus } = useAuth();
+=======
+  const { isLoading, handleEmailAuth, handleGithubAuth, checkAdminStatus } = useAuth();
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -115,6 +126,7 @@ export const Auth = () => {
     }
   };
 
+<<<<<<< HEAD
   const handleGoogleSignIn = async () => {
     try {
       const response = await handleGoogleAuth();
@@ -135,6 +147,8 @@ export const Auth = () => {
     }
   };
 
+=======
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
   const handleAuthAction = async (type: 'login' | 'signup') => {
     if (!email || !password) {
       toast({
@@ -198,7 +212,10 @@ export const Auth = () => {
         
         <div className="space-y-4">
           <GithubButton onClick={handleGithubSignIn} disabled={isLoading} />
+<<<<<<< HEAD
           <GoogleButton onClick={handleGoogleSignIn} disabled={isLoading} />
+=======
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
           <Divider />
           
           <div className="space-y-4">
@@ -265,4 +282,8 @@ export const Auth = () => {
   );
 };
 
+<<<<<<< HEAD
 export default Auth;
+=======
+export default Auth;
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402

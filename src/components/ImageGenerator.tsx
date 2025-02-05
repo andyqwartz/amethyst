@@ -4,7 +4,11 @@ import { useImageHandling } from '@/hooks/useImageHandling';
 import { useHistoryManagement } from '@/hooks/useHistoryManagement';
 import { useUIState } from '@/hooks/useUIState';
 import { useImageGeneratorStore } from '@/state/imageGeneratorStore';
+<<<<<<< HEAD
 import type { GenerationSettings } from '@/types/generation';
+=======
+import type { ImageSettings } from '@/types/generation';
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
 
 export const ImageGenerator: React.FC = () => {
   const {
@@ -26,7 +30,11 @@ export const ImageGenerator: React.FC = () => {
     error,
     generatedImages,
     settings,
+<<<<<<< HEAD
     updateSettings
+=======
+    setSettings
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
   } = useImageGeneratorStore();
 
   const {
@@ -54,18 +62,30 @@ export const ImageGenerator: React.FC = () => {
     await clearHistory();
   };
 
+<<<<<<< HEAD
   const handleUpdateSettings = (newSettings: Partial<GenerationSettings>) => {
     updateSettings({
       ...newSettings,
       negative_prompt: newSettings.negative_prompt,
       guidance_scale: newSettings.guidance_scale
     });
+=======
+  const handleUpdateSettings = (newSettings: Partial<ImageSettings>) => {
+    setSettings(prev => ({
+      ...prev,
+      ...newSettings
+    }));
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
   };
 
   return (
     <ImageGeneratorContainer
       showSettings={showSettings}
+<<<<<<< HEAD
       setShowSettings={(show) => updateSettings({ showSettings: show })}
+=======
+      setShowSettings={setShowSettings}
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
       showHelp={showHelp}
       setShowHelp={setShowHelp}
       isGenerating={isGenerating}

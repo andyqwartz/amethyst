@@ -21,7 +21,11 @@ export const ImageGenerator: React.FC = () => {
       clearError();
 
       // Mock API call - replace with actual API integration
+<<<<<<< HEAD
       const response = await fetch('/api/generate-image', {
+=======
+      const response = await fetch('/api/generate', {
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -88,4 +92,8 @@ export const ImageGenerator: React.FC = () => {
       )}
     </div>
   );
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> a945a29ba778c4116754a03171a654de675e5402
