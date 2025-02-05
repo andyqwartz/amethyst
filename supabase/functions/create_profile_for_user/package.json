@@ -1,0 +1,7 @@
+{
+  "name": "create_profile_for_user",
+  "version": "1.0.0",
+  "dependencies": {
+    "@supabase/supabase-js": "^1.35.6"
+  }
+}
