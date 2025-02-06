@@ -16,7 +16,9 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: true,
     storage: localStorage,
     flowType: 'pkce',
-    debug: true
+    debug: true,
+    retryAttempts: 3,
+    timeout: 20000
   },
   global: {
     headers: {
@@ -33,6 +35,25 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   }
 });
 
-// Export default supabase client
-export default supabase;
+// Utility function for handling auth retries
+export const retryAuth = async (authFn: () => Promise<any>, maxRetries = 3) => {
+  let attempt = 0;
+  while (attempt < maxRetries) {
+    try {
+      return await authFn();
+    } catch (error: any) {
+      attempt++;
+      if (error?.status === 503) {
+        // Exponential backoff: 1s, 2s, 4s
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt - 1) * 1000));
+        if (attempt === maxRetries) {
+          throw new Error("Le service d'authentification est temporairement indisponible. Veuillez réessayer dans quelques minutes.");
+        }
+        continue;
+      }
+      throw error;
+    }
+  }
+};
 
+export default supabase;

@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase/client';
+import { supabase, retryAuth } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from './use-toast';
@@ -64,7 +64,9 @@ export const useAuth = () => {
     const initializeAuth = async () => {
       console.log('Initializing auth state');
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const { data: { session }, error } = await retryAuth(() => 
+          supabase.auth.getSession()
+        );
         
         if (error) {
           console.error('Session error:', error);
@@ -82,6 +84,11 @@ export const useAuth = () => {
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
+        toast({
+          title: "Erreur de connexion",
+          description: "Impossible de se connecter au service d'authentification. Veuillez réessayer.",
+          variant: "destructive"
+        });
       } finally {
         if (mounted) {
           setIsLoading(false);
@@ -141,26 +148,23 @@ export const useAuth = () => {
         }
 
         console.log('Email status check passed, proceeding with sign up');
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
-            data: {
-              full_name: email.split('@')[0],
-              avatar_url: null,
-              language: 'Français',
-              theme: 'light'
+        const { error } = await retryAuth(() => 
+          supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              emailRedirectTo: `${window.location.origin}/auth/callback`,
+              data: {
+                full_name: email.split('@')[0],
+                avatar_url: null,
+                language: 'Français',
+                theme: 'light'
+              }
             }
-          }
-        });
+          })
+        );
 
-        if (error) {
-          if (error.status === 503) {
-            throw new Error("Le service d'authentification est temporairement indisponible. Veuillez réessayer dans quelques minutes.");
-          }
-          throw error;
-        }
+        if (error) throw error;
 
         toast({
           title: "Inscription réussie",
@@ -169,20 +173,16 @@ export const useAuth = () => {
 
         return { success: true, error: null };
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password
-        });
+        const { error } = await retryAuth(() => 
+          supabase.auth.signInWithPassword({
+            email,
+            password
+          })
+        );
 
         if (error) {
-          if (error.status === 503) {
-            throw new Error("Le service d'authentification est temporairement indisponible. Veuillez réessayer dans quelques minutes.");
-          }
           if (error.message === 'Invalid login credentials') {
             throw new Error("Email ou mot de passe incorrect");
-          }
-          if (error.message.includes('upstream connect error')) {
-            throw new Error("Impossible de se connecter au service d'authentification. Veuillez vérifier votre connexion et réessayer.");
           }
           throw error;
         }
@@ -196,7 +196,13 @@ export const useAuth = () => {
       }
     } catch (error: any) {
       console.error('Auth error:', error);
-      return { success: false, error: error.message };
+      const message = error.message;
+      toast({
+        title: "Erreur",
+        description: message,
+        variant: "destructive"
+      });
+      return { success: false, error: message };
     } finally {
       setIsLoading(false);
     }
@@ -206,7 +212,7 @@ export const useAuth = () => {
     console.log('Starting sign out');
     try {
       setIsLoading(true);
-      const { error } = await supabase.auth.signOut();
+      const { error } = await retryAuth(() => supabase.auth.signOut());
       if (error) throw error;
       
       setUser(null);
