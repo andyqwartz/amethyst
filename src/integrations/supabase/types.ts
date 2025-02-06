@@ -50,50 +50,6 @@ export type Database = {
           },
         ]
       }
-      ads_history: {
-        Row: {
-          ad_id: string
-          completed: boolean | null
-          credits_earned: number
-          id: string
-          metadata: Json | null
-          platform: string | null
-          profile_id: string | null
-          watched_at: string | null
-          watched_duration: number | null
-        }
-        Insert: {
-          ad_id: string
-          completed?: boolean | null
-          credits_earned: number
-          id?: string
-          metadata?: Json | null
-          platform?: string | null
-          profile_id?: string | null
-          watched_at?: string | null
-          watched_duration?: number | null
-        }
-        Update: {
-          ad_id?: string
-          completed?: boolean | null
-          credits_earned?: number
-          id?: string
-          metadata?: Json | null
-          platform?: string | null
-          profile_id?: string | null
-          watched_at?: string | null
-          watched_duration?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ads_history_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       Amethyst: {
         Row: {
           created_at: string
@@ -109,19 +65,86 @@ export type Database = {
         }
         Relationships: []
       }
+      banned_emails: {
+        Row: {
+          banned_at: string | null
+          banned_by: string | null
+          email: string
+          id: string
+          reason: string | null
+        }
+        Insert: {
+          banned_at?: string | null
+          banned_by?: string | null
+          email: string
+          id?: string
+          reason?: string | null
+        }
+        Update: {
+          banned_at?: string | null
+          banned_by?: string | null
+          email?: string
+          id?: string
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "banned_emails_banned_by_fkey"
+            columns: ["banned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      banned_users: {
+        Row: {
+          banned_at: string | null
+          banned_by: string | null
+          created_at: string | null
+          email: string
+          id: string
+          reason: string | null
+        }
+        Insert: {
+          banned_at?: string | null
+          banned_by?: string | null
+          created_at?: string | null
+          email: string
+          id?: string
+          reason?: string | null
+        }
+        Update: {
+          banned_at?: string | null
+          banned_by?: string | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "banned_users_banned_by_fkey"
+            columns: ["banned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collection_images: {
         Row: {
-          added_at: string
+          added_at: string | null
           collection_id: string
           image_id: string
         }
         Insert: {
-          added_at?: string
+          added_at?: string | null
           collection_id: string
           image_id: string
         }
         Update: {
-          added_at?: string
+          added_at?: string | null
           collection_id?: string
           image_id?: string
         }
@@ -142,45 +165,7 @@ export type Database = {
           },
         ]
       }
-      credit_sources: {
-        Row: {
-          amount: number
-          created_at: string | null
-          expires_at: string | null
-          id: string
-          metadata: Json | null
-          profile_id: string | null
-          type: string
-        }
-        Insert: {
-          amount: number
-          created_at?: string | null
-          expires_at?: string | null
-          id?: string
-          metadata?: Json | null
-          profile_id?: string | null
-          type: string
-        }
-        Update: {
-          amount?: number
-          created_at?: string | null
-          expires_at?: string | null
-          id?: string
-          metadata?: Json | null
-          profile_id?: string | null
-          type?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "credit_sources_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      credits_transactions: {
+      credit_transactions: {
         Row: {
           amount: number
           created_at: string | null
@@ -210,7 +195,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "credits_transactions_profile_id_fkey"
+            foreignKeyName: "credit_transactions_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -222,21 +207,21 @@ export type Database = {
         Row: {
           aspect_ratio: string | null
           completed_at: string | null
-          created_at: string
+          created_at: string | null
           disable_safety_checker: boolean | null
           error_message: string | null
           generation_time: number | null
-          guidance_scale: number
-          height: number
+          guidance_scale: number | null
+          height: number | null
           hf_loras: string[] | null
           id: string
           image_id: string | null
           lora_scales: number[] | null
           model_version: string | null
           negative_prompt: string | null
-          num_inference_steps: number
+          num_inference_steps: number | null
           num_outputs: number | null
-          output_format: string
+          output_format: string | null
           output_quality: number | null
           parameter_history: Json[] | null
           prompt: string
@@ -247,29 +232,29 @@ export type Database = {
           scheduler: string | null
           seed: number | null
           started_at: string | null
-          status: Database["public"]["Enums"]["image_status"] | null
+          status: string | null
           strength: number | null
           user_id: string | null
-          width: number
+          width: number | null
         }
         Insert: {
           aspect_ratio?: string | null
           completed_at?: string | null
-          created_at?: string
+          created_at?: string | null
           disable_safety_checker?: boolean | null
           error_message?: string | null
           generation_time?: number | null
-          guidance_scale?: number
-          height?: number
+          guidance_scale?: number | null
+          height?: number | null
           hf_loras?: string[] | null
           id?: string
           image_id?: string | null
           lora_scales?: number[] | null
           model_version?: string | null
           negative_prompt?: string | null
-          num_inference_steps?: number
+          num_inference_steps?: number | null
           num_outputs?: number | null
-          output_format?: string
+          output_format?: string | null
           output_quality?: number | null
           parameter_history?: Json[] | null
           prompt: string
@@ -280,29 +265,29 @@ export type Database = {
           scheduler?: string | null
           seed?: number | null
           started_at?: string | null
-          status?: Database["public"]["Enums"]["image_status"] | null
+          status?: string | null
           strength?: number | null
           user_id?: string | null
-          width?: number
+          width?: number | null
         }
         Update: {
           aspect_ratio?: string | null
           completed_at?: string | null
-          created_at?: string
+          created_at?: string | null
           disable_safety_checker?: boolean | null
           error_message?: string | null
           generation_time?: number | null
-          guidance_scale?: number
-          height?: number
+          guidance_scale?: number | null
+          height?: number | null
           hf_loras?: string[] | null
           id?: string
           image_id?: string | null
           lora_scales?: number[] | null
           model_version?: string | null
           negative_prompt?: string | null
-          num_inference_steps?: number
+          num_inference_steps?: number | null
           num_outputs?: number | null
-          output_format?: string
+          output_format?: string | null
           output_quality?: number | null
           parameter_history?: Json[] | null
           prompt?: string
@@ -313,10 +298,10 @@ export type Database = {
           scheduler?: string | null
           seed?: number | null
           started_at?: string | null
-          status?: Database["public"]["Enums"]["image_status"] | null
+          status?: string | null
           strength?: number | null
           user_id?: string | null
-          width?: number
+          width?: number | null
         }
         Relationships: [
           {
@@ -333,37 +318,52 @@ export type Database = {
             referencedRelation: "images"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "generated_images_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       image_collections: {
         Row: {
-          created_at: string
+          created_at: string | null
           description: string | null
           id: string
           is_public: boolean | null
           name: string
-          updated_at: string
+          updated_at: string | null
           user_id: string | null
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           description?: string | null
           id?: string
           is_public?: boolean | null
           name: string
-          updated_at?: string
+          updated_at?: string | null
           user_id?: string | null
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           description?: string | null
           id?: string
           is_public?: boolean | null
           name?: string
-          updated_at?: string
+          updated_at?: string | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "image_collections_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       image_metadata: {
         Row: {
@@ -374,7 +374,7 @@ export type Database = {
           image_id: string
           nsfw_score: number | null
           processed_at: string | null
-          processing_status: Database["public"]["Enums"]["image_status"] | null
+          processing_status: string | null
           raw_analysis_result: Json | null
           style_embedding: string | null
           vision_colors: Json | null
@@ -390,7 +390,7 @@ export type Database = {
           image_id: string
           nsfw_score?: number | null
           processed_at?: string | null
-          processing_status?: Database["public"]["Enums"]["image_status"] | null
+          processing_status?: string | null
           raw_analysis_result?: Json | null
           style_embedding?: string | null
           vision_colors?: Json | null
@@ -406,7 +406,7 @@ export type Database = {
           image_id?: string
           nsfw_score?: number | null
           processed_at?: string | null
-          processing_status?: Database["public"]["Enums"]["image_status"] | null
+          processing_status?: string | null
           raw_analysis_result?: Json | null
           style_embedding?: string | null
           vision_colors?: Json | null
@@ -426,7 +426,7 @@ export type Database = {
       }
       images: {
         Row: {
-          created_at: string
+          created_at: string | null
           file_size_bytes: number
           format: string
           hash: string
@@ -439,7 +439,7 @@ export type Database = {
           width: number
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           file_size_bytes: number
           format: string
           hash: string
@@ -452,7 +452,7 @@ export type Database = {
           width: number
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           file_size_bytes?: number
           format?: string
           hash?: string
@@ -466,66 +466,29 @@ export type Database = {
         }
         Relationships: []
       }
-      oauth_tokens: {
-        Row: {
-          access_token: string | null
-          expires_at: string | null
-          profile_id: string | null
-          provider: string
-          refresh_token: string | null
-          scope: string[] | null
-        }
-        Insert: {
-          access_token?: string | null
-          expires_at?: string | null
-          profile_id?: string | null
-          provider: string
-          refresh_token?: string | null
-          scope?: string[] | null
-        }
-        Update: {
-          access_token?: string | null
-          expires_at?: string | null
-          profile_id?: string | null
-          provider?: string
-          refresh_token?: string | null
-          scope?: string[] | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "oauth_tokens_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       profiles: {
         Row: {
           ads_credits_earned: number | null
           ads_enabled: boolean | null
           ads_last_watched: string | null
           ads_watched_today: number | null
-          apple_id: string | null
           auth_provider: string | null
           avatar_url: string | null
-          created_at: string
+          created_at: string | null
           credits_balance: number | null
           daily_ads_limit: number | null
           email: string | null
           email_verified: boolean | null
           full_name: string | null
-          github_id: string | null
-          google_id: string | null
           id: string
           is_admin: boolean | null
           is_banned: boolean | null
           language: string | null
           last_credit_update: string | null
-          last_sign_in_at: string
+          last_sign_in_at: string | null
           lifetime_credits: number | null
           marketing_emails_enabled: boolean | null
+          needs_attention: boolean | null
           notifications_enabled: boolean | null
           phone_number: string | null
           phone_verified: boolean | null
@@ -535,31 +498,30 @@ export type Database = {
           subscription_status: string | null
           subscription_tier: string | null
           theme: string | null
+          updated_at: string | null
         }
         Insert: {
           ads_credits_earned?: number | null
           ads_enabled?: boolean | null
           ads_last_watched?: string | null
           ads_watched_today?: number | null
-          apple_id?: string | null
           auth_provider?: string | null
           avatar_url?: string | null
-          created_at?: string
+          created_at?: string | null
           credits_balance?: number | null
           daily_ads_limit?: number | null
           email?: string | null
           email_verified?: boolean | null
           full_name?: string | null
-          github_id?: string | null
-          google_id?: string | null
           id: string
           is_admin?: boolean | null
           is_banned?: boolean | null
           language?: string | null
           last_credit_update?: string | null
-          last_sign_in_at?: string
+          last_sign_in_at?: string | null
           lifetime_credits?: number | null
           marketing_emails_enabled?: boolean | null
+          needs_attention?: boolean | null
           notifications_enabled?: boolean | null
           phone_number?: string | null
           phone_verified?: boolean | null
@@ -569,31 +531,30 @@ export type Database = {
           subscription_status?: string | null
           subscription_tier?: string | null
           theme?: string | null
+          updated_at?: string | null
         }
         Update: {
           ads_credits_earned?: number | null
           ads_enabled?: boolean | null
           ads_last_watched?: string | null
           ads_watched_today?: number | null
-          apple_id?: string | null
           auth_provider?: string | null
           avatar_url?: string | null
-          created_at?: string
+          created_at?: string | null
           credits_balance?: number | null
           daily_ads_limit?: number | null
           email?: string | null
           email_verified?: boolean | null
           full_name?: string | null
-          github_id?: string | null
-          google_id?: string | null
           id?: string
           is_admin?: boolean | null
           is_banned?: boolean | null
           language?: string | null
           last_credit_update?: string | null
-          last_sign_in_at?: string
+          last_sign_in_at?: string | null
           lifetime_credits?: number | null
           marketing_emails_enabled?: boolean | null
+          needs_attention?: boolean | null
           notifications_enabled?: boolean | null
           phone_number?: string | null
           phone_verified?: boolean | null
@@ -603,164 +564,15 @@ export type Database = {
           subscription_status?: string | null
           subscription_tier?: string | null
           theme?: string | null
-        }
-        Relationships: []
-      }
-      prompts: {
-        Row: {
-          aspect_ratio: string
-          created_at: string
-          guidance_scale: number
-          hf_loras: string[]
-          id: string
-          lora_scales: number[]
-          negative_prompt: string | null
-          num_outputs: number
-          output_format: string
-          output_quality: number
-          prompt: string
-          prompt_strength: number
-          safety_checker: boolean
-          seed: number
-          steps: number
-          user_id: string | null
-        }
-        Insert: {
-          aspect_ratio?: string
-          created_at?: string
-          guidance_scale?: number
-          hf_loras?: string[]
-          id?: string
-          lora_scales?: number[]
-          negative_prompt?: string | null
-          num_outputs?: number
-          output_format?: string
-          output_quality?: number
-          prompt: string
-          prompt_strength?: number
-          safety_checker?: boolean
-          seed?: number
-          steps?: number
-          user_id?: string | null
-        }
-        Update: {
-          aspect_ratio?: string
-          created_at?: string
-          guidance_scale?: number
-          hf_loras?: string[]
-          id?: string
-          lora_scales?: number[]
-          negative_prompt?: string | null
-          num_outputs?: number
-          output_format?: string
-          output_quality?: number
-          prompt?: string
-          prompt_strength?: number
-          safety_checker?: boolean
-          seed?: number
-          steps?: number
-          user_id?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
       reference_images: {
         Row: {
-          created_at: string
-          id: string
-          image_id: string | null
-          last_used_at: string
-          original_filename: string | null
-          preprocessing_applied: Json | null
-          purpose: string | null
-          usage_count: number | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          image_id?: string | null
-          last_used_at?: string
-          original_filename?: string | null
-          preprocessing_applied?: Json | null
-          purpose?: string | null
-          usage_count?: number | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          image_id?: string | null
-          last_used_at?: string
-          original_filename?: string | null
-          preprocessing_applied?: Json | null
-          purpose?: string | null
-          usage_count?: number | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "reference_images_image_id_fkey"
-            columns: ["image_id"]
-            isOneToOne: false
-            referencedRelation: "images"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      subscription_history: {
-        Row: {
-          amount: number | null
-          currency: string | null
-          end_date: string | null
-          id: string
-          metadata: Json | null
-          payment_method: string | null
-          profile_id: string | null
-          start_date: string | null
-          status: string
-          tier: string
-        }
-        Insert: {
-          amount?: number | null
-          currency?: string | null
-          end_date?: string | null
-          id?: string
-          metadata?: Json | null
-          payment_method?: string | null
-          profile_id?: string | null
-          start_date?: string | null
-          status: string
-          tier: string
-        }
-        Update: {
-          amount?: number | null
-          currency?: string | null
-          end_date?: string | null
-          id?: string
-          metadata?: Json | null
-          payment_method?: string | null
-          profile_id?: string | null
-          start_date?: string | null
-          status?: string
-          tier?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "subscription_history_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-    }
-    Views: {
-      active_reference_images: {
-        Row: {
           created_at: string | null
           height: number | null
-          id: string | null
+          id: string
           image_id: string | null
           last_used_at: string | null
           original_filename: string | null
@@ -771,6 +583,34 @@ export type Database = {
           user_id: string | null
           width: number | null
         }
+        Insert: {
+          created_at?: string | null
+          height?: number | null
+          id?: string
+          image_id?: string | null
+          last_used_at?: string | null
+          original_filename?: string | null
+          preprocessing_applied?: Json | null
+          public_url?: string | null
+          purpose?: string | null
+          usage_count?: number | null
+          user_id?: string | null
+          width?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          height?: number | null
+          id?: string
+          image_id?: string | null
+          last_used_at?: string | null
+          original_filename?: string | null
+          preprocessing_applied?: Json | null
+          public_url?: string | null
+          purpose?: string | null
+          usage_count?: number | null
+          user_id?: string | null
+          width?: number | null
+        }
         Relationships: [
           {
             foreignKeyName: "reference_images_image_id_fkey"
@@ -779,21 +619,29 @@ export type Database = {
             referencedRelation: "images"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "reference_images_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
-      user_generation_stats: {
-        Row: {
-          active_days: number | null
-          avg_generation_time: number | null
-          failed_generations: number | null
-          successful_generations: number | null
-          total_generations: number | null
-          user_id: string | null
-        }
-        Relationships: []
-      }
+    }
+    Views: {
+      [_ in never]: never
     }
     Functions: {
+      add_credits: {
+        Args: {
+          user_id: string
+          amount: number
+          source: string
+          description?: string
+        }
+        Returns: undefined
+      }
       award_ad_credits: {
         Args: {
           profile_id: string
@@ -816,11 +664,29 @@ export type Database = {
             }
             Returns: unknown
           }
+      can_access_collection: {
+        Args: {
+          collection_id: string
+        }
+        Returns: boolean
+      }
+      can_watch_ads: {
+        Args: {
+          user_id: string
+        }
+        Returns: boolean
+      }
       check_admin_status: {
         Args: {
           user_id: string
         }
         Returns: boolean
+      }
+      check_and_reset_daily_ad_limits: {
+        Args: {
+          user_id: string
+        }
+        Returns: undefined
       }
       check_daily_ad_credits_limit: {
         Args: {
@@ -828,13 +694,35 @@ export type Database = {
         }
         Returns: boolean
       }
+      check_email_status: {
+        Args: {
+          check_email: string
+        }
+        Returns: {
+          exists_in_auth: boolean
+          is_banned: boolean
+        }[]
+      }
       check_expired_subscriptions: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      create_admin_user: {
+        Args: {
+          admin_email: string
+          admin_password: string
+        }
+        Returns: string
+      }
       daily_maintenance: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      get_user_credits: {
+        Args: {
+          user_id: string
+        }
+        Returns: number
       }
       get_user_profile: {
         Args: {
@@ -896,6 +784,15 @@ export type Database = {
         }
         Returns: number
       }
+      handle_ad_view: {
+        Args: {
+          user_id: string
+          ad_id: string
+          duration: number
+          platform?: string
+        }
+        Returns: number
+      }
       hnsw_bit_support: {
         Args: {
           "": unknown
@@ -920,10 +817,17 @@ export type Database = {
         }
         Returns: unknown
       }
-      is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      is_admin:
+        | {
+            Args: Record<PropertyKey, never>
+            Returns: boolean
+          }
+        | {
+            Args: {
+              user_id: string
+            }
+            Returns: boolean
+          }
       ivfflat_bit_support: {
         Args: {
           "": unknown
@@ -974,6 +878,12 @@ export type Database = {
             }
             Returns: unknown
           }
+      owns_record: {
+        Args: {
+          record_user_id: string
+        }
+        Returns: boolean
+      }
       purchase_credits: {
         Args: {
           profile_id: string
@@ -981,6 +891,49 @@ export type Database = {
           stripe_payment_id: string
           price_paid: number
         }
+        Returns: undefined
+      }
+      record_ad_view:
+        | {
+            Args: {
+              p_profile_id: string
+              p_ad_id: string
+              p_view_duration: number
+              p_completed: boolean
+              p_credits_earned: number
+              p_metadata?: Json
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              user_id: string
+              ad_id: string
+              view_duration: number
+              credits_earned?: number
+            }
+            Returns: boolean
+          }
+      record_credit_transaction: {
+        Args: {
+          p_profile_id: string
+          p_amount: number
+          p_type: string
+          p_description?: string
+          p_metadata?: Json
+        }
+        Returns: string
+      }
+      reset_daily_ad_counts: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      reset_daily_ad_limits: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      reset_daily_ad_views: {
+        Args: Record<PropertyKey, never>
         Returns: undefined
       }
       reset_daily_ads: {
@@ -1039,6 +992,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      update_user_credits: {
+        Args: {
+          user_id: string
+          amount: number
+          transaction_type: string
+          description?: string
+        }
+        Returns: number
+      }
       vector_avg: {
         Args: {
           "": number[]
@@ -1093,7 +1055,9 @@ export type Database = {
       }
     }
     Enums: {
+      generation_status: "pending" | "processing" | "completed" | "failed"
       image_status: "pending" | "processing" | "completed" | "failed"
+      processing_status: "pending" | "processing" | "completed" | "failed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1162,4 +1126,38 @@ export type TablesUpdate<
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  PublicEnumNameOrOptions extends
+    | keyof PublicSchema["Enums"]
+    | { schema: keyof Database },
+  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = PublicEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
+    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof PublicSchema["CompositeTypes"]
+    | { schema: keyof Database },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
+    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
