@@ -217,13 +217,16 @@ export type Database = {
           id: string
           image_id: string | null
           lora_scales: number[] | null
+          model_id: string | null
           model_version: string | null
           negative_prompt: string | null
           num_inference_steps: number | null
           num_outputs: number | null
           output_format: string | null
           output_quality: number | null
+          output_url: string | null
           parameter_history: Json[] | null
+          processing_time: number | null
           prompt: string
           prompt_strength: number | null
           raw_parameters: Json | null
@@ -250,13 +253,16 @@ export type Database = {
           id?: string
           image_id?: string | null
           lora_scales?: number[] | null
+          model_id?: string | null
           model_version?: string | null
           negative_prompt?: string | null
           num_inference_steps?: number | null
           num_outputs?: number | null
           output_format?: string | null
           output_quality?: number | null
+          output_url?: string | null
           parameter_history?: Json[] | null
+          processing_time?: number | null
           prompt: string
           prompt_strength?: number | null
           raw_parameters?: Json | null
@@ -283,13 +289,16 @@ export type Database = {
           id?: string
           image_id?: string | null
           lora_scales?: number[] | null
+          model_id?: string | null
           model_version?: string | null
           negative_prompt?: string | null
           num_inference_steps?: number | null
           num_outputs?: number | null
           output_format?: string | null
           output_quality?: number | null
+          output_url?: string | null
           parameter_history?: Json[] | null
+          processing_time?: number | null
           prompt?: string
           prompt_strength?: number | null
           raw_parameters?: Json | null
