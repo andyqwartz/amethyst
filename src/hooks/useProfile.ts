@@ -1,9 +1,10 @@
+
 import { useAuth } from '@/hooks/use-auth';
 import { supabase } from '@/lib/supabase/client';
 import { useEffect, useState } from 'react';
-import { Database } from '@/types/database';
+import type { Database } from '@/types/database';
 
-type Profile = Database['public']['Tables']['profiles']['Row'];
+export type Profile = Database['public']['Tables']['profiles']['Row'];
 
 export const useProfile = () => {
   const { user } = useAuth();
@@ -42,7 +43,6 @@ export const useProfile = () => {
 
       if (error) throw error;
       
-      // Mettre à jour le profil local
       setProfile(prev => prev ? { ...prev, ...updates } : null);
       
       return { error: null };

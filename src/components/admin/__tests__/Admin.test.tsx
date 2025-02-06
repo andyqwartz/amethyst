@@ -34,56 +34,41 @@ vi.mock('@/lib/supabase/client', () => ({
 // Mock data
 const mockProfiles: Profile[] = [
   {
-    // User Identity
     id: '1',
     email: 'user@example.com',
     full_name: 'Test User',
     avatar_url: null,
-    phone_number: null,
-    created_at: '2025-01-01T00:00:00Z',
-    updated_at: '2025-01-01T00:00:00Z',
-
-    // Authentication
     auth_provider: 'email',
     provider_id: null,
-    github_id: null,
     google_id: null,
     apple_id: null,
+    github_id: null,
+    stripe_customer_id: null,
+    phone_number: null,
+    language: 'fr',
+    theme: 'dark',
+    is_admin: false,
+    is_banned: false,
     email_verified: true,
     phone_verified: false,
-    last_sign_in_at: null,
-    last_login: null,
-
-    // Subscription
+    needs_attention: false,
+    notifications_enabled: true,
+    marketing_emails_enabled: true,
+    ads_enabled: false,
     subscription_tier: 'free',
     subscription_status: 'active',
     subscription_end_date: null,
-    stripe_customer_id: null,
-
-    // Credits
     credits_balance: 100,
     lifetime_credits: 200,
-    last_credit_update: null,
-    last_generation: null,
-
-    // Advertising
-    ads_enabled: false,
     ads_credits_earned: 0,
     ads_watched_today: 0,
     daily_ads_limit: 5,
-    ads_last_watched: null,
-
-    // Preferences
-    notifications_enabled: true,
-    marketing_emails_enabled: true,
-    language: 'fr',
-    theme: 'dark',
-
-    // Status
-    is_admin: false,
-    is_banned: false,
-    needs_attention: false,
-  },
+    created_at: '2025-01-01T00:00:00Z',
+    updated_at: '2025-01-01T00:00:00Z',
+    last_sign_in_at: null,
+    role: 'user',
+    username: 'testuser'
+  }
 ];
 
 const mockImages: GeneratedImage[] = [
@@ -186,7 +171,6 @@ describe('Admin Component', () => {
       isAuthenticated: false,
       handleEmailAuth: vi.fn(),
       handleGithubAuth: vi.fn(),
-      handleGoogleAuth: vi.fn(),
       checkAdminStatus: vi.fn(),
       signOut: vi.fn(),
     } as TestAuthHook);

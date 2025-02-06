@@ -1,30 +1,54 @@
+
 import { supabase } from '@/lib/supabase';
 import type { Profile } from '@/types/database';
 import { PostgrestError } from '@supabase/supabase-js';
 
-const PROFILE_FIELDS = "id,username,full_name,avatar_url,credits,total_generations,subscription_tier,subscription_expires_at,created_at,updated_at,role";
-
-function validateProfileData(data: unknown): data is Profile {
-  if (!data || typeof data !== 'object') return false;
-  const profile = data as Record<string, unknown>;
-  return (
-    typeof profile.id === 'string' &&
-    typeof profile.username === 'string' &&
-    typeof profile.created_at === 'string' &&
-    typeof profile.updated_at === 'string'
-  );
-}
+const PROFILE_FIELDS = `
+  id,
+  email,
+  username,
+  full_name,
+  avatar_url,
+  auth_provider,
+  provider_id,
+  google_id,
+  apple_id,
+  github_id,
+  stripe_customer_id,
+  phone_number,
+  language,
+  theme,
+  is_admin,
+  is_banned,
+  email_verified,
+  phone_verified,
+  needs_attention,
+  notifications_enabled,
+  marketing_emails_enabled,
+  ads_enabled,
+  subscription_tier,
+  subscription_status,
+  subscription_end_date,
+  credits_balance,
+  lifetime_credits,
+  ads_credits_earned,
+  ads_watched_today,
+  daily_ads_limit,
+  created_at,
+  updated_at,
+  last_sign_in_at,
+  role
+`;
 
 export async function getProfile(userId: string): Promise<Profile | null> {
   try {
     const { data: currentUser } = await supabase.auth.getUser();
     
     if (!currentUser.user) {
-      console.error('Utilisateur non authentifié');
+      console.error('User not authenticated');
       return null;
     }
 
-    // Utilisation d'une chaîne sur une seule ligne pour éviter les problèmes de formatage
     const { data, error } = await supabase
       .from('profiles')
       .select(PROFILE_FIELDS)
@@ -33,26 +57,26 @@ export async function getProfile(userId: string): Promise<Profile | null> {
       .single();
 
     if (error) {
-      console.error('Erreur lors de la récupération du profil:', error);
+      console.error('Error fetching profile:', error);
       return null;
     }
 
     return data;
   } catch (error) {
-    console.error('Erreur inattendue lors de la récupération du profil:', error);
+    console.error('Unexpected error fetching profile:', error);
     return null;
   }
 }
 
 export async function updateProfile(
   userId: string, 
-  updates: Partial<Omit<Profile, 'id' | 'created_at' | 'updated_at' | 'credits' | 'total_generations'>>
+  updates: Partial<Omit<Profile, 'id' | 'created_at' | 'updated_at' | 'credits_balance' | 'total_generations'>>
 ): Promise<Profile | null> {
   try {
     const { data: currentUser } = await supabase.auth.getUser();
     
     if (!currentUser.user) {
-      console.error('Utilisateur non authentifié');
+      console.error('User not authenticated');
       return null;
     }
 
@@ -67,33 +91,33 @@ export async function updateProfile(
       .single();
 
     if (error) {
-      console.error('Erreur lors de la mise à jour du profil:', error);
+      console.error('Error updating profile:', error);
       return null;
     }
 
     return data;
   } catch (error) {
-    console.error('Erreur inattendue lors de la mise à jour du profil:', error);
+    console.error('Unexpected error updating profile:', error);
     return null;
   }
 }
 
 export async function createProfile(
   userId: string, 
-  profile: Partial<Omit<Profile, 'id' | 'created_at' | 'updated_at' | 'credits' | 'total_generations'>>
+  profile: Partial<Omit<Profile, 'id' | 'created_at' | 'updated_at' | 'credits_balance' | 'total_generations'>>
 ): Promise<Profile | null> {
   try {
     const { data, error } = await supabase
       .from('profiles')
       .insert({
         id: userId,
+        email: profile.email,
         username: profile.username || userId,
         full_name: profile.full_name,
         avatar_url: profile.avatar_url,
         subscription_tier: 'free',
         role: 'user',
-        credits: 100,
-        total_generations: 0,
+        credits_balance: 100,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
@@ -101,13 +125,13 @@ export async function createProfile(
       .single();
 
     if (error) {
-      console.error('Erreur lors de la création du profil:', error);
+      console.error('Error creating profile:', error);
       return null;
     }
 
     return data;
   } catch (error) {
-    console.error('Erreur inattendue lors de la création du profil:', error);
+    console.error('Unexpected error creating profile:', error);
     return null;
   }
-} 
+}

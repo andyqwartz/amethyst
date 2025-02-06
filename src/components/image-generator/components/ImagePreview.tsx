@@ -1,110 +1,117 @@
 import React from 'react';
-import { useImageGeneratorStore } from '../../../state/imageGeneratorStore';
-import { Button } from '@/components/ui/button';
-import { Download, Trash2, Wand2 } from 'lucide-react';
-import useModalStore, { ModalId } from '@/state/modalStore';
+import { Button } from "@/components/ui/button";
+import { Download, Wand2, Trash2 } from 'lucide-react';
+import { cn } from "@/lib/utils";
+import { DeleteImageModal } from './modals/DeleteImageModal';
+import type { ImageSettings } from '@/types/generation';
 
-export const ImagePreview: React.FC = () => {
-  const currentImage = useImageGeneratorStore((state) => state.currentImage);
-  const setCurrentImage = useImageGeneratorStore((state) => state.setCurrentImage);
-  const updateSettings = useImageGeneratorStore((state) => state.updateSettings);
-  const isGenerating = useImageGeneratorStore((state) => state.ui.isGenerating);
-  const setError = useImageGeneratorStore((state) => state.setError);
+interface ImagePreviewProps {
+  generatedImages: string[];
+  history: Array<{ url: string; settings: ImageSettings }>;
+  isLoading: boolean;
+  onDownload: (imageUrl: string, outputFormat: string) => Promise<void>;
+  onTweak: (settings: Partial<ImageSettings>) => void;
+  onDeleteImage: (imageUrl: string) => void;
+  onDeleteHistory: () => void;
+}
 
-  const handleDownload = async () => {
-    if (!currentImage?.url) return;
-
-    try {
-      const response = await fetch(currentImage.url);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `generated-image-${currentImage.id}.png`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      setError('Failed to download image');
-    }
-  };
-
-  const handleTweak = () => {
-    if (!currentImage) return;
-    
-    updateSettings({
-      prompt: currentImage.settings.prompt,
-      negativePrompt: currentImage.settings.negativePrompt,
-      width: currentImage.settings.width,
-      height: currentImage.settings.height,
-      steps: currentImage.settings.steps,
-      seed: currentImage.settings.seed,
-      guidanceScale: currentImage.settings.guidanceScale,
+export const ImagePreview: React.FC<ImagePreviewProps> = ({ 
+  generatedImages,
+  history,
+  isLoading,
+  onDownload,
+  onTweak,
+  onDeleteImage,
+  onDeleteHistory
+}) => {
+  const handleTweak = (settings: ImageSettings) => {
+    onTweak({
+      prompt: settings.prompt,
+      negative_prompt: settings.negative_prompt,
+      width: settings.width,
+      height: settings.height,
+      steps: settings.steps,
+      guidance_scale: settings.guidance_scale,
       img2img: true,
       strength: 0.75,
-      initImage: currentImage.url
+      initImage: settings.initImage
     });
   };
-
-  const { openModal } = useModalStore();
-
-  const handleDelete = () => {
-    if (!currentImage) return;
-    
-    openModal(ModalId.DELETE_IMAGE, {
-      type: ModalId.DELETE_IMAGE,
-      data: {
-        imageId: currentImage.id,
-        imageName: currentImage.settings.prompt,
-      }
-    });
-  };
-
-  if (!currentImage) {
-    return (
-      <div className="flex items-center justify-center w-full h-full min-h-[512px] bg-secondary rounded-lg">
-        <p className="text-muted-foreground">No image generated</p>
-      </div>
-    );
-  }
 
   return (
-    <div className="relative group">
-      <img
-        src={currentImage.url}
-        alt={currentImage.settings.prompt}
-        className="w-full h-auto rounded-lg"
-      />
-      
-      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-        <div className="flex justify-end gap-2">
-          <Button
-            variant="secondary"
-            size="icon"
-            onClick={handleDownload}
-            disabled={isGenerating}
-          >
-            <Download className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="secondary"
-            size="icon"
-            onClick={handleTweak}
-            disabled={isGenerating}
-          >
-            <Wand2 className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="secondary"
-            size="icon"
-            onClick={handleDelete}
-            disabled={isGenerating}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+    <>
+      <div className="space-y-6">
+        {/* Generated Images */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          {generatedImages.map((url, index) => (
+            <div 
+              key={url + index}
+              className="relative group rounded-lg overflow-hidden bg-black/10 hover:bg-black/5 transition-colors duration-300"
+            >
+              <div className="relative w-full">
+                <img
+                  src={url}
+                  alt={`Generated image ${index + 1}`}
+                  className="w-full h-auto object-cover rounded-lg"
+                  loading="lazy"
+                  style={{ aspectRatio: '1', objectFit: 'contain', backgroundColor: 'rgb(15, 15, 15)' }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg">
+                  <div className="absolute top-2 right-2 flex items-center gap-1.5">
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      onClick={() => onDownload(url, 'webp')}
+                      className="rounded-full bg-black/50 hover:bg-black/70 shadow-sm transition-colors duration-200 w-8 h-8"
+                    >
+                      <Download className="h-4 w-4 text-white" />
+                    </Button>
+                    {history.find(item => item.url === url)?.settings && (
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        onClick={() => handleTweak(history.find(item => item.url === url)!.settings)}
+                        className="rounded-full bg-black/50 hover:bg-black/70 shadow-sm transition-colors duration-200 w-8 h-8"
+                      >
+                        <Wand2 className="h-4 w-4 text-white" />
+                      </Button>
+                    )}
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      onClick={() => onDeleteImage(url)}
+                      className="rounded-full bg-black/50 hover:bg-black/70 shadow-sm transition-colors duration-200 w-8 h-8"
+                    >
+                      <Trash2 className="h-4 w-4 text-white" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
+
+        {/* History Actions */}
+        {history.length > 0 && (
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              onClick={onDeleteHistory}
+              className="text-destructive hover:text-destructive"
+            >
+              Clear History
+            </Button>
+          </div>
+        )}
       </div>
-    </div>
+
+      {/* Delete Modal */}
+      <DeleteImageModal
+        open={false}
+        onOpenChange={() => {}}
+        onConfirm={() => {}}
+        imageUrl={''}
+      />
+    </>
   );
 };
