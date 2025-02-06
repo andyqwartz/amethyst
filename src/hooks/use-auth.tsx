@@ -181,6 +181,9 @@ export const useAuth = () => {
           if (error.message === 'Invalid login credentials') {
             throw new Error("Email ou mot de passe incorrect");
           }
+          if (error.message.includes('upstream connect error')) {
+            throw new Error("Impossible de se connecter au service d'authentification. Veuillez vérifier votre connexion et réessayer.");
+          }
           throw error;
         }
 

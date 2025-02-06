@@ -45,6 +45,8 @@ export const Auth = () => {
           errorMessage = "Un compte existe déjà avec cet email";
         } else if (error.includes("503")) {
           errorMessage = "Le service est temporairement indisponible. Veuillez réessayer dans quelques instants.";
+        } else if (error.includes("upstream connect error")) {
+          errorMessage = "Impossible de se connecter au service d'authentification. Veuillez vérifier votre connexion et réessayer.";
         }
 
         toast({

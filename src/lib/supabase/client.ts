@@ -16,14 +16,13 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: true,
     storage: localStorage,
     flowType: 'pkce',
-    debug: true // Enable debug mode temporarily to help diagnose issues
+    debug: true
   },
   global: {
     headers: {
       'X-Client-Info': 'supabase-js-web'
     }
   },
-  // Add retry configuration
   db: {
     schema: 'public'
   },
@@ -31,7 +30,10 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     params: {
       eventsPerSecond: 10
     }
-  }
+  },
+  // Add retry configuration
+  retryAttempts: 3,
+  retryInterval: 1000
 });
 
 // Export default supabase client
