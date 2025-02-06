@@ -67,7 +67,10 @@ const mockProfiles: Profile[] = [
     updated_at: '2025-01-01T00:00:00Z',
     last_sign_in_at: null,
     role: 'user',
-    username: 'testuser'
+    username: 'testuser',
+    last_credit_update: '2025-01-01T00:00:00Z',
+    ads_last_watched: null,
+    last_login: null
   }
 ];
 
@@ -143,7 +146,7 @@ describe('Admin Component', () => {
       handleGoogleAuth: vi.fn(),
       checkAdminStatus: vi.fn(),
       signOut: vi.fn(),
-    } as TestAuthHook);
+    } as unknown as TestAuthHook);
 
     vi.mocked(useToast).mockReturnValue({
       toast: vi.fn(),
@@ -173,7 +176,7 @@ describe('Admin Component', () => {
       handleGithubAuth: vi.fn(),
       checkAdminStatus: vi.fn(),
       signOut: vi.fn(),
-    } as TestAuthHook);
+    } as unknown as TestAuthHook);
 
     render(<Admin />);
     expect(mockNavigate).toHaveBeenCalledWith('/');

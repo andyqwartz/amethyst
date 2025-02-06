@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Shield, LogOut, RefreshCw, Bell } from 'lucide-react';
@@ -18,7 +18,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
   isLoading,
 }) => {
   const [isRefreshBarOpen, setIsRefreshBarOpen] = useState(false);
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   const { notifications, clearNotification, clearAllNotifications } = useNotifications();
 
   const unreadCount = notifications.filter(n => !n.read).length;

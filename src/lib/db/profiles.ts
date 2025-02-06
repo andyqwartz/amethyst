@@ -37,7 +37,9 @@ const PROFILE_FIELDS = `
   created_at,
   updated_at,
   last_sign_in_at,
-  role
+  last_credit_update,
+  ads_last_watched,
+  last_login
 `;
 
 export async function getProfile(userId: string): Promise<Profile | null> {
@@ -53,14 +55,9 @@ export async function getProfile(userId: string): Promise<Profile | null> {
       .from('profiles')
       .select(PROFILE_FIELDS)
       .eq('id', userId)
-      .limit(1)
       .single();
 
-    if (error) {
-      console.error('Error fetching profile:', error);
-      return null;
-    }
-
+    if (error) throw error;
     return data;
   } catch (error) {
     console.error('Unexpected error fetching profile:', error);
@@ -90,11 +87,7 @@ export async function updateProfile(
       .select(PROFILE_FIELDS)
       .single();
 
-    if (error) {
-      console.error('Error updating profile:', error);
-      return null;
-    }
-
+    if (error) throw error;
     return data;
   } catch (error) {
     console.error('Unexpected error updating profile:', error);
@@ -112,23 +105,21 @@ export async function createProfile(
       .insert({
         id: userId,
         email: profile.email,
-        username: profile.username || userId,
+        username: profile.email ? profile.email.split('@')[0] : userId,
         full_name: profile.full_name,
         avatar_url: profile.avatar_url,
         subscription_tier: 'free',
-        role: 'user',
         credits_balance: 100,
+        last_credit_update: new Date().toISOString(),
+        ads_last_watched: null,
+        last_login: new Date().toISOString(),
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
       .select(PROFILE_FIELDS)
       .single();
 
-    if (error) {
-      console.error('Error creating profile:', error);
-      return null;
-    }
-
+    if (error) throw error;
     return data;
   } catch (error) {
     console.error('Unexpected error creating profile:', error);
