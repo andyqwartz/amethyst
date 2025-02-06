@@ -770,6 +770,12 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      check_user_auth: {
+        Args: {
+          user_id: string
+        }
+        Returns: boolean
+      }
       create_admin_user: {
         Args: {
           admin_email: string
