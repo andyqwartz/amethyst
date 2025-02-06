@@ -9,7 +9,6 @@ import { Loader2, Eye, EyeOff, Github, Globe, Mail, Lock } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { supabase } from '@/lib/supabase/client';
 import { useNavigate } from 'react-router-dom';
 
 export const Auth = () => {
@@ -19,53 +18,58 @@ export const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { handleEmailAuth } = useAuth();
 
-  const handleEmailAuth = async (isSignUp: boolean) => {
+  const handleAuth = async (isSignUp: boolean) => {
+    if (!email || !password) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Veuillez remplir tous les champs"
+      });
+      return;
+    }
+
     try {
       setIsLoading(true);
+      const { success, error } = await handleEmailAuth(email, password, isSignUp);
 
-      const { error } = isSignUp 
-        ? await supabase.auth.signUp({ email, password })
-        : await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        let errorMessage = "Une erreur est survenue";
+        
+        if (error.includes("Email not confirmed")) {
+          errorMessage = "Veuillez confirmer votre email avant de vous connecter";
+        } else if (error.includes("Invalid login credentials")) {
+          errorMessage = "Email ou mot de passe incorrect";
+        } else if (error.includes("User already registered")) {
+          errorMessage = "Un compte existe déjà avec cet email";
+        } else if (error.includes("503")) {
+          errorMessage = "Le service est temporairement indisponible. Veuillez réessayer dans quelques instants.";
+        }
 
-      if (error) throw error;
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: errorMessage
+        });
+      }
 
-      toast({
-        title: isSignUp ? "Compte créé" : "Connexion réussie",
-        description: isSignUp 
-          ? "Vérifiez votre email pour confirmer votre compte"
-          : "Vous êtes maintenant connecté"
-      });
-
-      if (!isSignUp) navigate('/');
+      if (success) {
+        toast({
+          title: isSignUp ? "Compte créé" : "Connexion réussie",
+          description: isSignUp ? "Vérifiez votre email pour confirmer votre compte" : "Bienvenue !"
+        });
+        
+        if (!isSignUp) {
+          navigate('/');
+        }
+      }
     } catch (error: any) {
       console.error('Auth error:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: error.message
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleOAuthSignIn = async (provider: 'github' | 'google') => {
-    try {
-      setIsLoading(true);
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`
-        }
-      });
-      if (error) throw error;
-    } catch (error: any) {
-      console.error('OAuth error:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: error.message
+        description: "Le service est temporairement indisponible. Veuillez réessayer dans quelques instants."
       });
     } finally {
       setIsLoading(false);
@@ -74,7 +78,7 @@ export const Auth = () => {
 
   const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && email && password) {
-      handleEmailAuth(false);
+      handleAuth(false);
     }
   };
 
@@ -102,7 +106,7 @@ export const Auth = () => {
           <Button 
             variant="outline" 
             className="w-full relative overflow-hidden transition-all duration-300 hover:bg-purple-900/20 hover:border-purple-300/50" 
-            onClick={() => handleOAuthSignIn('github')}
+            onClick={() => {}} // OAuth coming soon
             disabled={isLoading}
           >
             {isLoading ? (
@@ -116,7 +120,7 @@ export const Auth = () => {
           <Button 
             variant="outline" 
             className="w-full relative overflow-hidden transition-all duration-300 hover:bg-purple-900/20 hover:border-purple-300/50" 
-            onClick={() => handleOAuthSignIn('google')}
+            onClick={() => {}} // OAuth coming soon
             disabled={isLoading}
           >
             {isLoading ? (
@@ -186,7 +190,7 @@ export const Auth = () => {
         <div className="space-y-4">
           <Button 
             className="w-full bg-purple-300 hover:bg-purple-200 text-purple-950 font-medium shadow-lg transition-all duration-300" 
-            onClick={() => handleEmailAuth(false)}
+            onClick={() => handleAuth(false)}
             disabled={isLoading || !email || !password}
           >
             {isLoading ? (
@@ -198,7 +202,7 @@ export const Auth = () => {
           <Button 
             className="w-full bg-background/30 hover:bg-purple-900/20 border-purple-300/30 hover:border-purple-300/50 transition-all duration-300" 
             variant="outline"
-            onClick={() => handleEmailAuth(true)}
+            onClick={() => handleAuth(true)}
             disabled={isLoading || !email || !password}
           >
             Créer un nouveau compte
