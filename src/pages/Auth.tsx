@@ -1,128 +1,85 @@
+
 import { useState, KeyboardEvent } from 'react';
 import { Card } from "@/components/ui/card";
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Eye, EyeOff, Github, Sparkles, Globe, Mail, Lock } from "lucide-react";
+import { Loader2, Eye, EyeOff, Github, Globe, Mail, Lock } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-
-const AuthHeader = () => (
-  <div className="space-y-6 text-center">
-    <div className="space-y-2">
-      <h1 className="text-5xl font-bold tracking-tight">
-        <span className="text-white drop-shadow-[0_0_30px_rgba(167,139,250,0.5)]">✧</span>
-        <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-purple-200 drop-shadow-[0_0_15px_rgba(167,139,250,0.3)]">Amethyst</span>
-        <span className="text-white drop-shadow-[0_0_30px_rgba(167,139,250,0.5)]">✧</span>
-      </h1>
-      <p className="text-xl font-light">
-        <span className="text-purple-200/90">Bienvenue sur le portail</span>
-      </p>
-    </div>
-    <p className="text-purple-300/60 text-base font-medium tracking-wide uppercase">
-      Créez • Explorez • Imaginez
-    </p>
-  </div>
-);
-
-const GithubButton = ({ onClick, disabled }: { onClick: () => void, disabled: boolean }) => (
-  <Button 
-    variant="outline" 
-    className="w-full relative overflow-hidden transition-all duration-300 hover:bg-purple-900/20 hover:border-purple-300/50" 
-    onClick={onClick}
-    disabled={disabled}
-  >
-    {disabled ? (
-      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-    ) : (
-      <Github className="mr-2 h-4 w-4" />
-    )}
-    Continuer avec Github
-  </Button>
-);
-
-const GoogleButton = ({ onClick, disabled }: { onClick: () => void, disabled: boolean }) => (
-  <Button 
-    variant="outline" 
-    className="w-full relative overflow-hidden transition-all duration-300 hover:bg-purple-900/20 hover:border-purple-300/50" 
-    onClick={onClick}
-    disabled={disabled}
-  >
-    {disabled ? (
-      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-    ) : (
-      <Globe className="mr-2 h-4 w-4" />
-    )}
-    Continuer avec Google
-  </Button>
-);
-
-const Divider = () => (
-  <div className="relative">
-    <div className="absolute inset-0 flex items-center">
-      <Separator className="bg-purple-300/20" />
-    </div>
-    <div className="relative flex justify-center text-xs uppercase">
-      <span className="bg-background/50 px-2 text-purple-200/60">
-        Ou continuez avec
-      </span>
-    </div>
-  </div>
-);
+import { supabase } from '@/lib/supabase/client';
+import { useNavigate } from 'react-router-dom';
 
 export const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
-  const { isLoading, handleEmailAuth, handleGithubAuth, handleGoogleAuth } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const handleGithubSignIn = async () => {
-    if (isLoading) return;
-    await handleGithubAuth();
-  };
+  const handleEmailAuth = async (isSignUp: boolean) => {
+    try {
+      setIsLoading(true);
 
-  const handleGoogleSignIn = async () => {
-    if (isLoading) return;
-    await handleGoogleAuth();
-  };
+      const { error } = isSignUp 
+        ? await supabase.auth.signUp({ email, password })
+        : await supabase.auth.signInWithPassword({ email, password });
 
-  const handleAuthAction = async (type: 'login' | 'signup') => {
-    if (isLoading) return;
+      if (error) throw error;
 
-    if (!email || !password) {
+      toast({
+        title: isSignUp ? "Compte créé" : "Connexion réussie",
+        description: isSignUp 
+          ? "Vérifiez votre email pour confirmer votre compte"
+          : "Vous êtes maintenant connecté"
+      });
+
+      if (!isSignUp) navigate('/');
+    } catch (error: any) {
+      console.error('Auth error:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Veuillez remplir tous les champs"
+        description: error.message
       });
-      return;
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    if (password.length < 6) {
+  const handleOAuthSignIn = async (provider: 'github' | 'google') => {
+    try {
+      setIsLoading(true);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`
+        }
+      });
+      if (error) throw error;
+    } catch (error: any) {
+      console.error('OAuth error:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Le mot de passe doit contenir au moins 6 caractères"
+        description: error.message
       });
-      return;
+    } finally {
+      setIsLoading(false);
     }
-
-    await handleEmailAuth(email, password, type === 'signup');
   };
 
   const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && email && password && !isLoading) {
-      handleAuthAction('login');
+    if (e.key === 'Enter' && email && password) {
+      handleEmailAuth(false);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background Effects */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_#1a103d_0%,_#0d0621_100%)]"></div>
       <div className="absolute inset-0 bg-purple-900/20 animate-pulse-slowest"></div>
       
@@ -132,13 +89,55 @@ export const Auth = () => {
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full border border-purple-300/10 animate-pulse-slowest"></div>
 
       <Card className="w-full max-w-md p-8 space-y-8 relative backdrop-blur-xl bg-background/30 border-purple-300/20 shadow-2xl shadow-purple-900/20">
-        <AuthHeader />
-        
+        <div className="space-y-6 text-center">
+          <h1 className="text-5xl font-bold tracking-tight">
+            <span className="text-white drop-shadow-[0_0_30px_rgba(167,139,250,0.5)]">✧</span>
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-purple-200 drop-shadow-[0_0_15px_rgba(167,139,250,0.3)]">Amethyst</span>
+            <span className="text-white drop-shadow-[0_0_30px_rgba(167,139,250,0.5)]">✧</span>
+          </h1>
+          <p className="text-xl font-light text-purple-200/90">Bienvenue sur le portail</p>
+        </div>
+
         <div className="space-y-4">
-          <GithubButton onClick={handleGithubSignIn} disabled={isLoading} />
-          <GoogleButton onClick={handleGoogleSignIn} disabled={isLoading} />
-          <Divider />
-          
+          <Button 
+            variant="outline" 
+            className="w-full relative overflow-hidden transition-all duration-300 hover:bg-purple-900/20 hover:border-purple-300/50" 
+            onClick={() => handleOAuthSignIn('github')}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Github className="mr-2 h-4 w-4" />
+            )}
+            Continuer avec Github
+          </Button>
+
+          <Button 
+            variant="outline" 
+            className="w-full relative overflow-hidden transition-all duration-300 hover:bg-purple-900/20 hover:border-purple-300/50" 
+            onClick={() => handleOAuthSignIn('google')}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Globe className="mr-2 h-4 w-4" />
+            )}
+            Continuer avec Google
+          </Button>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <Separator className="bg-purple-300/20" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background/50 px-2 text-purple-200/60">
+                Ou continuer avec
+              </span>
+            </div>
+          </div>
+
           <div className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-purple-100">Email</Label>
@@ -156,6 +155,7 @@ export const Auth = () => {
                 />
               </div>
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="password" className="text-purple-100">Mot de passe</Label>
               <div className="relative">
@@ -180,40 +180,25 @@ export const Auth = () => {
                 </button>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="remember" 
-                checked={rememberMe}
-                onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-                disabled={isLoading}
-              />
-              <label
-                htmlFor="remember"
-                className="text-sm font-medium text-purple-200/80 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                Se souvenir de moi
-              </label>
-            </div>
           </div>
         </div>
 
         <div className="space-y-4">
           <Button 
             className="w-full bg-purple-300 hover:bg-purple-200 text-purple-950 font-medium shadow-lg transition-all duration-300" 
-            onClick={() => handleAuthAction('login')}
+            onClick={() => handleEmailAuth(false)}
             disabled={isLoading || !email || !password}
           >
             {isLoading ? (
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            ) : (
-              <Sparkles className="mr-2 h-5 w-5" />
-            )}
+            ) : null}
             Entrer dans le portail
           </Button>
+
           <Button 
             className="w-full bg-background/30 hover:bg-purple-900/20 border-purple-300/30 hover:border-purple-300/50 transition-all duration-300" 
             variant="outline"
-            onClick={() => handleAuthAction('signup')}
+            onClick={() => handleEmailAuth(true)}
             disabled={isLoading || !email || !password}
           >
             Créer un nouveau compte
