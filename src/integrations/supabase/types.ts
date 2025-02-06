@@ -484,14 +484,18 @@ export type Database = {
           ads_enabled: boolean | null
           ads_last_watched: string | null
           ads_watched_today: number | null
+          apple_id: string | null
           auth_provider: string | null
           avatar_url: string | null
           created_at: string | null
+          credits: number | null
           credits_balance: number | null
           daily_ads_limit: number | null
           email: string | null
           email_verified: boolean | null
           full_name: string | null
+          github_id: string | null
+          google_id: string | null
           id: string
           is_admin: boolean | null
           is_banned: boolean | null
@@ -509,6 +513,7 @@ export type Database = {
           role: string | null
           stripe_customer_id: string | null
           subscription_end_date: string | null
+          subscription_expires_at: string | null
           subscription_status: string | null
           subscription_tier: string | null
           theme: string | null
@@ -521,14 +526,18 @@ export type Database = {
           ads_enabled?: boolean | null
           ads_last_watched?: string | null
           ads_watched_today?: number | null
+          apple_id?: string | null
           auth_provider?: string | null
           avatar_url?: string | null
           created_at?: string | null
+          credits?: number | null
           credits_balance?: number | null
           daily_ads_limit?: number | null
           email?: string | null
           email_verified?: boolean | null
           full_name?: string | null
+          github_id?: string | null
+          google_id?: string | null
           id: string
           is_admin?: boolean | null
           is_banned?: boolean | null
@@ -546,6 +555,7 @@ export type Database = {
           role?: string | null
           stripe_customer_id?: string | null
           subscription_end_date?: string | null
+          subscription_expires_at?: string | null
           subscription_status?: string | null
           subscription_tier?: string | null
           theme?: string | null
@@ -558,14 +568,18 @@ export type Database = {
           ads_enabled?: boolean | null
           ads_last_watched?: string | null
           ads_watched_today?: number | null
+          apple_id?: string | null
           auth_provider?: string | null
           avatar_url?: string | null
           created_at?: string | null
+          credits?: number | null
           credits_balance?: number | null
           daily_ads_limit?: number | null
           email?: string | null
           email_verified?: boolean | null
           full_name?: string | null
+          github_id?: string | null
+          google_id?: string | null
           id?: string
           is_admin?: boolean | null
           is_banned?: boolean | null
@@ -583,6 +597,7 @@ export type Database = {
           role?: string | null
           stripe_customer_id?: string | null
           subscription_end_date?: string | null
+          subscription_expires_at?: string | null
           subscription_status?: string | null
           subscription_tier?: string | null
           theme?: string | null

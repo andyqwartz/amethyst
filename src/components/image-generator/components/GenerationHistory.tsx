@@ -1,5 +1,7 @@
+
 import React from 'react';
-import { useGenerationHistory, GenerationHistoryItem } from '../hooks/useGenerationHistory';
+import { useGenerationHistory } from '../hooks/useGenerationHistory';
+import type { GenerationHistoryItem } from '@/types/generation';
 import {
   Box,
   Grid,
@@ -17,9 +19,9 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { format } from 'date-fns';
 
 export const GenerationHistory: React.FC = () => {
-  const { history, removeFromHistory, clearHistory, isLoading, error } = useGenerationHistory();
+  const { history, loading, error, removeFromHistory, clearHistory } = useGenerationHistory();
 
-  if (isLoading) {
+  if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
         <CircularProgress />
@@ -64,7 +66,7 @@ export const GenerationHistory: React.FC = () => {
               <CardMedia
                 component="img"
                 height="200"
-                image={item.imageUrl}
+                image={item.output_url || item.url}
                 alt={item.prompt}
                 sx={{ objectFit: 'cover' }}
               />
@@ -73,12 +75,12 @@ export const GenerationHistory: React.FC = () => {
                   {item.prompt}
                 </Typography>
                 <Typography variant="caption" color="textSecondary" display="block">
-                  {format(item.timestamp, 'MMM d, yyyy HH:mm')}
+                  {format(new Date(item.created_at), 'MMM d, yyyy HH:mm')}
                 </Typography>
                 {item.parameters && (
                   <Typography variant="caption" color="textSecondary" component="div">
-                    {`${item.parameters.width}x${item.parameters.height} • Steps: ${item.parameters.steps} • CFG: ${item.parameters.cfgScale}`}
-                    {item.parameters.seed !== undefined && ` • Seed: ${item.parameters.seed}`}
+                    {`${item.settings.width}x${item.settings.height} • Steps: ${item.settings.num_inference_steps} • CFG: ${item.settings.guidance_scale}`}
+                    {item.settings.seed !== undefined && ` • Seed: ${item.settings.seed}`}
                   </Typography>
                 )}
               </CardContent>
