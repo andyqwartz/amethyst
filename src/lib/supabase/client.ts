@@ -23,12 +23,6 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   }
 });
 
-// Export a function to get the client instance
-export const getSupabaseClient = () => supabase;
+// Export default supabase client
+export default supabase;
 
-export const checkSession = async () => {
-  const { data: { session }, error } = await supabase.auth.getSession();
-  if (error) throw error;
-  if (!session) throw new Error('No active session');
-  return session;
-};

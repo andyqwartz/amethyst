@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { supabase, getSupabaseClient } from '@/lib/supabase/client';
+import { supabase } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from './use-toast';
@@ -228,3 +228,4 @@ export const useAuth = () => {
     signOut
   };
 };
+
