@@ -2,6 +2,8 @@ import React, { useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -28,13 +30,22 @@ export const HelpModal: React.FC<HelpModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-screen h-screen max-w-none m-0 p-0 bg-black/30 backdrop-blur-xl" onClick={handleBackdropClick}>
+      <DialogContent 
+        className="w-screen h-screen max-w-none m-0 p-0 bg-background/95 backdrop-blur-xl" 
+        onClick={handleBackdropClick}
+        onEscapeKeyDown={handleClose}
+        onInteractOutside={handleClose}
+      >
+        <DialogTitle className="sr-only">Help and Credits</DialogTitle>
+        <DialogDescription className="sr-only">
+          User guide and information about Amethyst
+        </DialogDescription>
         <div className="absolute right-4 top-4 sm:right-6 sm:top-6">
           <Button
             variant="ghost"
             size="icon"
             onClick={handleClose}
-            className="relative hover:bg-primary/10 active:bg-primary/20 transition-all duration-300 hover-scale touch-manipulation rounded-xl"
+            className="relative hover:bg-primary/10 active:bg-primary/20 transition-all duration-300 hover:scale-105 touch-manipulation rounded-xl"
           >
             <X className="h-5 w-5 text-primary" />
           </Button>
@@ -42,26 +53,26 @@ export const HelpModal: React.FC<HelpModalProps> = ({
 
         <ScrollArea className="h-screen w-full" onClick={e => e.stopPropagation()}>
           <div className="flex flex-col items-center p-6 space-y-12 max-w-3xl mx-auto pb-24">
-            {/* Logo et Titre */}
+            {/* Logo and Title */}
             <div 
               className="flex flex-col items-center space-y-4 animate-in fade-in-0 duration-500 pt-12 cursor-pointer group"
               onClick={handleClose}
             >
               <div className="relative transition-transform duration-300 group-hover:scale-105">
-                <div className="absolute inset-0 bg-primary/20 blur-xl animate-pulse rounded-full group-hover:bg-primary/30"></div>
-                <Sparkles className="h-20 w-20 text-primary relative animate-pulse group-hover:text-primary/80" />
+                <div className="absolute inset-0 bg-[#D6BCFA]/20 blur-xl animate-pulse rounded-full group-hover:bg-[#D6BCFA]/30"></div>
+                <Sparkles className="h-20 w-20 text-[#D6BCFA] relative animate-pulse group-hover:text-[#D6BCFA]/80" />
               </div>
               <h1 className="text-5xl font-bold font-outfit title-gradient group-hover:opacity-80">
                 Amethyst
               </h1>
-              <p className="text-xl text-muted-foreground text-center max-w-lg group-hover:text-primary/80">
-                Une nouvelle génération d'IA créative pour transformer vos idées en images
+              <p className="text-xl text-muted-foreground text-center max-w-lg group-hover:text-[#D6BCFA]/80">
+                A new generation of creative AI to transform your ideas into images
               </p>
             </div>
 
-            {/* Contact et Liens */}
+            {/* Contact & Links */}
             <section className="text-center space-y-6 animate-in fade-in-50 duration-700 w-full">
-              <h2 className="text-3xl font-semibold text-primary">Contact & Liens</h2>
+              <h2 className="text-3xl font-semibold text-[#D6BCFA]">Contact & Links</h2>
               <div className="flex justify-center gap-6">
                 <a href="https://github.com/joachimcohen" target="_blank" rel="noopener noreferrer" 
                    className="flex items-center gap-2 px-6 py-3 bg-card hover:bg-card/80 rounded-lg transition-all hover:scale-105">
@@ -81,95 +92,95 @@ export const HelpModal: React.FC<HelpModalProps> = ({
               </div>
             </section>
 
-            {/* Guide d'utilisation */}
+            {/* User Guide */}
             <section className="space-y-6 animate-in fade-in-50 duration-1000 w-full">
-              <h2 className="text-3xl font-semibold text-primary text-center">Guide d'utilisation</h2>
+              <h2 className="text-3xl font-semibold text-[#D6BCFA] text-center">User Guide</h2>
               <div className="space-y-6 text-muted-foreground">
                 <div className="bg-card/50 rounded-xl p-6 space-y-4">
-                  <h3 className="text-xl font-medium text-foreground">Commencer avec Amethyst</h3>
+                  <h3 className="text-xl font-medium text-foreground">Getting Started with Amethyst</h3>
                   <p>
-                    Amethyst est conçu pour être intuitif et puissant. Voici comment commencer :
+                    Amethyst is designed to be both intuitive and powerful. Here's how to get started:
                   </p>
                   <ol className="list-decimal list-inside space-y-3 pl-4">
-                    <li>Connectez-vous avec votre compte Google pour accéder à toutes les fonctionnalités</li>
-                    <li>Dans le champ de texte principal, décrivez l'image que vous souhaitez générer</li>
-                    <li>Utilisez le bouton des paramètres avancés pour affiner votre génération</li>
-                    <li>Cliquez sur "Générer" et laissez l'IA créer votre vision</li>
+                    <li>Sign in with your Google account to access all features</li>
+                    <li>In the main text field, describe the image you want to generate</li>
+                    <li>Use the advanced settings button to fine-tune your generation</li>
+                    <li>Click "Generate" and let the AI create your vision</li>
                   </ol>
                 </div>
               </div>
             </section>
 
-            {/* Paramètres avancés */}
+            {/* Advanced Settings */}
             <section className="space-y-6 animate-in fade-in-50 duration-1000 w-full">
-              <h2 className="text-3xl font-semibold text-primary text-center">Paramètres avancés</h2>
+              <h2 className="text-3xl font-semibold text-[#D6BCFA] text-center">Advanced Settings</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-card/50 rounded-xl p-6 space-y-4">
                   <h3 className="text-xl font-medium text-foreground">LoRA (Low-Rank Adaptation)</h3>
                   <p className="text-muted-foreground">
-                    Les LoRA sont des modules d'adaptation qui permettent de personnaliser le style
-                    et le contenu de vos générations. Chaque LoRA peut être combiné et ajusté :
+                    LoRAs are adaptation modules that allow you to customize the style
+                    and content of your generations. Each LoRA can be combined and adjusted:
                   </p>
                   <ul className="list-disc list-inside space-y-2 text-muted-foreground pl-4">
-                    <li>Style artistique (anime, photoréaliste, peinture...)</li>
-                    <li>Contenu spécifique (personnages, objets, environnements)</li>
-                    <li>Ajustement par échelle (0.1 à 1.0) pour contrôler l'influence</li>
+                    <li>Artistic style (anime, photorealistic, painting...)</li>
+                    <li>Specific content (characters, objects, environments)</li>
+                    <li>Scale adjustment (0.1 to 1.0) to control influence</li>
                   </ul>
                 </div>
 
                 <div className="bg-card/50 rounded-xl p-6 space-y-4">
-                  <h3 className="text-xl font-medium text-foreground">Pipeline de génération</h3>
+                  <h3 className="text-xl font-medium text-foreground">Generation Pipeline</h3>
                   <p className="text-muted-foreground">
-                    Notre pipeline utilise les dernières avancées en matière de diffusion stable :
+                    Our pipeline uses the latest advances in stable diffusion:
                   </p>
                   <ul className="list-disc list-inside space-y-2 text-muted-foreground pl-4">
-                    <li>Modèle de base SDXL 1.0</li>
-                    <li>Support des LoRA pour la personnalisation</li>
-                    <li>Optimisations pour la qualité et la vitesse</li>
-                    <li>Pipeline de post-traitement avancé</li>
+                    <li>SDXL 1.0 base model</li>
+                    <li>LoRA support for customization</li>
+                    <li>Optimizations for quality and speed</li>
+                    <li>Advanced post-processing pipeline</li>
                   </ul>
                 </div>
               </div>
             </section>
 
-            {/* Conseils avancés */}
+            {/* Advanced Tips */}
             <section className="space-y-6 animate-in fade-in-50 duration-1000 w-full">
-              <h2 className="text-3xl font-semibold text-primary text-center">Conseils avancés</h2>
+              <h2 className="text-3xl font-semibold text-[#D6BCFA] text-center">Advanced Tips</h2>
               <div className="bg-card/50 rounded-xl p-6 space-y-6">
                 <div className="space-y-4">
-                  <h3 className="text-xl font-medium text-foreground">Prompts efficaces</h3>
+                  <h3 className="text-xl font-medium text-foreground">Effective Prompts</h3>
                   <p className="text-muted-foreground">
-                    Pour obtenir les meilleurs résultats, suivez ces conseils pour vos prompts :
+                    For best results, follow these prompting tips:
                   </p>
                   <ul className="list-disc list-inside space-y-2 text-muted-foreground pl-4">
-                    <li>Soyez précis dans vos descriptions (composition, éclairage, style)</li>
-                    <li>Utilisez des termes artistiques spécifiques</li>
-                    <li>Équilibrez les détails positifs et négatifs</li>
-                    <li>Expérimentez avec différentes combinaisons de LoRA</li>
+                    <li>Be specific in your descriptions (composition, lighting, style)</li>
+                    <li>Use specific artistic terms</li>
+                    <li>Balance positive and negative details</li>
+                    <li>Experiment with different LoRA combinations</li>
                   </ul>
                 </div>
 
                 <div className="space-y-4">
-                  <h3 className="text-xl font-medium text-foreground">Optimisation des paramètres</h3>
+                  <h3 className="text-xl font-medium text-foreground">Parameter Optimization</h3>
                   <p className="text-muted-foreground">
-                    Ajustez ces paramètres pour affiner vos résultats :
+                    Adjust these parameters to refine your results:
                   </p>
                   <ul className="list-disc list-inside space-y-2 text-muted-foreground pl-4">
-                    <li>Steps : 30-50 pour un bon équilibre qualité/vitesse</li>
-                    <li>CFG Scale : 7-8 pour un équilibre fidélité/créativité</li>
-                    <li>Seed : Fixez-la pour reproduire des résultats</li>
-                    <li>Taille : Adaptez selon vos besoins (optimisé pour 1024x1024)</li>
+                    <li>Steps: 30-50 for good quality/speed balance</li>
+                    <li>CFG Scale: 7-8 for fidelity/creativity balance</li>
+                    <li>Seed: Fix it to reproduce results</li>
+                    <li>Size: Adapt to your needs (optimized for 1024x1024)</li>
                   </ul>
                 </div>
               </div>
             </section>
 
-            {/* Crédits */}
+            {/* Credits */}
             <section className="space-y-6 animate-in fade-in-50 duration-1000 w-full">
-              <h2 className="text-3xl font-semibold text-primary text-center">Crédits</h2>
+              <h2 className="text-3xl font-semibold text-[#D6BCFA] text-center">Credits</h2>
               <div className="bg-card/50 rounded-xl p-6 space-y-4">
                 <p className="text-muted-foreground text-center">
-                  Développé avec passion par Joachim Cohen. Propulsé par les technologies suivantes :
+                  Developed with passion by Joachim Cohen. Powered by the following technologies:
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center text-sm text-muted-foreground">
                   <div className="p-3 bg-card/50 rounded-lg">React + TypeScript</div>

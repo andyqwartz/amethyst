@@ -1,31 +1,4 @@
 import { useState, useEffect } from 'react';
-<<<<<<< HEAD
-import { supabase } from '@/lib/supabase';
-
-export const useGenerationHistory = (userId: string) => {
-  const [history, setHistory] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchHistory = async () => {
-      const { data, error } = await supabase
-        .from('generated_images')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-
-      if (!error && data) {
-        setHistory(data);
-      }
-      setLoading(false);
-    };
-
-    fetchHistory();
-  }, [userId]);
-
-  return { history, loading };
-}; 
-=======
 import { supabase } from '@/lib/supabase/client';
 import type { GeneratedImage } from '@/types/generation';
 
@@ -55,7 +28,12 @@ export const useGenerationHistory = () => {
         public_url: item.public_url,
         timestamp: new Date(item.created_at).getTime(),
         created_at: item.created_at,
-        settings: item.settings
+        settings: item.settings,
+        user_id: item.user_id,
+        image_id: item.image_id,
+        status: item.status,
+        completed_at: item.completed_at,
+        error_message: item.error_message
       })));
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch history'));
@@ -109,4 +87,3 @@ export const useGenerationHistory = () => {
     fetchHistory
   };
 };
->>>>>>> a945a29ba778c4116754a03171a654de675e5402

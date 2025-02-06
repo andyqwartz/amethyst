@@ -9,8 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-<<<<<<< HEAD
-=======
       ad_views: {
         Row: {
           ad_id: string
@@ -96,7 +94,6 @@ export type Database = {
           },
         ]
       }
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
       Amethyst: {
         Row: {
           created_at: string
@@ -145,8 +142,6 @@ export type Database = {
           },
         ]
       }
-<<<<<<< HEAD
-=======
       credit_sources: {
         Row: {
           amount: number
@@ -223,7 +218,6 @@ export type Database = {
           },
         ]
       }
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
       generated_images: {
         Row: {
           aspect_ratio: string | null
@@ -472,47 +466,6 @@ export type Database = {
         }
         Relationships: []
       }
-<<<<<<< HEAD
-      profiles: {
-        Row: {
-          avatar_url: string | null
-          created_at: string
-          credits: number | null
-          full_name: string | null
-          id: string
-          role: string | null
-          subscription_expires_at: string | null
-          subscription_tier: string | null
-          total_generations: number | null
-          updated_at: string
-          username: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          created_at?: string
-          credits?: number | null
-          full_name?: string | null
-          id: string
-          role?: string | null
-          subscription_expires_at?: string | null
-          subscription_tier?: string | null
-          total_generations?: number | null
-          updated_at?: string
-          username?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          created_at?: string
-          credits?: number | null
-          full_name?: string | null
-          id?: string
-          role?: string | null
-          subscription_expires_at?: string | null
-          subscription_tier?: string | null
-          total_generations?: number | null
-          updated_at?: string
-          username?: string | null
-=======
       oauth_tokens: {
         Row: {
           access_token: string | null
@@ -707,7 +660,6 @@ export type Database = {
           seed?: number
           steps?: number
           user_id?: string | null
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
         }
         Relationships: []
       }
@@ -755,8 +707,6 @@ export type Database = {
           },
         ]
       }
-<<<<<<< HEAD
-=======
       subscription_history: {
         Row: {
           amount: number | null
@@ -804,7 +754,6 @@ export type Database = {
           },
         ]
       }
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
     }
     Views: {
       active_reference_images: {
@@ -845,8 +794,6 @@ export type Database = {
       }
     }
     Functions: {
-<<<<<<< HEAD
-=======
       award_ad_credits: {
         Args: {
           profile_id: string
@@ -856,7 +803,6 @@ export type Database = {
         }
         Returns: undefined
       }
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
       binary_quantize:
         | {
             Args: {
@@ -870,8 +816,6 @@ export type Database = {
             }
             Returns: unknown
           }
-<<<<<<< HEAD
-=======
       check_admin_status: {
         Args: {
           user_id: string
@@ -898,7 +842,6 @@ export type Database = {
         }
         Returns: Json
       }
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
       gtrgm_compress: {
         Args: {
           "": unknown
@@ -977,13 +920,10 @@ export type Database = {
         }
         Returns: unknown
       }
-<<<<<<< HEAD
-=======
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
       ivfflat_bit_support: {
         Args: {
           "": unknown
@@ -1034,8 +974,6 @@ export type Database = {
             }
             Returns: unknown
           }
-<<<<<<< HEAD
-=======
       purchase_credits: {
         Args: {
           profile_id: string
@@ -1049,7 +987,6 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
       set_limit: {
         Args: {
           "": number
@@ -1084,8 +1021,6 @@ export type Database = {
         }
         Returns: number
       }
-<<<<<<< HEAD
-=======
       update_credits_balance: {
         Args: {
           profile_id: string
@@ -1104,7 +1039,6 @@ export type Database = {
         }
         Returns: undefined
       }
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
       vector_avg: {
         Args: {
           "": number[]
@@ -1148,8 +1082,6 @@ export type Database = {
         }
         Returns: number
       }
-<<<<<<< HEAD
-=======
       watch_ad: {
         Args: {
           profile_id: string
@@ -1159,7 +1091,6 @@ export type Database = {
         }
         Returns: boolean
       }
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
     }
     Enums: {
       image_status: "pending" | "processing" | "completed" | "failed"
@@ -1231,38 +1162,4 @@ export type TablesUpdate<
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
-
-export type Enums<
-  PublicEnumNameOrOptions extends
-    | keyof PublicSchema["Enums"]
-    | { schema: keyof Database },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
-> = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
-    : never
-
-export type CompositeTypes<
-  PublicCompositeTypeNameOrOptions extends
-    | keyof PublicSchema["CompositeTypes"]
-    | { schema: keyof Database },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
-  }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
-    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+  : PublicTableNameOrOptions extends

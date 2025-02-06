@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Loading } from '@/components/ui/loading';
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { useEffect, useState } from 'react';
@@ -10,6 +11,10 @@ import Admin from './pages/Admin';
 import { AdminRoute } from './components/auth/AdminRoute';
 import { AuthCallbackPage } from './pages/AuthCallbackPage';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { AccountSettingsPage } from './pages/account/AccountSettingsPage';
+import { SecurityPage } from './pages/account/SecurityPage';
+import { SubscriptionPage } from './pages/account/SubscriptionPage';
+import { AdsPage } from './pages/account/AdsPage';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -22,9 +27,12 @@ function App() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
-      </div>
+      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <Loading 
+          fullScreen 
+          message="Initialisation de l'application..." 
+        />
+      </ThemeProvider>
     );
   }
 
@@ -43,7 +51,36 @@ function App() {
                 <Index />
               </ProtectedRoute>
             } />
+
+            {/* Routes du compte */}
+            <Route path="/account/settings" element={
+              <ProtectedRoute>
+                <AccountSettingsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/account/security" element={
+              <ProtectedRoute>
+                <SecurityPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/account/subscription" element={
+              <ProtectedRoute>
+                <SubscriptionPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/account/ads" element={
+              <ProtectedRoute>
+                <AdsPage />
+              </ProtectedRoute>
+            } />
             
+            {/* Redirect /profile to /account/settings */}
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <Navigate to="/account/settings" replace />
+              </ProtectedRoute>
+            } />
+
             {/* Routes admin */}
             <Route path="/admin" element={
               <AdminRoute>

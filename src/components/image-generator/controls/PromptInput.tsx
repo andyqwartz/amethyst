@@ -1,50 +1,20 @@
 import React, { useRef, useEffect } from 'react';
-<<<<<<< HEAD
 import { Textarea } from '@/components/ui/textarea';
-import type { GenerationSettings } from '@/types/replicate';
-
-interface PromptInputProps {
-  settings: GenerationSettings;
-  updateSettings: (settings: Partial<GenerationSettings>) => void;
-  onGenerate: () => void;
-=======
-import { Textarea } from "@/components/ui/textarea";
+import type { ImageSettings } from '@/types/generation';
 import { useImageGeneratorStore } from '@/state/imageGeneratorStore';
-import { ImageSettings } from '@/types/generation';
 
 interface PromptInputProps {
   settings: ImageSettings;
-  updateSettings: (settings: Partial<ImageSettings>) => void;
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
+  onSettingsChange: (settings: Partial<ImageSettings>) => void;
+  onGenerate: () => void;
 }
 
 export const PromptInput: React.FC<PromptInputProps> = ({
   settings,
-<<<<<<< HEAD
-  updateSettings,
+  onSettingsChange,
   onGenerate,
 }) => {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    const resizeTextarea = () => {
-      const textarea = textareaRef.current;
-      if (textarea) {
-        textarea.style.height = 'auto';
-        textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
-      }
-    };
-
-    resizeTextarea();
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.addEventListener('input', resizeTextarea);
-      return () => {
-        textarea.removeEventListener('input', resizeTextarea);
-=======
-  updateSettings
-}) => {
-  const { ui } = useImageGeneratorStore();
+  const { ui, setShowSettings } = useImageGeneratorStore();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -63,35 +33,29 @@ export const PromptInput: React.FC<PromptInputProps> = ({
         if (textareaRef.current) {
           textareaRef.current.removeEventListener('input', resizeTextarea);
         }
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
       };
     }
   }, [settings.prompt]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
-<<<<<<< HEAD
-    e.preventDefault();
-    onGenerate();
-  }
-=======
       e.preventDefault();
       if (ui.showSettings) {
-        updateSettings({ showSettings: false });
+        setShowSettings(false);
       }
+      onGenerate();
     }
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
   };
 
   const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    updateSettings({ prompt: e.target.value });
+    onSettingsChange({ prompt: e.target.value });
   };
 
   return (
     <div className="w-full">
       <Textarea
         ref={textareaRef}
-        placeholder="Décrivez l'image que vous souhaitez générer..."
+        placeholder="Describe the image you want to generate..."
         value={settings.prompt || ''}
         onChange={onChange}
         onKeyDown={handleKeyDown}
@@ -100,8 +64,4 @@ export const PromptInput: React.FC<PromptInputProps> = ({
       />
     </div>
   );
-<<<<<<< HEAD
 };
-=======
-};
->>>>>>> a945a29ba778c4116754a03171a654de675e5402

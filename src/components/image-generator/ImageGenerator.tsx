@@ -1,99 +1,99 @@
 import React from 'react';
-import { useImageGeneratorStore } from '../../state/imageGeneratorStore';
-import { v4 as uuidv4 } from 'uuid';
+import { ImageGeneratorContainer } from './containers/ImageGeneratorContainer';
+import { useImageHandling } from '@/hooks/useImageHandling';
+import { useHistoryManagement } from '@/hooks/useHistoryManagement';
+import { useUIState } from '@/hooks/useUIState';
+import { useImageGeneratorStore } from '@/state/imageGeneratorStore';
+import type { ImageSettings } from '@/types/generation';
 
 export const ImageGenerator: React.FC = () => {
-  const settings = useImageGeneratorStore((state) => state.settings);
-  const currentImage = useImageGeneratorStore((state) => state.currentImage);
-  const isGenerating = useImageGeneratorStore((state) => state.ui.isGenerating);
-  const error = useImageGeneratorStore((state) => state.error);
+  const {
+    generateImage,
+    setGeneratedImage,
+    handleError,
+    checkAuthStatus
+  } = useImageHandling();
   
-  const setIsGenerating = useImageGeneratorStore((state) => state.setIsGenerating);
-  const setCurrentImage = useImageGeneratorStore((state) => state.setCurrentImage);
-  const addGeneratedImage = useImageGeneratorStore((state) => state.addGeneratedImage);
-  const addToHistory = useImageGeneratorStore((state) => state.addToHistory);
-  const setError = useImageGeneratorStore((state) => state.setError);
-  const clearError = useImageGeneratorStore((state) => state.clearError);
+  const {
+    fetchHistory,
+    addToHistory,
+    removeFromHistory,
+    clearHistory
+  } = useHistoryManagement();
 
-  const handleGenerate = async () => {
-    try {
-      setIsGenerating(true);
-      clearError();
+  const {
+    currentImage,
+    error,
+    generatedImages,
+    settings,
+    setSettings
+  } = useImageGeneratorStore();
 
-      // Mock API call - replace with actual API integration
-<<<<<<< HEAD
-      const response = await fetch('/api/generate-image', {
-=======
-      const response = await fetch('/api/generate', {
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(settings),
-      });
+  const {
+    isSettingsOpen: showSettings,
+    setSettingsOpen: setShowSettings,
+    isHelpModalOpen: showHelp,
+    setHelpModalOpen: setShowHelp,
+    isGenerating,
+    progress,
+    logs: currentLogs,
+    setGenerating,
+    setProgress
+  } = useUIState();
 
-      if (!response.ok) {
-        throw new Error('Failed to generate image');
-      }
+  const formattedHistory = generatedImages.map(img => ({
+    url: img.url,
+    settings: img.settings
+  }));
 
-      const data = await response.json();
-      const generatedImage = {
-        id: uuidv4(),
-        url: data.imageUrl,
-        timestamp: Date.now(),
-        settings: { ...settings },
-      };
+  const handleImageClick = () => {
+    // TODO: Implement image click handler
+  };
 
-      setCurrentImage(generatedImage);
-      addGeneratedImage(generatedImage);
-      addToHistory(generatedImage);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setIsGenerating(false);
-    }
+  const handleClearHistory = async () => {
+    await clearHistory();
+  };
+
+  const handleUpdateSettings = (newSettings: Partial<ImageSettings>) => {
+    setSettings(prev => ({
+      ...prev,
+      ...newSettings
+    }));
   };
 
   return (
-    <div className="image-generator">
-      {error.hasError && (
-        <div className="error-message">
-          {error.errorMessage}
-        </div>
-      )}
-      
-      <div className="settings-display">
-        <h3>Current Settings</h3>
-        <div>Prompt: {settings.prompt}</div>
-        <div>Width: {settings.width}</div>
-        <div>Height: {settings.height}</div>
-        <div>Steps: {settings.steps}</div>
-      </div>
-
-      <button 
-        onClick={handleGenerate}
-        disabled={isGenerating || !settings.prompt}
-      >
-        {isGenerating ? 'Generating...' : 'Generate Image'}
-      </button>
-
-      {currentImage && (
-        <div className="generated-image">
-          <img 
-            src={currentImage.url} 
-            alt={currentImage.settings.prompt}
-            style={{ 
-              maxWidth: '100%', 
-              height: 'auto' 
-            }}
-          />
-        </div>
-      )}
-    </div>
+    <ImageGeneratorContainer
+      showSettings={showSettings}
+      setShowSettings={setShowSettings}
+      showHelp={showHelp}
+      setShowHelp={setShowHelp}
+      isGenerating={isGenerating}
+      referenceImage={null}
+      settings={settings}
+      generatedImages={generatedImages.map(img => img.url)}
+      history={formattedHistory}
+      isLoading={isGenerating}
+      progress={progress}
+      currentLogs={currentLogs.join('\n')}
+      handleImageUpload={() => {}}
+      handleImageClick={handleImageClick}
+      handleGenerate={generateImage}
+      handleTweak={handleUpdateSettings}
+      handleDownload={async (url: string, format: string) => {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `generated-image.${format}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }}
+      handleDeleteImage={removeFromHistory}
+      updateSettings={handleUpdateSettings}
+      setReferenceImage={() => {}}
+      handleRemoveReferenceImage={() => {}}
+      handleDeleteHistory={handleClearHistory}
+    />
   );
-<<<<<<< HEAD
 };
-=======
-};
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
+
+ImageGenerator.displayName = 'ImageGenerator';

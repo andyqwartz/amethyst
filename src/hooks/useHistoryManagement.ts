@@ -1,123 +1,128 @@
 import { useCallback } from 'react';
-import { supabase, checkSession } from '@/lib/supabase/client';
+import { useAuth } from './use-auth';
+import { useToast } from './use-toast';
+import { supabase } from '@/lib/supabase/client';
+import type { ImageSettings } from '@/types/generation';
 
-interface HistoryImage {
+interface HistoryItem {
   id: string;
   url: string;
-  timestamp: number;
-  settings: Record<string, any>;
-}
-
-interface HistoryResponse {
-  success: boolean;
-  data?: HistoryImage[];
-  error?: string;
+  settings: ImageSettings;
+  created_at: string;
 }
 
 export const useHistoryManagement = () => {
-  const fetchHistory = useCallback(async (): Promise<HistoryResponse> => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  const fetchHistory = useCallback(async () => {
+    if (!user) return [];
+
     try {
-      await checkSession();
-      
       const { data, error } = await supabase
-        .from('image_history')
+        .from('generated_images')
         .select('*')
-        .order('timestamp', { ascending: false });
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      return {
-        success: true,
-        data: data as HistoryImage[]
-      };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch history';
-      return {
-        success: false,
-        error: errorMessage
-      };
+      return data as HistoryItem[];
+    } catch (err) {
+      console.error('Error fetching history:', err);
+      toast({
+        title: "Error",
+        description: "Failed to load generation history",
+        variant: "destructive"
+      });
+      return [];
     }
-  }, []);
+  }, [user, toast]);
 
-  const addToHistory = useCallback(async (image: HistoryImage): Promise<{ success: boolean; error?: string }> => {
+  const addToHistory = useCallback(async (image: { url: string; settings: ImageSettings }) => {
+    if (!user) return;
+
     try {
-      await checkSession();
-
       const { error } = await supabase
-        .from('image_history')
-        .insert([{
-          id: image.id,
+        .from('generated_images')
+        .insert({
+          user_id: user.id,
           url: image.url,
-          timestamp: image.timestamp,
-          settings: image.settings
-        }]);
+          settings: image.settings,
+          created_at: new Date().toISOString()
+        });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      return { success: true };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to add to history';
-      return {
-        success: false,
-        error: errorMessage
-      };
+      toast({
+        title: "Success",
+        description: "Image added to history"
+      });
+    } catch (err) {
+      console.error('Error adding to history:', err);
+      toast({
+        title: "Error",
+        description: "Failed to save image to history",
+        variant: "destructive"
+      });
     }
-  }, []);
+  }, [user, toast]);
 
-  const clearHistory = useCallback(async (): Promise<{ success: boolean; error?: string }> => {
+  const removeFromHistory = useCallback(async (imageUrl: string) => {
+    if (!user) return;
+
     try {
-      await checkSession();
-
       const { error } = await supabase
-        .from('image_history')
+        .from('generated_images')
         .delete()
-        .neq('id', ''); // Delete all records
+        .eq('user_id', user.id)
+        .eq('url', imageUrl);
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      return { success: true };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to clear history';
-      return {
-        success: false,
-        error: errorMessage
-      };
+      toast({
+        title: "Success",
+        description: "Image removed from history"
+      });
+    } catch (err) {
+      console.error('Error removing from history:', err);
+      toast({
+        title: "Error",
+        description: "Failed to remove image from history",
+        variant: "destructive"
+      });
     }
-  }, []);
+  }, [user, toast]);
 
-  const removeFromHistory = useCallback(async (imageId: string): Promise<{ success: boolean; error?: string }> => {
+  const clearHistory = useCallback(async () => {
+    if (!user) return;
+
     try {
-      await checkSession();
-
       const { error } = await supabase
-        .from('image_history')
+        .from('generated_images')
         .delete()
-        .eq('id', imageId);
+        .eq('user_id', user.id);
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      return { success: true };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to remove from history';
-      return {
-        success: false,
-        error: errorMessage
-      };
+      toast({
+        title: "Success",
+        description: "Generation history cleared"
+      });
+    } catch (err) {
+      console.error('Error clearing history:', err);
+      toast({
+        title: "Error",
+        description: "Failed to clear generation history",
+        variant: "destructive"
+      });
     }
-  }, []);
+  }, [user, toast]);
 
   return {
     fetchHistory,
     addToHistory,
-    clearHistory,
-    removeFromHistory
+    removeFromHistory,
+    clearHistory
   };
 };

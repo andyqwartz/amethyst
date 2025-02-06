@@ -1,7 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CreditDialog } from "@/components/credits/CreditDialog";
+import { AdViewer } from "@/components/credits/AdViewer";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Progress } from "@/components/ui/progress";
+import { useProfile } from '@/hooks/useProfile';
+import { useProfileActions } from '@/hooks/useProfileActions';
 import { 
   Settings2, 
   Key, 
@@ -19,84 +27,46 @@ import {
   Sparkles,
   User,
   Youtube,
-  AlertCircle
+  AlertCircle,
+  RefreshCw
 } from 'lucide-react';
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { useAuth } from '@/hooks/use-auth';
-import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
-import { Progress } from "@/components/ui/progress";
 
 interface UserProfileProps {
   user?: {
-    name?: string;
+    id?: string;
     email?: string;
-    avatarUrl?: string;
-    joinDate?: Date;
-    credits?: number;
-    membershipType?: string;
-    totalGenerations?: number;
-    lastActive?: Date;
-    preferences?: {
-      language?: string;
-      notifications?: boolean;
-      newsletter?: boolean;
-      ads_enabled?: boolean;
-    };
-    auth_provider?: string;
-    ads_watched_today?: number;
-    daily_ads_limit?: number;
-    ads_credits_earned?: number;
   };
-  onWatchAd?: () => void;
-  canWatchAd?: boolean;
+  onSignOut?: () => void;
 }
 
-const defaultUser = {
-  name: 'Utilisateur',
-  email: 'utilisateur@exemple.com',
-  credits: 0,
-  membershipType: 'Gratuit',
-  totalGenerations: 0,
-  joinDate: new Date(),
-  lastActive: new Date(),
-  preferences: {
-    language: 'Français',
-    notifications: false,
-    newsletter: false,
-    ads_enabled: true
-  },
-  ads_watched_today: 0,
-  daily_ads_limit: 10,
-  ads_credits_earned: 0
-};
+export const UserProfile = ({ user, onSignOut }: UserProfileProps) => {
+  const { profile, loading, updateProfile } = useProfile();
+  const { isUploading, updateAvatar } = useProfileActions(user?.id, () => {
+    updateProfile({});
+  });
 
-export const UserProfile = ({ user: providedUser, onWatchAd, canWatchAd }: UserProfileProps) => {
-  const user = { ...defaultUser, ...providedUser, preferences: { ...defaultUser.preferences, ...providedUser?.preferences } };
-  const [isDarkMode, setIsDarkMode] = React.useState(true);
-  const [showEmail, setShowEmail] = React.useState(false);
-  const { signOut } = useAuth();
-  const navigate = useNavigate();
-  const { toast } = useToast();
+  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [showEmail, setShowEmail] = useState(false);
+  const [showCreditDialog, setShowCreditDialog] = useState(false);
+  const [showAdViewer, setShowAdViewer] = useState(false);
 
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      navigate('/auth');
-      toast({
-        title: "Déconnexion réussie",
-        description: "À bientôt !"
-      });
-    } catch (error) {
-      console.error('Error signing out:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de se déconnecter"
-      });
-    }
+  if (loading || !profile) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="flex flex-col items-center gap-4">
+          <RefreshCw className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Chargement du profil...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const canWatchAd = (profile.ads_watched_today || 0) < (profile.daily_ads_limit || 10);
+
+  const handleAdComplete = async () => {
+    setShowAdViewer(false);
+    // Refresh profile data to get updated credit balance
+    updateProfile({});
   };
 
   const protectEmail = (email: string) => {
@@ -111,7 +81,7 @@ export const UserProfile = ({ user: providedUser, onWatchAd, canWatchAd }: UserP
   };
 
   const getAuthProviderBadge = () => {
-    switch (user.auth_provider) {
+    switch (profile.auth_provider) {
       case 'google':
         return <Badge variant="outline" className="ml-2">Google</Badge>;
       case 'github':
@@ -141,56 +111,42 @@ export const UserProfile = ({ user: providedUser, onWatchAd, canWatchAd }: UserP
     {
       icon: <CreditCard className="w-5 h-5" />,
       title: "Abonnements et crédits",
-      description: `${user.credits} crédits disponibles`,
-      onClick: undefined,
-      badge: <Badge className="bg-primary/10 text-primary ml-2">{user.membershipType}</Badge>
+      description: `${profile.credits_balance} crédits disponibles`,
+      onClick: () => setShowCreditDialog(true),
+      badge: <Badge className="bg-primary/10 text-primary ml-2">{profile.subscription_tier}</Badge>
     },
     {
       icon: <Youtube className="w-5 h-5" />,
       title: "Gagner des crédits",
-      description: `${user.ads_watched_today}/${user.daily_ads_limit} publicités vues aujourd'hui`,
-      onClick: canWatchAd ? onWatchAd : undefined,
+      description: `${profile.ads_watched_today}/${profile.daily_ads_limit} publicités vues aujourd'hui`,
+      onClick: canWatchAd ? () => setShowAdViewer(true) : undefined,
       badge: canWatchAd ? (
         <Badge variant="outline" className="ml-2 bg-primary/10 text-primary">+5 crédits</Badge>
       ) : (
         <Badge variant="secondary" className="ml-2">Limite atteinte</Badge>
       )
-    },
-    {
-      icon: <History className="w-5 h-5" />,
-      title: "Historique des générations",
-      description: "Consultez vos générations précédentes",
-      onClick: undefined,
-      badge: <Badge variant="secondary" className="ml-2">Bientôt disponible</Badge>
-    },
-    {
-      icon: <Palette className="w-5 h-5" />,
-      title: "Préférences de style",
-      description: "Personnalisez l'apparence de l'interface",
-      onClick: undefined,
-      badge: null
     }
   ];
 
   const statsItems = [
     {
       icon: <ImageIcon className="w-4 h-4" />,
-      value: (user.totalGenerations ?? 0).toString(),
+      value: "0", // TODO: Add total generations from stats
       label: "Images générées"
     },
     {
       icon: <Sparkles className="w-4 h-4" />,
-      value: (user.credits ?? 0).toString(),
+      value: profile.credits_balance.toString(),
       label: "Crédits restants"
     },
     {
       icon: <Gift className="w-4 h-4" />,
-      value: (user.ads_credits_earned ?? 0).toString(),
+      value: profile.ads_credits_earned.toString(),
       label: "Crédits gagnés"
     },
     {
       icon: <Globe className="w-4 h-4" />,
-      value: user.membershipType ?? 'Gratuit',
+      value: profile.subscription_tier || 'Standard',
       label: "Type d'abonnement"
     }
   ];
@@ -202,8 +158,8 @@ export const UserProfile = ({ user: providedUser, onWatchAd, canWatchAd }: UserP
         <div className="flex items-center gap-6">
           <div className="relative">
             <Avatar className="w-24 h-24">
-              {user.avatarUrl ? (
-                <AvatarImage src={user.avatarUrl} alt={user.name} />
+              {profile.avatar_url ? (
+                <AvatarImage src={profile.avatar_url} alt={profile.full_name || ''} />
               ) : (
                 <AvatarFallback>
                   <User className="h-10 w-10" />
@@ -215,20 +171,22 @@ export const UserProfile = ({ user: providedUser, onWatchAd, canWatchAd }: UserP
             </div>
           </div>
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold">{user.name}</h1>
+            <h1 className="text-2xl font-bold">{profile.full_name || 'Utilisateur'}</h1>
             <div 
               className="text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
               onClick={() => setShowEmail(!showEmail)}
             >
-              {protectEmail(user.email)}
+              {protectEmail(profile.email)}
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">
-                Membre depuis {user.joinDate ? new Date(user.joinDate).toLocaleDateString() : 'N/A'}
+                Membre depuis {new Date(profile.created_at).toLocaleDateString()}
               </p>
-              <p className="text-sm text-muted-foreground">
-                Dernière connexion: {user.lastActive ? new Date(user.lastActive).toLocaleDateString() : 'N/A'}
-              </p>
+              {profile.last_sign_in_at && (
+                <p className="text-sm text-muted-foreground">
+                  Dernière connexion: {new Date(profile.last_sign_in_at).toLocaleDateString()}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -247,7 +205,7 @@ export const UserProfile = ({ user: providedUser, onWatchAd, canWatchAd }: UserP
         </div>
 
         {/* Progression des publicités */}
-        {user.preferences.ads_enabled && (
+        {profile.ads_enabled && (
           <Card className="p-4">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
@@ -255,11 +213,11 @@ export const UserProfile = ({ user: providedUser, onWatchAd, canWatchAd }: UserP
                 <span className="font-medium">Progression des publicités</span>
               </div>
               <span className="text-sm text-muted-foreground">
-                {user.ads_watched_today}/{user.daily_ads_limit}
+                {profile.ads_watched_today}/{profile.daily_ads_limit}
               </span>
             </div>
             <Progress 
-              value={(user.ads_watched_today / user.daily_ads_limit) * 100} 
+              value={(profile.ads_watched_today / profile.daily_ads_limit) * 100} 
               className="h-2"
             />
             {!canWatchAd && (
@@ -307,7 +265,7 @@ export const UserProfile = ({ user: providedUser, onWatchAd, canWatchAd }: UserP
                 <span>Langue</span>
               </div>
               <Button variant="outline" size="sm" className="text-sm pointer-events-none opacity-75">
-                {user.preferences.language || 'Français'} (Non modifiable)
+                Français (Non modifiable)
               </Button>
             </div>
             <div className="flex items-center justify-between">
@@ -327,8 +285,10 @@ export const UserProfile = ({ user: providedUser, onWatchAd, canWatchAd }: UserP
                 <span>Notifications</span>
               </div>
               <Switch
-                checked={user.preferences.notifications}
-                disabled
+                checked={profile.notifications_enabled}
+                onCheckedChange={(checked) => 
+                  updateProfile({ notifications_enabled: checked })
+                }
               />
             </div>
             <div className="flex items-center justify-between">
@@ -337,8 +297,10 @@ export const UserProfile = ({ user: providedUser, onWatchAd, canWatchAd }: UserP
                 <span>Newsletter</span>
               </div>
               <Switch
-                checked={user.preferences.newsletter}
-                disabled
+                checked={profile.marketing_emails_enabled}
+                onCheckedChange={(checked) => 
+                  updateProfile({ marketing_emails_enabled: checked })
+                }
               />
             </div>
             <div className="flex items-center justify-between">
@@ -347,8 +309,10 @@ export const UserProfile = ({ user: providedUser, onWatchAd, canWatchAd }: UserP
                 <span>Publicités récompensées</span>
               </div>
               <Switch
-                checked={user.preferences.ads_enabled}
-                disabled
+                checked={profile.ads_enabled}
+                onCheckedChange={(checked) => 
+                  updateProfile({ ads_enabled: checked })
+                }
               />
             </div>
           </div>
@@ -359,7 +323,7 @@ export const UserProfile = ({ user: providedUser, onWatchAd, canWatchAd }: UserP
           <Button
             variant="outline"
             className="w-full justify-start"
-            onClick={handleSignOut}
+            onClick={onSignOut}
           >
             <LogOut className="w-4 h-4 mr-2" />
             Se déconnecter
@@ -374,6 +338,25 @@ export const UserProfile = ({ user: providedUser, onWatchAd, canWatchAd }: UserP
           </Button>
         </div>
       </div>
+
+      {/* Credit Dialog */}
+      <CreditDialog
+        userId={user?.id}
+        open={showCreditDialog}
+        onOpenChange={setShowCreditDialog}
+        onSuccess={() => {
+          updateProfile({});
+        }}
+      />
+
+      {/* Ad Viewer */}
+      {showAdViewer && user?.id && (
+        <AdViewer
+          userId={user.id}
+          onComplete={handleAdComplete}
+          onError={() => setShowAdViewer(false)}
+        />
+      )}
     </ScrollArea>
   );
-}; 
+};

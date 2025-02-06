@@ -2,11 +2,11 @@ import React from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { PromptInput } from './controls/PromptInput';
 import { GenerationButtons } from './controls/GenerationButtons';
-import type { GenerationSettings } from '@/types/replicate';
+import type { ImageSettings } from '@/types/generation';
 
 interface GenerationControlsProps {
-  settings: GenerationSettings;
-  onSettingsChange: (settings: Partial<GenerationSettings>) => void;
+  settings: ImageSettings;
+  onSettingsChange: (settings: Partial<ImageSettings>) => void;
   onGenerate: () => void;
   onToggleSettings: () => void;
   isGenerating: boolean;
@@ -41,11 +41,7 @@ export const GenerationControls: React.FC<GenerationControlsProps> = ({
     <div className="space-y-4 w-full">
       <PromptInput
         settings={settings}
-<<<<<<< HEAD
-        updateSettings={onSettingsChange}
-=======
         onSettingsChange={onSettingsChange}
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
         onGenerate={handleGenerate}
       />
       <div className="flex justify-center">
@@ -58,8 +54,4 @@ export const GenerationControls: React.FC<GenerationControlsProps> = ({
       </div>
     </div>
   );
-<<<<<<< HEAD
 };
-=======
-};
->>>>>>> a945a29ba778c4116754a03171a654de675e5402

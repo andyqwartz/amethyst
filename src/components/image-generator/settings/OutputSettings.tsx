@@ -6,12 +6,15 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { HelpCircle } from 'lucide-react';
-import type { GenerationSettings } from '@/types/replicate';
+import type { ImageSettings } from '@/types/generation';
 
 interface OutputSettingsProps {
-  settings: GenerationSettings;
-  onSettingsChange: (settings: Partial<GenerationSettings>) => void;
+  settings: ImageSettings;
+  onSettingsChange: (settings: Partial<ImageSettings>) => void;
 }
+
+const outputFormats = ['webp', 'jpg', 'png'] as const;
+type OutputFormat = typeof outputFormats[number];
 
 export const OutputSettings = ({ settings, onSettingsChange }: OutputSettingsProps) => {
   const renderTooltip = (description: string) => (
@@ -26,6 +29,12 @@ export const OutputSettings = ({ settings, onSettingsChange }: OutputSettingsPro
       </Tooltip>
     </TooltipProvider>
   );
+
+  const handleFormatChange = (value: string) => {
+    if (outputFormats.includes(value as OutputFormat)) {
+      onSettingsChange({ output_format: value as OutputFormat });
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -48,7 +57,7 @@ export const OutputSettings = ({ settings, onSettingsChange }: OutputSettingsPro
         </Label>
         <Select
           value={settings.output_format}
-          onValueChange={(value) => onSettingsChange({ output_format: value as 'webp' | 'jpg' | 'png' })}
+          onValueChange={handleFormatChange}
         >
           <SelectTrigger className="bg-popover border-primary/20">
             <SelectValue placeholder="Select format" />

@@ -36,14 +36,15 @@ export const ReferenceImageUpload: React.FC<ReferenceImageUploadProps> = ({
         <div className="relative group">
           <img
             src={referenceImage}
-            alt="Image de référence"
-            className="w-full h-auto rounded-xl object-contain"
+            alt="Reference image"
+            className="w-full h-auto rounded-xl object-contain max-h-[300px] bg-black/10"
+            onClick={onImageClick}
           />
           <Button
             variant="secondary"
             size="icon"
             onClick={onRemoveImage}
-            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-primary hover:bg-primary-hover rounded-full"
+            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-[#D6BCFA] hover:bg-[#C4B5FD] text-white rounded-full shadow-lg backdrop-blur-sm"
           >
             <X className="h-4 w-4" />
           </Button>
@@ -51,11 +52,11 @@ export const ReferenceImageUpload: React.FC<ReferenceImageUploadProps> = ({
       ) : (
         <button
           onClick={handleClick}
-          className="w-full p-6 border-2 border-dashed border-primary/30 rounded-xl hover:bg-primary/5 transition-colors"
+          className="w-full aspect-[16/9] p-6 border-2 border-dashed border-[#D6BCFA]/30 rounded-xl hover:bg-[#D6BCFA]/5 transition-colors flex items-center justify-center"
         >
-          <div className="flex flex-col items-center gap-2 text-primary/70">
+          <div className="flex flex-col items-center gap-2 text-[#D6BCFA]/70 select-none">
             <ImagePlus className="h-6 w-6" />
-            <span>Ajouter une image de référence</span>
+            <span>Add reference image</span>
           </div>
         </button>
       )}

@@ -1,28 +1,3 @@
-<<<<<<< HEAD
-import { useState } from 'react';
-import { ImageSettings } from '@/types/generation';
-
-export const useGenerationState = () => {
-  const [settings, setSettings] = useState<ImageSettings>({
-    negative_prompt: '',
-    guidance_scale: 7.5,
-    num_inference_steps: 50,
-    aspect_ratio: '1:1'
-  });
-
-  const updateSettings = (newSettings: Partial<ImageSettings>) => {
-    setSettings(prev => ({
-      ...prev,
-      ...newSettings
-    }));
-  };
-
-  return {
-    settings,
-    updateSettings
-  };
-}; 
-=======
 import { useState, useRef } from 'react';
 import type { GenerationStatus, ImageSettings } from '@/types/generation';
 
@@ -31,6 +6,8 @@ export const useGenerationState = () => {
   const [status, setStatus] = useState<GenerationStatus>('idle');
   const [generatedImages, setGeneratedImages] = useState<string[]>([]);
   const [predictionId, setPredictionId] = useState<string | null>(null);
+  const [progress, setProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
   
   const abortControllerRef = useRef<AbortController | null>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -41,23 +18,39 @@ export const useGenerationState = () => {
       clearInterval(pollIntervalRef.current);
       pollIntervalRef.current = null;
     }
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
     generationInProgressRef.current = false;
     setIsGenerating(false);
+    setProgress(0);
+    setError(null);
   };
 
   return {
+    // Status states
     isGenerating,
     setIsGenerating,
     status,
     setStatus,
+    progress,
+    setProgress,
+    error,
+    setError,
+
+    // Generation states
     generatedImages,
     setGeneratedImages,
     predictionId,
     setPredictionId,
+
+    // Control refs
     abortControllerRef,
     pollIntervalRef,
     generationInProgressRef,
+    
+    // Cleanup function
     cleanupGeneration
   };
 };
->>>>>>> a945a29ba778c4116754a03171a654de675e5402

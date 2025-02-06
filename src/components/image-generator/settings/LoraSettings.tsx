@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react';
-import type { GenerationSettings } from '@/types/replicate';
+import type { ImageSettings } from '@/types/generation';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Trash2, Plus } from 'lucide-react';
 
 export interface LoraSettingsProps {
-  settings: GenerationSettings;
-  onSettingsChange: (settings: Partial<GenerationSettings>) => void;
+  settings: ImageSettings;
+  onSettingsChange: (settings: Partial<ImageSettings>) => void;
   disabled?: boolean;
 }
 
@@ -19,7 +19,7 @@ export const LoraSettings: React.FC<LoraSettingsProps> = ({
   onSettingsChange,
   disabled = false
 }) => {
-  // Initialiser les LoRAs par défaut si nécessaire
+  // Initialize default LoRAs if needed
   useEffect(() => {
     if (!settings.hf_loras || settings.hf_loras.length === 0) {
       onSettingsChange({
@@ -34,7 +34,7 @@ export const LoraSettings: React.FC<LoraSettingsProps> = ({
     const currentScales = settings.lora_scales || [];
 
     onSettingsChange({
-      hf_loras: [...currentLoras, DEFAULT_LORA],
+      hf_loras: [...currentLoras, ''],
       lora_scales: [...currentScales, DEFAULT_SCALE]
     });
   };
@@ -54,7 +54,7 @@ export const LoraSettings: React.FC<LoraSettingsProps> = ({
   };
 
   const handleRemoveLora = (index: number) => {
-    if (index === 0) return; // Ne pas supprimer le premier LoRA
+    if (index === 0) return; // Don't remove the first LoRA
     
     const currentLoras = [...(settings.hf_loras || [])];
     const currentScales = [...(settings.lora_scales || [])];
@@ -93,8 +93,8 @@ export const LoraSettings: React.FC<LoraSettingsProps> = ({
                 type="text"
                 value={lora}
                 onChange={(e) => handleLoraChange(index, e.target.value)}
-                disabled={disabled}
-                placeholder="LoRA model path (e.g., AndyVampiro/fog)"
+                disabled={disabled || index === 0}
+                placeholder="LoRA model path"
                 className="w-full"
               />
             </div>
@@ -129,9 +129,9 @@ export const LoraSettings: React.FC<LoraSettingsProps> = ({
       <div className="text-sm text-muted-foreground">
         <p>Tips:</p>
         <ul className="list-disc list-inside space-y-1 ml-2">
-          <li>Utilisez des valeurs d'échelle entre 0.1 et 1.0</li>
-          <li>Combinez plusieurs LoRA pour des résultats uniques</li>
-          <li>Le premier LoRA ne peut pas être supprimé (valeur par défaut)</li>
+          <li>Scale values between 0.1 and 2.0</li>
+          <li>Combine multiple LoRAs for unique results</li>
+          <li>The default LoRA cannot be removed</li>
         </ul>
       </div>
     </div>

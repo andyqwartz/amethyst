@@ -1,13 +1,18 @@
-<<<<<<< HEAD
 import { useState, useRef } from 'react';
 import type { GenerationStatus } from '@/types/replicate';
 
 export const useGenerationState = () => {
+  // Generation status
   const [isGenerating, setIsGenerating] = useState(false);
   const [status, setStatus] = useState<GenerationStatus>('idle');
+  const [progress, setProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+
+  // Generated images
   const [generatedImages, setGeneratedImages] = useState<string[]>([]);
   const [predictionId, setPredictionId] = useState<string | null>(null);
   
+  // Control references
   const abortControllerRef = useRef<AbortController | null>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const generationInProgressRef = useRef(false);
@@ -19,35 +24,33 @@ export const useGenerationState = () => {
     }
     generationInProgressRef.current = false;
     setIsGenerating(false);
+    setProgress(0);
+    setError(null);
   };
-=======
-import { useState } from 'react';
-
-export const useGenerationState = () => {
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [error, setError] = useState<string | null>(null);
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
 
   return {
+    // Status states
     isGenerating,
     setIsGenerating,
-<<<<<<< HEAD
     status,
     setStatus,
+    progress,
+    setProgress,
+    error,
+    setError,
+
+    // Image states
     generatedImages,
     setGeneratedImages,
     predictionId,
     setPredictionId,
+
+    // Control refs
     abortControllerRef,
     pollIntervalRef,
     generationInProgressRef,
+    
+    // Cleanup function
     cleanupGeneration
-=======
-    progress,
-    setProgress,
-    error,
-    setError
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
   };
 };

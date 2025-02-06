@@ -1,51 +1,67 @@
-import { create } from 'zustand'
+import { useState, useCallback } from 'react';
+import { useImageGeneratorStore } from '@/state/imageGeneratorStore';
 
-interface UIState {
-  isSettingsOpen: boolean
-  isHelpModalOpen: boolean
-  isGenerating: boolean
-  progress: number
-  logs: string[]
-  setSettingsOpen: (isOpen: boolean) => void
-  setHelpModalOpen: (isOpen: boolean) => void
-  setGenerating: (isGenerating: boolean) => void
-  setProgress: (progress: number) => void
-  addLog: (log: string) => void
-  clearLogs: () => void
-  reset: () => void
-}
+export const useUIState = () => {
+  const { ui: { showSettings }, setShowSettings } = useImageGeneratorStore();
+  const [isGenerating, setGenerating] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [logs, setLogs] = useState<string[]>([]);
+  const [isHelpModalOpen, setHelpModalOpen] = useState(false);
 
-const initialState = {
-  isSettingsOpen: false,
-  isHelpModalOpen: false,
-  isGenerating: false,
-  progress: 0,
-  logs: []
-}
+  const addLog = useCallback((log: string) => {
+    setLogs(prev => [...prev, log]);
+  }, []);
 
-export const useUIState = create<UIState>((set) => ({
-  ...initialState,
+  const clearLogs = useCallback(() => {
+    setLogs([]);
+  }, []);
 
-  setSettingsOpen: (isOpen: boolean) =>
-    set({ isSettingsOpen: isOpen }),
+  const updateProgress = useCallback((newProgress: number) => {
+    setProgress(Math.min(Math.max(newProgress, 0), 100));
+  }, []);
 
-  setHelpModalOpen: (isOpen: boolean) =>
-    set({ isHelpModalOpen: isOpen }),
+  const startGeneration = useCallback(() => {
+    setGenerating(true);
+    setProgress(0);
+    clearLogs();
+    addLog('Starting image generation...');
+  }, [clearLogs, addLog]);
 
-  setGenerating: (isGenerating: boolean) =>
-    set({ isGenerating }),
+  const finishGeneration = useCallback(() => {
+    setGenerating(false);
+    setProgress(100);
+    addLog('Generation complete!');
+  }, [addLog]);
 
-  setProgress: (progress: number) =>
-    set({ progress: Math.min(Math.max(progress, 0), 100) }),
+  const handleError = useCallback((error: string) => {
+    setGenerating(false);
+    setProgress(0);
+    addLog(`Error: ${error}`);
+  }, [addLog]);
 
-  addLog: (log: string) =>
-    set((state) => ({
-      logs: [...state.logs, log]
-    })),
+  return {
+    // Settings state
+    isSettingsOpen: showSettings,
+    setSettingsOpen: setShowSettings,
 
-  clearLogs: () =>
-    set({ logs: [] }),
+    // Help modal state
+    isHelpModalOpen,
+    setHelpModalOpen,
 
-  reset: () =>
-    set(initialState)
-}))
+    // Generation state
+    isGenerating,
+    setGenerating,
+    startGeneration,
+    finishGeneration,
+
+    // Progress state
+    progress,
+    setProgress: updateProgress,
+
+    // Logs state
+    logs,
+    addLog,
+    clearLogs,
+    handleError
+  };
+};

@@ -21,7 +21,7 @@ export type PostgrestResponse<T> = {
   error: Error | null;
 };
 
-export type PostgrestMockBuilder<T> = {
+export interface PostgrestMockBuilder<T> {
   select: (query?: string) => {
     order: (column: string, options?: { ascending?: boolean }) => Promise<PostgrestResponse<T[]>>;
     eq: (column: string, value: any) => Promise<PostgrestResponse<T[]>>;
@@ -32,7 +32,7 @@ export type PostgrestMockBuilder<T> = {
   delete: () => {
     eq: (column: string, value: any) => Promise<PostgrestResponse<T | null>>;
   };
-};
+}
 
 export type SupabaseMock = {
   from: <T>(table: string) => PostgrestMockBuilder<T>;

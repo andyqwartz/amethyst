@@ -25,16 +25,21 @@ export const DeleteImageModal = ({
 }: DeleteImageModalProps) => {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent className="bg-background/95 backdrop-blur-xl">
         <AlertDialogHeader>
-          <AlertDialogTitle>Êtes-vous sûr de vouloir supprimer cette image ?</AlertDialogTitle>
+          <AlertDialogTitle>Delete Image</AlertDialogTitle>
           <AlertDialogDescription>
-            Cette action est irréversible. L'image sera définitivement supprimée.
+            Are you sure you want to delete this image? This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Annuler</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm}>Supprimer</AlertDialogAction>
+          <AlertDialogCancel className="bg-background hover:bg-muted">Cancel</AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={onConfirm}
+            className="bg-destructive hover:bg-destructive/90"
+          >
+            Delete
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

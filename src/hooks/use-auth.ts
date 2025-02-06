@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase/client';
+import { getSupabaseClient, handleAuthError } from '@/lib/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 
 interface AuthResponse {
   success: boolean;
@@ -13,11 +14,12 @@ export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const supabase = getSupabaseClient();
 
   const checkAdminStatus = async (userId: string | undefined): Promise<boolean> => {
+    console.log('Checking admin status for user:', userId);
     if (!userId) return false;
-    console.log("Vérification admin pour:", userId);
-
     try {
       const { data, error } = await supabase
         .rpc('check_admin_status', {
@@ -25,43 +27,100 @@ export const useAuth = () => {
         });
 
       if (error) {
-        console.error('Erreur check_admin_status:', error);
+        console.error('Error checking admin status:', error);
         return false;
       }
 
-      console.log("Résultat check_admin_status:", data);
+      console.log('Admin status result:', data);
       return !!data;
     } catch (err) {
-      console.error('Erreur check_admin_status:', err);
+      console.error('Error in checkAdminStatus:', err);
       return false;
     }
   };
 
-  // Effet pour initialiser l'authentification
+  const checkEmailStatus = async (email: string) => {
+    console.log('Checking email status for:', email);
+    try {
+      const { data, error } = await supabase
+        .rpc('check_email_status', { check_email: email });
+
+      if (error) {
+        console.error('Error checking email status:', error);
+        throw error;
+      }
+
+      console.log('Email status result:', data);
+      return data?.[0] || { exists_in_auth: false, is_banned: false };
+    } catch (err) {
+      console.error('Error in checkEmailStatus:', err);
+      throw err;
+    }
+  };
+
+  const createProfile = async (userId: string, email: string, metadata: any) => {
+    console.log('Creating profile for user:', userId, 'with metadata:', metadata);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .insert([{
+          id: userId,
+          email,
+          full_name: metadata.full_name || email.split('@')[0],
+          avatar_url: metadata.avatar_url,
+          language: metadata.language || 'Français',
+          theme: metadata.theme || 'light',
+          credits_balance: 0,
+          lifetime_credits: 0,
+          subscription_tier: 'free',
+          subscription_status: 'inactive',
+          ads_enabled: true,
+          ads_watched_today: 0,
+          daily_ads_limit: 5,
+          ads_credits_earned: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating profile:', error);
+        throw error;
+      }
+
+      console.log('Profile created successfully:', data);
+      return data;
+    } catch (err) {
+      console.error('Error in createProfile:', err);
+      throw err;
+    }
+  };
+
   useEffect(() => {
     let mounted = true;
 
     const initializeAuth = async () => {
+      console.log('Initializing auth state');
       try {
-        console.log("Initialisation de l'auth...");
-        const { data: { session } } = await supabase.auth.getSession();
-        const currentUser = session?.user ?? null;
+        const { data: { session }, error } = await supabase.auth.getSession();
         
-        if (mounted) {
-          console.log("Session récupérée:", currentUser?.id);
-          setUser(currentUser);
-          
-          if (currentUser) {
-            const adminStatus = await checkAdminStatus(currentUser.id);
-            console.log("Statut admin initial:", adminStatus);
-            setIsAdmin(adminStatus);
-            if (adminStatus) {
-              navigate('/admin');
-            }
+        if (error) {
+          console.error('Session error:', error);
+          return;
+        }
+
+        if (mounted && session?.user) {
+          console.log('Found existing session for user:', session.user.id);
+          setUser(session.user);
+          const adminStatus = await checkAdminStatus(session.user.id);
+          setIsAdmin(adminStatus);
+          if (adminStatus) {
+            navigate('/admin');
           }
         }
       } catch (error) {
-        console.error('Erreur initialisation auth:', error);
+        console.error('Auth initialization error:', error);
       } finally {
         if (mounted) {
           setIsLoading(false);
@@ -71,26 +130,25 @@ export const useAuth = () => {
 
     initializeAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event, session?.user?.id);
       if (!mounted) return;
 
-      const currentUser = session?.user ?? null;
-      console.log("Changement d'état auth:", currentUser?.id);
-      setUser(currentUser);
-      
-      if (currentUser) {
-        const adminStatus = await checkAdminStatus(currentUser.id);
-        console.log("Nouveau statut admin:", adminStatus);
+      if (event === 'SIGNED_IN' && session?.user) {
+        console.log('User signed in:', session.user.id);
+        setUser(session.user);
+        const adminStatus = await checkAdminStatus(session.user.id);
         setIsAdmin(adminStatus);
         if (adminStatus) {
           navigate('/admin');
-        } else {
-          navigate('/');
         }
-      } else {
+      } else if (event === 'SIGNED_OUT') {
+        console.log('User signed out');
+        setUser(null);
         setIsAdmin(false);
         navigate('/auth');
       }
+      
       setIsLoading(false);
     });
 
@@ -105,174 +163,136 @@ export const useAuth = () => {
     password: string, 
     isSignUp: boolean
   ): Promise<AuthResponse> => {
+    console.log(`Starting ${isSignUp ? 'sign up' : 'sign in'} process for email:`, email);
     try {
-      console.log(`Tentative de ${isSignUp ? 'création de compte' : 'connexion'} pour:`, email);
-      
-      let response;
-      if (isSignUp) {
-        // Vérifier si l'email existe déjà
-        const { data: existingUser } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('email', email)
-          .single();
+      setIsLoading(true);
 
-        if (existingUser) {
-          return {
-            success: false,
-            error: "Un compte existe déjà avec cet email"
-          };
+      if (isSignUp) {
+        console.log('Checking email status before sign up');
+        const emailStatus = await checkEmailStatus(email);
+
+        if (emailStatus.exists_in_auth) {
+          throw new Error("Un compte existe déjà avec cet email");
         }
 
-        // Créer l'utilisateur
-<<<<<<< HEAD
-        response = await supabase.auth.signUp({
+        if (emailStatus.is_banned) {
+          throw new Error("Cet email n'est pas autorisé à créer un compte");
+        }
+
+        console.log('Email status check passed, proceeding with sign up');
+        const { data, error } = await supabase.auth.signUp({
           email,
-=======
-        response = await supabase.auth.signUp({ 
-          email, 
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
           password,
           options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
             data: {
               full_name: email.split('@')[0],
               avatar_url: null,
               language: 'Français',
               theme: 'light'
-            },
-            emailRedirectTo: `${window.location.origin}/auth/callback`
+            }
           }
         });
-<<<<<<< HEAD
 
-        // Check if the user is banned
-        const { data: bannedUser } = await supabase
-          .from('banned_users')
-          .select('id')
-          .eq('email', email)
-          .single();
-
-        if (bannedUser) {
-          return {
-            success: false,
-            error: "This email is banned from creating an account."
-          };
-        }
-        console.log('Réponse création de compte:', response);
-
-=======
-        
-        console.log('Réponse création de compte:', response);
-        
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
-        if (response.error) {
-          console.error('Erreur création de compte:', response.error);
-          return {
-            success: false,
-            error: response.error.message
-          };
+        if (error) {
+          console.error('Sign up error:', error);
+          throw error;
         }
 
-<<<<<<< HEAD
-        if (response.data?.user) {
-          console.log('Utilisateur créé avec succès:', response.data.user);
+        if (data.user) {
+          console.log('User created successfully:', data.user.id);
+          await createProfile(data.user.id, email, data.user.user_metadata);
+        }
 
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .insert({
-              id: response.data.user.id,
-              email: response.data.user.email,
-              full_name: email.split('@')[0],
-              avatar_url: null,
-              language: 'Français',
-              theme: 'light',
-              provider_id: user?.app_metadata.provider_id || 'email', // Updated line to handle null case
+        toast({
+          title: "Inscription réussie",
+          description: "Un email de confirmation vous a été envoyé"
+        });
+
+        return { success: true, error: null };
+      } else {
+        // Try to sign in multiple times in case of temporary 500 error
+        let attempts = 0;
+        const maxAttempts = 3;
+        let lastError;
+
+        while (attempts < maxAttempts) {
+          try {
+            console.log(`Sign in attempt ${attempts + 1} of ${maxAttempts}`);
+            const { data, error } = await supabase.auth.signInWithPassword({
+              email,
+              password
             });
 
-          if (profileError) {
-            console.error('Erreur création profil:', profileError);
-            return {
-              success: false,
-              error: profileError.message
-            };
-=======
-        // Si la création a réussi, on attend que le trigger crée le profil
-        if (response.data?.user) {
-          console.log('Utilisateur créé avec succès:', response.data.user);
-          
-          // Attendre que le profil soit créé
-          await new Promise(resolve => setTimeout(resolve, 2000));
+            if (!error) {
+              if (data?.user) {
+                console.log('Sign in successful for user:', data.user.id);
+                const emailStatus = await checkEmailStatus(email);
 
-          // Vérifier que le profil a bien été créé
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', response.data.user.id)
-            .single();
+                if (emailStatus.is_banned) {
+                  console.log('User is banned, signing out');
+                  await supabase.auth.signOut();
+                  throw new Error("Votre compte a été suspendu");
+                }
 
-          if (profileError) {
-            console.error('Erreur vérification profil:', profileError);
-            // On continue quand même car le trigger pourrait être juste lent
-          } else {
-            console.log('Profil créé:', profile);
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
-          }
+                toast({
+                  title: "Connexion réussie",
+                  description: "Bienvenue !"
+                });
 
-          return {
-            success: true,
-            error: "Un email de confirmation vous a été envoyé. Veuillez vérifier votre boîte de réception."
-          };
-        }
+                return { success: true, error: null };
+              }
+              break;
+            }
 
-        return {
-<<<<<<< HEAD
-          success: false,
-          error: "Erreur inconnue lors de la création de l'utilisateur."
-=======
-          success: true,
-          error: null
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
-        };
-      } else {
-        response = await supabase.auth.signInWithPassword({ email, password });
-        
-        console.log('Réponse connexion:', response);
-        
-        if (response.error) {
-          console.error('Erreur connexion:', response.error);
-          return {
-            success: false,
-            error: response.error.message
-          };
-        }
+            if (error.status !== 500) {
+              console.error('Non-500 error during sign in:', error);
+              throw error;
+            }
 
-        if (response.data?.user) {
-          const adminStatus = await checkAdminStatus(response.data.user.id);
-          console.log('Statut admin après connexion:', adminStatus);
-          setIsAdmin(adminStatus);
-          if (adminStatus) {
-            navigate('/admin');
-          } else {
-            navigate('/');
+            console.log('Got 500 error, will retry');
+            lastError = error;
+            attempts++;
+            if (attempts < maxAttempts) {
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+          } catch (error) {
+            if (error instanceof Error && error.message !== "Le service d'authentification est temporairement indisponible") {
+              throw error;
+            }
+            lastError = error;
+            attempts++;
+            if (attempts < maxAttempts) {
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
           }
         }
 
-        return {
-          success: true,
-          error: null
-        };
+        if (lastError) {
+          console.error('All sign in attempts failed:', lastError);
+          throw lastError;
+        }
+
+        throw new Error("Erreur inconnue lors de la connexion");
       }
-    } catch (err) {
-      console.error('Erreur inattendue:', err);
-      return {
-        success: false,
-        error: err instanceof Error ? err.message : "Une erreur s'est produite"
-      };
+    } catch (error) {
+      console.error('Auth error:', error);
+      const message = handleAuthError(error);
+      toast({
+        title: "Erreur",
+        description: message,
+        variant: "destructive"
+      });
+      return { success: false, error: message };
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleGithubAuth = async (): Promise<AuthResponse> => {
+    console.log('Starting GitHub auth');
     try {
+      setIsLoading(true);
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
         options: {
@@ -280,28 +300,26 @@ export const useAuth = () => {
         }
       });
 
-      if (error) {
-        return {
-          success: false,
-          error: error.message
-        };
-      }
-
-      return {
-        success: true,
-        error: null
-      };
-    } catch (err) {
-      return {
-        success: false,
-        error: err instanceof Error ? err.message : "Une erreur s'est produite"
-      };
+      if (error) throw error;
+      return { success: true, error: null };
+    } catch (error) {
+      console.error('GitHub auth error:', error);
+      const message = handleAuthError(error);
+      toast({
+        title: "Erreur GitHub",
+        description: message,
+        variant: "destructive"
+      });
+      return { success: false, error: message };
+    } finally {
+      setIsLoading(false);
     }
   };
 
-<<<<<<< HEAD
   const handleGoogleAuth = async (): Promise<AuthResponse> => {
+    console.log('Starting Google auth');
     try {
+      setIsLoading(true);
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -309,32 +327,48 @@ export const useAuth = () => {
         }
       });
 
-      if (error) {
-        return {
-          success: false,
-          error: error.message
-        };
-      }
-
-      return {
-        success: true,
-        error: null
-      };
-    } catch (err) {
-      return {
-        success: false,
-        error: err instanceof Error ? err.message : "Une erreur s'est produite"
-      };
+      if (error) throw error;
+      return { success: true, error: null };
+    } catch (error) {
+      console.error('Google auth error:', error);
+      const message = handleAuthError(error);
+      toast({
+        title: "Erreur Google",
+        description: message,
+        variant: "destructive"
+      });
+      return { success: false, error: message };
+    } finally {
+      setIsLoading(false);
     }
   };
 
-=======
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setIsAdmin(false);
-    navigate('/auth');
+    console.log('Starting sign out');
+    try {
+      setIsLoading(true);
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      setUser(null);
+      setIsAdmin(false);
+      navigate('/auth');
+      
+      toast({
+        title: "Déconnexion réussie",
+        description: "À bientôt !"
+      });
+    } catch (error) {
+      console.error('Sign out error:', error);
+      const message = handleAuthError(error);
+      toast({
+        title: "Erreur de déconnexion",
+        description: message,
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return {
@@ -344,15 +378,8 @@ export const useAuth = () => {
     isAuthenticated: !!user,
     handleEmailAuth,
     handleGithubAuth,
-<<<<<<< HEAD
     handleGoogleAuth,
     checkAdminStatus,
     signOut
   };
 };
-=======
-    checkAdminStatus,
-    signOut
-  };
-};
->>>>>>> a945a29ba778c4116754a03171a654de675e5402

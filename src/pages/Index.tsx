@@ -1,7 +1,13 @@
-import { ImageGenerator } from "@/components/ImageGenerator";
+import { ImageGenerator } from "@/components/image-generator/ImageGenerator";
+import { Header } from "@/components/image-generator/Header";
 
 export const Index = () => {
-  return <ImageGenerator />;
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      <ImageGenerator />
+    </div>
+  );
 };
 
 export default Index;

@@ -1,32 +1,36 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase/client';
+import { useState, KeyboardEvent } from 'react';
 import { Card } from "@/components/ui/card";
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
-import { useNavigate } from 'react-router-dom';
+import { Loader2, Eye, EyeOff, Github, Sparkles, Globe, Mail, Lock } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-<<<<<<< HEAD
-import { Github, Sparkles, Globe } from "lucide-react";
-=======
-import { Github, Sparkles } from "lucide-react";
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
 const AuthHeader = () => (
-  <div className="space-y-2 text-center">
-    <h1 className="text-3xl font-bold">Bienvenue</h1>
-    <p className="text-muted-foreground">Connectez-vous pour continuer</p>
+  <div className="space-y-6 text-center">
+    <div className="space-y-2">
+      <h1 className="text-5xl font-bold tracking-tight">
+        <span className="text-white drop-shadow-[0_0_30px_rgba(167,139,250,0.5)]">✧</span>
+        <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-purple-200 drop-shadow-[0_0_15px_rgba(167,139,250,0.3)]">Amethyst</span>
+        <span className="text-white drop-shadow-[0_0_30px_rgba(167,139,250,0.5)]">✧</span>
+      </h1>
+      <p className="text-xl font-light">
+        <span className="text-purple-200/90">Bienvenue sur le portail</span>
+      </p>
+    </div>
+    <p className="text-purple-300/60 text-base font-medium tracking-wide uppercase">
+      Créez • Explorez • Imaginez
+    </p>
   </div>
 );
 
 const GithubButton = ({ onClick, disabled }: { onClick: () => void, disabled: boolean }) => (
   <Button 
     variant="outline" 
-    className="w-full" 
+    className="w-full relative overflow-hidden transition-all duration-300 hover:bg-purple-900/20 hover:border-purple-300/50" 
     onClick={onClick}
     disabled={disabled}
   >
@@ -39,11 +43,10 @@ const GithubButton = ({ onClick, disabled }: { onClick: () => void, disabled: bo
   </Button>
 );
 
-<<<<<<< HEAD
 const GoogleButton = ({ onClick, disabled }: { onClick: () => void, disabled: boolean }) => (
   <Button 
     variant="outline" 
-    className="w-full" 
+    className="w-full relative overflow-hidden transition-all duration-300 hover:bg-purple-900/20 hover:border-purple-300/50" 
     onClick={onClick}
     disabled={disabled}
   >
@@ -56,15 +59,13 @@ const GoogleButton = ({ onClick, disabled }: { onClick: () => void, disabled: bo
   </Button>
 );
 
-=======
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
 const Divider = () => (
   <div className="relative">
     <div className="absolute inset-0 flex items-center">
-      <Separator />
+      <Separator className="bg-purple-300/20" />
     </div>
     <div className="relative flex justify-center text-xs uppercase">
-      <span className="bg-background px-2 text-muted-foreground">
+      <span className="bg-background/50 px-2 text-purple-200/60">
         Ou continuez avec
       </span>
     </div>
@@ -74,82 +75,24 @@ const Divider = () => (
 export const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-<<<<<<< HEAD
-  const { isLoading, handleEmailAuth, handleGithubAuth, handleGoogleAuth, checkAdminStatus } = useAuth();
-=======
-  const { isLoading, handleEmailAuth, handleGithubAuth, checkAdminStatus } = useAuth();
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
+  const { isLoading, handleEmailAuth, handleGithubAuth, handleGoogleAuth } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        // Vérifier si l'utilisateur est un admin
-        const isUserAdmin = await checkAdminStatus(session.user.id);
-        if (isUserAdmin) {
-          navigate('/admin');
-        } else {
-          navigate('/');
-        }
-        
-        toast({
-          title: "Connexion réussie",
-          description: "Vous êtes maintenant connecté",
-        });
-      }
-    });
-
-    return () => {
-      authListener?.subscription.unsubscribe();
-    };
-  }, [navigate, toast, checkAdminStatus]);
 
   const handleGithubSignIn = async () => {
-    try {
-      const response = await handleGithubAuth();
-      if (!response.success) {
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: response.error || "Une erreur s'est produite"
-        });
-      }
-    } catch (err) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur s'est produite lors de la connexion"
-      });
-      console.error('Github auth error:', err);
-    }
+    if (isLoading) return;
+    await handleGithubAuth();
   };
 
-<<<<<<< HEAD
   const handleGoogleSignIn = async () => {
-    try {
-      const response = await handleGoogleAuth();
-      if (!response.success) {
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: response.error || "Une erreur s'est produite"
-        });
-      }
-    } catch (err) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur s'est produite lors de la connexion"
-      });
-      console.error('Google auth error:', err);
-    }
+    if (isLoading) return;
+    await handleGoogleAuth();
   };
 
-=======
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
   const handleAuthAction = async (type: 'login' | 'signup') => {
+    if (isLoading) return;
+
     if (!email || !password) {
       toast({
         variant: "destructive",
@@ -168,86 +111,85 @@ export const Auth = () => {
       return;
     }
 
-    try {
-      console.log(`Tentative de ${type === 'signup' ? 'création de compte' : 'connexion'}`);
-      const response = await handleEmailAuth(email, password, type === 'signup');
-      
-      if (!response.success) {
-        let errorMessage = response.error || "Une erreur s'est produite";
-        
-        // Traduire les messages d'erreur courants
-        if (response.error?.includes('Email not confirmed')) {
-          errorMessage = "Veuillez confirmer votre email avant de vous connecter";
-        } else if (response.error?.includes('Invalid login credentials')) {
-          errorMessage = "Email ou mot de passe incorrect";
-        } else if (response.error?.includes('User already registered')) {
-          errorMessage = "Un compte existe déjà avec cet email";
-        }
-        
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: errorMessage
-        });
-      } else if (type === 'signup') {
-        toast({
-          title: "Compte créé",
-          description: "Votre compte a été créé avec succès"
-        });
-      }
-    } catch (err) {
-      console.error('Erreur authentification:', err);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur s'est produite lors de l'authentification"
-      });
+    await handleEmailAuth(email, password, type === 'signup');
+  };
+
+  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && email && password && !isLoading) {
+      handleAuthAction('login');
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-primary/20 to-secondary/20">
-      <Card className="w-full max-w-md p-6 space-y-6 backdrop-blur-xl bg-background/80">
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background Effects */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_#1a103d_0%,_#0d0621_100%)]"></div>
+      <div className="absolute inset-0 bg-purple-900/20 animate-pulse-slowest"></div>
+      
+      {/* Portal Effect Rings */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full border border-purple-300/10 animate-pulse-slow"></div>
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full border border-purple-300/10 animate-pulse-slower"></div>
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full border border-purple-300/10 animate-pulse-slowest"></div>
+
+      <Card className="w-full max-w-md p-8 space-y-8 relative backdrop-blur-xl bg-background/30 border-purple-300/20 shadow-2xl shadow-purple-900/20">
         <AuthHeader />
         
         <div className="space-y-4">
           <GithubButton onClick={handleGithubSignIn} disabled={isLoading} />
-<<<<<<< HEAD
           <GoogleButton onClick={handleGoogleSignIn} disabled={isLoading} />
-=======
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
           <Divider />
           
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
+              <Label htmlFor="email" className="text-purple-100">Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-200/50 h-4 w-4" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="votre@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  disabled={isLoading}
+                  className="pl-10 bg-background/30 border-purple-300/30 focus:border-purple-300/50 transition-all"
+                />
+              </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Mot de passe</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Mot de passe"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+              <Label htmlFor="password" className="text-purple-100">Mot de passe</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-200/50 h-4 w-4" />
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  disabled={isLoading}
+                  className="pl-10 pr-10 bg-background/30 border-purple-300/30 focus:border-purple-300/50 transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  disabled={isLoading}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-purple-200/50 hover:text-purple-200 transition-colors"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox 
                 id="remember" 
                 checked={rememberMe}
                 onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                disabled={isLoading}
               />
               <label
                 htmlFor="remember"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                className="text-sm font-medium text-purple-200/80 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
                 Se souvenir de moi
               </label>
@@ -257,24 +199,24 @@ export const Auth = () => {
 
         <div className="space-y-4">
           <Button 
-            className="w-full" 
+            className="w-full bg-purple-300 hover:bg-purple-200 text-purple-950 font-medium shadow-lg transition-all duration-300" 
             onClick={() => handleAuthAction('login')}
             disabled={isLoading || !email || !password}
           >
             {isLoading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
             ) : (
-              <Sparkles className="mr-2 h-4 w-4" />
+              <Sparkles className="mr-2 h-5 w-5" />
             )}
-            Entrer dans le portail Amethyst
+            Entrer dans le portail
           </Button>
           <Button 
-            className="w-full" 
+            className="w-full bg-background/30 hover:bg-purple-900/20 border-purple-300/30 hover:border-purple-300/50 transition-all duration-300" 
             variant="outline"
             onClick={() => handleAuthAction('signup')}
             disabled={isLoading || !email || !password}
           >
-            Créer un compte
+            Créer un nouveau compte
           </Button>
         </div>
       </Card>
@@ -282,8 +224,4 @@ export const Auth = () => {
   );
 };
 
-<<<<<<< HEAD
 export default Auth;
-=======
-export default Auth;
->>>>>>> a945a29ba778c4116754a03171a654de675e5402

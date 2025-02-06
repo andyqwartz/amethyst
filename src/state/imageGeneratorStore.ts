@@ -1,71 +1,20 @@
-import { create } from 'zustand'
-import { devtools } from 'zustand/middleware'
-<<<<<<< HEAD
-import type { GenerationSettings } from '@/types/replicate'
-import { ImageSettings } from '@/types/generation'
-
-type ImageSettings = Omit<GenerationSettings, 'aspect_ratio'> & {
-  width: number
-  height: number
-  steps: number
-  img2img: boolean
-  strength: number
-  initImage: string | null
-}
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
+import type { ImageSettings } from '@/types/generation';
 
 interface GeneratedImage {
-  id: string
-  url: string
-  timestamp: number
-  settings: ImageSettings
+  id: string;
+  url: string;
+  timestamp: number;
+  settings: ImageSettings;
 }
 
-interface UIState {
-  isGenerating: boolean
-  showSettings: boolean
-  isSaving: boolean
-  currentTab: string
+interface GenerationHistoryItem {
+  id: string;
+  url: string;
+  settings: ImageSettings;
+  timestamp: number;
 }
-
-interface ErrorState {
-  hasError: boolean
-  errorMessage: string
-}
-
-interface ImageGeneratorState {
-  settings: ImageSettings
-  currentImage: GeneratedImage | null
-  generatedImages: GeneratedImage[]
-  history: GeneratedImage[]
-  ui: UIState
-  error: ErrorState
-  
-  // Settings actions
-  setSettings: (settings: ImageSettings | ((prev: ImageSettings) => ImageSettings)) => void
-  
-  // Image generation actions
-  setCurrentImage: (image: GeneratedImage | null) => void
-  addGeneratedImage: (image: GeneratedImage) => void
-  clearGeneratedImages: () => void
-  
-  // History actions
-  addToHistory: (image: GeneratedImage) => void
-  clearHistory: () => void
-  
-  // UI state actions
-  setIsGenerating: (isGenerating: boolean) => void
-  setShowSettings: (show: boolean) => void
-  setIsSaving: (isSaving: boolean) => void
-  setCurrentTab: (tab: string) => void
-  
-  // Error handling
-  setError: (message: string) => void
-  clearError: () => void
-  
-  // Reset all state
-  resetState: () => void
-=======
-import type { GenerationSettings, ImageSettings, GeneratedImage } from '@/types/generation'
 
 interface UIState {
   isGenerating: boolean;
@@ -112,7 +61,6 @@ interface ImageGeneratorState {
   
   // Reset all state
   resetState: () => void;
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
 }
 
 const initialSettings: ImageSettings = {
@@ -120,56 +68,38 @@ const initialSettings: ImageSettings = {
   negative_prompt: '',
   width: 512,
   height: 512,
-  steps: 20,
-<<<<<<< HEAD
-  seed: -1,
-  guidance_scale: 7.5,
-=======
-  guidance_scale: 7.5,
+  steps: 28,
+  guidance_scale: 3.5,
   num_inference_steps: 28,
   seed: -1,
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
   img2img: false,
   strength: 0.75,
   initImage: null,
   output_format: 'webp',
-  output_quality: 90,
+  output_quality: 80,
   num_outputs: 1,
-<<<<<<< HEAD
-  num_inference_steps: 28,
   prompt_strength: 0.8,
+  hf_loras: ['lucataco/flux-dev-multi-lora:2389224e115448d9a77c07d7d45672b3f0aa45acacf1c5bcf51857ac295e3aec'],
+  lora_scales: [0.8],
   disable_safety_checker: false,
-  hf_loras: ["AndyVampiro/fog"],
-  lora_scales: [1.0],
-  aspect_ratio: '1:1'
-}
-=======
-  prompt_strength: 0.8,
-  hf_loras: ["AndyVampiro/fog"],
-  lora_scales: [1.0],
-  disable_safety_checker: false
+  aspect_ratio: '1:1',
+  reference_image_url: null,
+  reference_image_strength: 0.5,
+  model_version: 'latest',
+  scheduler: 'DPMSolverMultistepScheduler'
 };
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
 
 const initialUIState: UIState = {
   isGenerating: false,
   showSettings: false,
   isSaving: false,
   currentTab: 'generate'
-<<<<<<< HEAD
-}
-=======
 };
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
 
 const initialErrorState: ErrorState = {
   hasError: false,
   errorMessage: ''
-<<<<<<< HEAD
-}
-=======
 };
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
 
 export const useImageGeneratorStore = create<ImageGeneratorState>()(
   devtools(
@@ -189,13 +119,10 @@ export const useImageGeneratorStore = create<ImageGeneratorState>()(
             ? newSettings(state.settings)
             : newSettings
         })),
-<<<<<<< HEAD
-=======
       updateSettings: (newSettings) =>
         set((state) => ({
           settings: { ...state.settings, ...newSettings }
         })),
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
 
       // Image generation actions
       setCurrentImage: (image) =>
@@ -262,8 +189,4 @@ export const useImageGeneratorStore = create<ImageGeneratorState>()(
     }),
     { name: 'ImageGeneratorStore' }
   )
-<<<<<<< HEAD
-)
-=======
 );
->>>>>>> a945a29ba778c4116754a03171a654de675e5402

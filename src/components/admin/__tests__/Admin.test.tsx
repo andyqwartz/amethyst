@@ -6,9 +6,9 @@ import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase/client';
 import type { Profile, GeneratedImage } from '@/types/database';
-import type { TestUser, TestAuthHook, PostgrestResponse, SupabaseMock } from '@/test/test-types';
-import type { PostgrestQueryBuilder } from '@supabase/postgrest-js';
+import type { TestUser, TestAuthHook, PostgrestResponse, PostgrestMockBuilder } from '@/test/test-types';
 import { useNavigate } from 'react-router-dom';
+import type { PostgrestQueryBuilder } from '@supabase/postgrest-js';
 
 // Mock the hooks
 vi.mock('@/hooks/use-auth', () => ({
@@ -28,7 +28,7 @@ vi.mock('react-router-dom', () => ({
 vi.mock('@/lib/supabase/client', () => ({
   supabase: {
     from: vi.fn(),
-  } as SupabaseMock,
+  },
 }));
 
 // Mock data
@@ -41,6 +41,7 @@ const mockProfiles: Profile[] = [
     avatar_url: null,
     phone_number: null,
     created_at: '2025-01-01T00:00:00Z',
+    updated_at: '2025-01-01T00:00:00Z',
 
     // Authentication
     auth_provider: 'email',
@@ -89,10 +90,12 @@ const mockImages: GeneratedImage[] = [
   {
     id: '1',
     user_id: '1',
+    image_id: 'img-1',
     created_at: '2025-01-01T00:00:00Z',
+    started_at: '2025-01-01T00:00:00Z',
+    completed_at: '2025-01-01T00:00:01Z',
     prompt: 'Test prompt',
-    negative_prompt: null,
-    model_id: 'test-model',
+    negative_prompt: '',
     width: 512,
     height: 512,
     num_inference_steps: 20,
@@ -102,9 +105,25 @@ const mockImages: GeneratedImage[] = [
     status: 'completed',
     error_message: null,
     output_format: 'png',
-    output_url: null,
-    processing_time: null,
+    output_quality: 90,
     credits_cost: 1,
+    scheduler: 'DPMSolverMultistepScheduler',
+    strength: 0.75,
+    num_outputs: 1,
+    aspect_ratio: '1:1',
+    hf_loras: [],
+    lora_scales: [],
+    disable_safety_checker: false,
+    reference_image_id: null,
+    reference_image_strength: 0,
+    model_version: 'latest',
+    generation_time: null,
+    raw_parameters: {},
+    parameter_history: [],
+    // Legacy properties
+    output_url: null,
+    model_id: 'test-model',
+    processing_time: null
   },
 ];
 
@@ -182,7 +201,7 @@ describe('Admin Component', () => {
       error: null,
     };
 
-    vi.mocked(supabase.from).mockImplementation(() => ({
+    const mockBuilder = {
       select: () => ({
         order: () => Promise.resolve(mockResponse),
         eq: () => Promise.resolve(mockResponse),
@@ -193,7 +212,9 @@ describe('Admin Component', () => {
       delete: () => ({
         eq: () => Promise.resolve({ data: null, error: null }),
       }),
-    }) as unknown as PostgrestQueryBuilder<Profile, Profile, string, Record<string, never>>;
+    } as unknown as PostgrestQueryBuilder<any, any, any, any>;
+
+    vi.mocked(supabase.from).mockReturnValue(mockBuilder);
 
     render(<Admin />);
 
@@ -204,7 +225,7 @@ describe('Admin Component', () => {
 
   it('handles ban user action', async () => {
     const mockUpdate = vi.fn().mockResolvedValue({ data: null, error: null });
-    vi.mocked(supabase.from).mockImplementation(() => ({
+    const mockBuilder = {
       select: () => ({
         order: () => Promise.resolve({ data: mockProfiles, error: null }),
         eq: () => Promise.resolve({ data: mockProfiles, error: null }),
@@ -215,7 +236,9 @@ describe('Admin Component', () => {
       delete: () => ({
         eq: () => Promise.resolve({ data: null, error: null }),
       }),
-    }) as unknown as PostgrestQueryBuilder<Profile, Profile, string, Record<string, never>>;
+    } as unknown as PostgrestQueryBuilder<any, any, any, any>;
+
+    vi.mocked(supabase.from).mockReturnValue(mockBuilder);
 
     render(<Admin />);
 
@@ -234,7 +257,7 @@ describe('Admin Component', () => {
 
   it('handles delete image action', async () => {
     const mockDelete = vi.fn().mockResolvedValue({ data: null, error: null });
-    vi.mocked(supabase.from).mockImplementation(() => ({
+    const mockBuilder = {
       select: () => ({
         order: () => Promise.resolve({ data: mockImages, error: null }),
         eq: () => Promise.resolve({ data: mockImages, error: null }),
@@ -245,7 +268,9 @@ describe('Admin Component', () => {
       delete: () => ({
         eq: mockDelete,
       }),
-    }) as unknown as PostgrestQueryBuilder<GeneratedImage, GeneratedImage, string, Record<string, never>>;
+    } as unknown as PostgrestQueryBuilder<any, any, any, any>;
+
+    vi.mocked(supabase.from).mockReturnValue(mockBuilder);
 
     render(<Admin />);
 
@@ -294,7 +319,7 @@ describe('Admin Component', () => {
       toasts: [],
     });
 
-    vi.mocked(supabase.from).mockImplementation(() => ({
+    const mockBuilder = {
       select: () => ({
         order: () => Promise.resolve({
           data: null,
@@ -311,7 +336,9 @@ describe('Admin Component', () => {
       delete: () => ({
         eq: () => Promise.resolve({ data: null, error: null }),
       }),
-    }) as unknown as PostgrestQueryBuilder<Profile, Profile, string, Record<string, never>>;
+    } as unknown as PostgrestQueryBuilder<any, any, any, any>;
+
+    vi.mocked(supabase.from).mockReturnValue(mockBuilder);
 
     render(<Admin />);
 

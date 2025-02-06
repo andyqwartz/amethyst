@@ -1,251 +1,145 @@
-<<<<<<< HEAD
-import React, { useEffect, useState, useCallback } from 'react';
-=======
-import React, { useEffect, useState } from 'react';
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
-import {
-  Dialog,
-  DialogContent,
-  DialogClose,
-<<<<<<< HEAD
-=======
-  DialogTitle,
-  DialogDescription,
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
-} from "@/components/ui/dialog";
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { X } from 'lucide-react';
-import { UserProfile } from "@/components/ui/user-profile";
-import { supabase } from "@/lib/supabase/client";
+import { Card } from "@/components/ui/card";
+import { useProfile } from '@/hooks/useProfile';
 import { useAuth } from '@/hooks/use-auth';
-<<<<<<< HEAD
-=======
-import { useNavigate } from 'react-router-dom';
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
-import { useToast } from '@/hooks/use-toast';
+import { useEffect, useRef } from 'react';
+import { Settings, Shield, CreditCard, PlayCircle, X } from 'lucide-react';
 
 interface ProfileModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onClose: () => void;
 }
 
-interface UserData {
-  name: string;
-  email: string;
-  avatarUrl?: string;
-  joinDate: Date;
-  credits: number;
-  membershipType: string;
-  totalGenerations: number;
-  lastActive: Date;
-  preferences: {
-    language: string;
-    notifications: boolean;
-    newsletter: boolean;
-    ads_enabled: boolean;
-  };
-  auth_provider?: string;
-  ads_watched_today?: number;
-  daily_ads_limit?: number;
-  ads_credits_earned?: number;
-}
-
-export const ProfileModal = ({
-  open,
-  onOpenChange
-}: ProfileModalProps) => {
-  const [userData, setUserData] = useState<UserData | null>(null);
-  const { user } = useAuth();
-  const { toast } = useToast();
-<<<<<<< HEAD
-=======
+export const ProfileModal = ({ onClose }: ProfileModalProps) => {
   const navigate = useNavigate();
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
+  const { profile } = useProfile();
+  const { signOut } = useAuth();
+  const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      if (!user) return;
-      
-      try {
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select(`
-            id,
-            full_name,
-            email,
-            avatar_url,
-            created_at,
-            last_sign_in_at,
-            credits_balance,
-            subscription_tier,
-<<<<<<< HEAD
-            notifications_enabled,
-=======
-            subscription_status,
-            lifetime_credits,
-            auth_provider,
-            ads_enabled,
-            ads_watched_today,
-            daily_ads_limit,
-            ads_credits_earned,
-            notifications_enabled,
-            marketing_emails_enabled,
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
-            language
-          `)
-          .eq('id', user.id)
-          .single();
-
-        if (error) throw error;
-
-        if (profile) {
-          setUserData({
-            name: profile.full_name || user.email?.split('@')[0] || "Utilisateur",
-            email: user.email || "utilisateur@example.com",
-            avatarUrl: profile.avatar_url,
-<<<<<<< HEAD
-            joinDate: new Date(profile.created_at || Date.now()),
-            credits: profile.credits_balance || 0,
-            membershipType: profile.subscription_tier || "Gratuit",
-            totalGenerations: 0, // lifetime_credits field removed
-            lastActive: new Date(profile.last_sign_in_at || Date.now()),
-            preferences: {
-              language: profile.language || "Français",
-              notifications: profile.notifications_enabled || false,
-              newsletter: false,
-              ads_enabled: true
-=======
-            joinDate: new Date(profile.created_at || user.created_at || Date.now()),
-            credits: profile.credits_balance || 0,
-            membershipType: profile.subscription_tier || "Gratuit",
-            totalGenerations: profile.lifetime_credits || 0,
-            lastActive: new Date(profile.last_sign_in_at || Date.now()),
-            auth_provider: profile.auth_provider,
-            ads_watched_today: profile.ads_watched_today || 0,
-            daily_ads_limit: profile.daily_ads_limit || 10,
-            ads_credits_earned: profile.ads_credits_earned || 0,
-            preferences: {
-              language: profile.language || "Français",
-              notifications: profile.notifications_enabled || false,
-              newsletter: profile.marketing_emails_enabled || false,
-              ads_enabled: profile.ads_enabled || true
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
-            }
-          });
-        }
-      } catch (err) {
-        console.error('Error fetching user data:', err);
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Impossible de charger les données utilisateur"
-        });
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        onClose();
       }
     };
 
-    if (open) {
-      fetchUserData();
-    }
-  }, [open, user, toast]);
-
-<<<<<<< HEAD
-  const handleClose = useCallback(() => {
-    onOpenChange(false);
-  }, [onOpenChange]);
-
-  const handleBackdropClick = useCallback((e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onOpenChange(false);
-    }
-  }, [onOpenChange]);
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent
-        className="fixed top-0 left-0 w-screen h-screen max-w-none m-0 p-0 bg-black/30 backdrop-blur-xl"
-        onClick={handleBackdropClick}
-      >
-        <DialogClose asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-4 top-4 z-50 rounded-full opacity-70 hover:opacity-100 hover:bg-primary/20 transition-all duration-200"
-            onClick={handleClose}
-          >
-            <X className="h-4 w-4" />
-            <span className="sr-only">Fermer</span>
-          </Button>
-        </DialogClose>
-        {/* Add user profile content here */}
-      </DialogContent>
-    </Dialog>
-  );
-};
-=======
-  const handleWatchAd = async () => {
-    if (!user) return;
-    
-    try {
-      const { data, error } = await supabase.rpc('watch_ad', {
-        profile_id: user.id,
-        ad_id: 'rewarded_video',
-        duration: 30
-      });
-
-      if (error) throw error;
-
-      if (data) {
-        toast({
-          title: "Publicité visionnée",
-          description: "5 crédits ont été ajoutés à votre compte"
-        });
-        // Rafraîchir les données utilisateur
-        fetchUserData();
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
       }
-    } catch (err) {
-      console.error('Error watching ad:', err);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de visionner la publicité"
-      });
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [onClose]);
+
+  const menuItems = [
+    {
+      icon: <Settings className="w-5 h-5" />,
+      title: "Paramètres du compte",
+      description: "Gérez vos informations personnelles",
+      path: "/account/settings"
+    },
+    {
+      icon: <Shield className="w-5 h-5" />,
+      title: "Sécurité",
+      description: "Gérez la sécurité de votre compte",
+      path: "/account/security"
+    },
+    {
+      icon: <CreditCard className="w-5 h-5" />,
+      title: "Abonnement & Crédits",
+      description: `${profile?.credits_balance || 0} crédits disponibles`,
+      path: "/account/subscription"
+    },
+    {
+      icon: <PlayCircle className="w-5 h-5" />,
+      title: "Gagner des crédits",
+      description: "Regarder des publicités pour gagner des crédits",
+      path: "/account/ads"
     }
+  ];
+
+  const handleSignOut = async () => {
+    await signOut();
+    onClose();
+    navigate('/auth');
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent 
-        className="w-screen h-screen max-w-none m-0 p-0 bg-black/30 backdrop-blur-xl"
+    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
+      <div 
+        ref={modalRef}
+        className="fixed right-4 top-16 z-50 w-full max-w-md rounded-lg border bg-background shadow-lg"
       >
-        <DialogTitle className="sr-only">Profil Utilisateur</DialogTitle>
-        <DialogDescription className="sr-only">
-          Gérez votre profil et vos préférences
-        </DialogDescription>
-        
-        <div className="max-w-4xl mx-auto h-full flex flex-col bg-background rounded-xl relative overflow-hidden">
-          <DialogClose asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-4 top-4 z-50 rounded-full opacity-70 hover:opacity-100 hover:bg-primary/20 transition-all duration-200"
-            >
-              <X className="h-4 w-4" />
-              <span className="sr-only">Fermer</span>
-            </Button>
-          </DialogClose>
+        <div className="flex items-center justify-between p-4 border-b">
+          <h2 className="text-lg font-semibold">Menu du compte</h2>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 rounded-full"
+            onClick={onClose}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
 
-          <div className="flex-grow h-full overflow-auto">
-            <div className="p-6">
-              <UserProfile 
-                user={userData} 
-                onWatchAd={handleWatchAd}
-                canWatchAd={userData?.ads_watched_today < (userData?.daily_ads_limit || 10)}
-              />
+        <div className="p-4 space-y-4">
+          {/* Informations de l'utilisateur */}
+          <div className="flex items-center space-x-4">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <span className="text-lg font-semibold text-primary">
+                {profile?.full_name?.[0] || profile?.email?.[0] || '?'}
+              </span>
+            </div>
+            <div>
+              <p className="font-medium">{profile?.full_name || 'Utilisateur'}</p>
+              <p className="text-sm text-muted-foreground">{profile?.email}</p>
             </div>
           </div>
+
+          {/* Menu */}
+          <div className="space-y-2">
+            {menuItems.map((item, index) => (
+              <Link 
+                key={index}
+                to={item.path}
+                onClick={onClose}
+              >
+                <Card className="p-4 hover:bg-accent transition-colors cursor-pointer">
+                  <div className="flex items-center gap-4">
+                    <div className="p-2 rounded-full bg-primary/10 text-primary">
+                      {item.icon}
+                    </div>
+                    <div>
+                      <h3 className="font-medium">{item.title}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {item.description}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              </Link>
+            ))}
+          </div>
+
+          {/* Déconnexion */}
+          <div className="pt-4 border-t">
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-muted-foreground hover:text-foreground"
+              onClick={handleSignOut}
+            >
+              Se déconnecter
+            </Button>
+          </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
-}; 
->>>>>>> a945a29ba778c4116754a03171a654de675e5402
+};
