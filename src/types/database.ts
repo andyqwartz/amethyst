@@ -32,9 +32,48 @@ export interface Profile {
   daily_ads_limit: number
   last_credit_update: string
   ads_last_watched: string | null
+  last_login: string | null
   created_at: string
   last_sign_in_at: string
   updated_at: string
+}
+
+export interface GeneratedImage {
+  id: string
+  user_id: string
+  image_id: string
+  prompt: string
+  negative_prompt: string
+  width: number
+  height: number
+  num_inference_steps: number
+  guidance_scale: number
+  seed: number | null
+  strength: number
+  num_outputs: number
+  output_quality: number
+  prompt_strength: number
+  lora_scales: number[]
+  disable_safety_checker: boolean
+  reference_image_id: string | null
+  reference_image_strength: number
+  generation_time: number | null
+  status: ImageStatus
+  error_message: string | null
+  raw_parameters: Record<string, any>
+  parameter_history: Record<string, any>[]
+  created_at: string
+  started_at: string | null
+  completed_at: string | null
+  model_id: string | null
+  model_version: string
+  scheduler: string
+  hf_loras: string[]
+  aspect_ratio: string
+  output_format: string
+  output_url: string | null
+  processing_time: number | null
+  credits_cost: number
 }
 
 export interface Image {
@@ -99,40 +138,6 @@ export interface Prompt {
   hf_loras: string[]
   lora_scales: number[]
   created_at: string
-}
-
-export interface GeneratedImage {
-  id: string
-  user_id: string
-  image_id: string
-  prompt: string
-  negative_prompt: string
-  model_version: string
-  scheduler: string
-  width: number
-  height: number
-  num_inference_steps: number
-  guidance_scale: number
-  prompt_strength: number
-  seed: number | null
-  strength: number
-  num_outputs: number
-  output_quality: number
-  output_format: string
-  aspect_ratio: string
-  lora_scales: number[]
-  hf_loras: string[]
-  disable_safety_checker: boolean
-  reference_image_id: string | null
-  reference_image_strength: number
-  generation_time: number | null
-  status: ImageStatus
-  error_message: string | null
-  raw_parameters: Record<string, any>
-  parameter_history: Record<string, any>[]
-  created_at: string
-  started_at: string | null
-  completed_at: string | null
 }
 
 export interface ReferenceImage {

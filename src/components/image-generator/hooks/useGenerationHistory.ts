@@ -1,8 +1,7 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import type { GeneratedImage } from '@/types/generation';
-
-export interface GenerationHistoryItem extends GeneratedImage {}
+import type { GenerationHistoryItem } from '@/types/generation';
 
 export const useGenerationHistory = () => {
   const [history, setHistory] = useState<GenerationHistoryItem[]>([]);
@@ -24,16 +23,28 @@ export const useGenerationHistory = () => {
 
       setHistory(data.map(item => ({
         id: item.id,
-        url: item.url,
-        public_url: item.public_url,
+        url: item.output_url,
+        output_url: item.output_url,
+        public_url: item.output_url,
         timestamp: new Date(item.created_at).getTime(),
         created_at: item.created_at,
-        settings: item.settings,
+        settings: {
+          ...item.raw_parameters,
+          width: item.width,
+          height: item.height,
+          img2img: false,
+          strength: item.strength,
+          initImage: null
+        },
         user_id: item.user_id,
         image_id: item.image_id,
         status: item.status,
         completed_at: item.completed_at,
-        error_message: item.error_message
+        error_message: item.error_message,
+        prompt: item.prompt,
+        parameters: item.raw_parameters,
+        processing_time: item.processing_time,
+        credits_cost: item.credits_cost
       })));
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch history'));

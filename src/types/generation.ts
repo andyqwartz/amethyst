@@ -59,9 +59,21 @@ export interface GeneratedImage {
 
 export interface GenerationHistoryItem {
   id: string;
-  url: string;
-  settings: GenerationSettings;
+  url: string | null;
+  output_url: string | null;
+  public_url: string | null;
   timestamp: number;
+  created_at: string;
+  settings: ImageSettings;
+  user_id: string;
+  image_id: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  completed_at?: string;
+  error_message?: string;
+  prompt: string;
+  parameters: Record<string, any>;
+  processing_time?: number;
+  credits_cost: number;
 }
 
 export interface GenerationButtonsProps {
