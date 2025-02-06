@@ -208,6 +208,7 @@ export type Database = {
           aspect_ratio: string | null
           completed_at: string | null
           created_at: string | null
+          credits_cost: number | null
           disable_safety_checker: boolean | null
           error_message: string | null
           generation_time: number | null
@@ -244,6 +245,7 @@ export type Database = {
           aspect_ratio?: string | null
           completed_at?: string | null
           created_at?: string | null
+          credits_cost?: number | null
           disable_safety_checker?: boolean | null
           error_message?: string | null
           generation_time?: number | null
@@ -280,6 +282,7 @@ export type Database = {
           aspect_ratio?: string | null
           completed_at?: string | null
           created_at?: string | null
+          credits_cost?: number | null
           disable_safety_checker?: boolean | null
           error_message?: string | null
           generation_time?: number | null
@@ -494,6 +497,7 @@ export type Database = {
           is_banned: boolean | null
           language: string | null
           last_credit_update: string | null
+          last_login: string | null
           last_sign_in_at: string | null
           lifetime_credits: number | null
           marketing_emails_enabled: boolean | null
@@ -530,6 +534,7 @@ export type Database = {
           is_banned?: boolean | null
           language?: string | null
           last_credit_update?: string | null
+          last_login?: string | null
           last_sign_in_at?: string | null
           lifetime_credits?: number | null
           marketing_emails_enabled?: boolean | null
@@ -566,6 +571,7 @@ export type Database = {
           is_banned?: boolean | null
           language?: string | null
           last_credit_update?: string | null
+          last_login?: string | null
           last_sign_in_at?: string | null
           lifetime_credits?: number | null
           marketing_emails_enabled?: boolean | null
