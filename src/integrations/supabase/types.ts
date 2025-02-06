@@ -502,12 +502,15 @@ export type Database = {
           phone_number: string | null
           phone_verified: boolean | null
           provider_id: string | null
+          role: string | null
           stripe_customer_id: string | null
           subscription_end_date: string | null
           subscription_status: string | null
           subscription_tier: string | null
           theme: string | null
+          total_generations: number | null
           updated_at: string | null
+          username: string | null
         }
         Insert: {
           ads_credits_earned?: number | null
@@ -535,12 +538,15 @@ export type Database = {
           phone_number?: string | null
           phone_verified?: boolean | null
           provider_id?: string | null
+          role?: string | null
           stripe_customer_id?: string | null
           subscription_end_date?: string | null
           subscription_status?: string | null
           subscription_tier?: string | null
           theme?: string | null
+          total_generations?: number | null
           updated_at?: string | null
+          username?: string | null
         }
         Update: {
           ads_credits_earned?: number | null
@@ -568,12 +574,15 @@ export type Database = {
           phone_number?: string | null
           phone_verified?: boolean | null
           provider_id?: string | null
+          role?: string | null
           stripe_customer_id?: string | null
           subscription_end_date?: string | null
           subscription_status?: string | null
           subscription_tier?: string | null
           theme?: string | null
+          total_generations?: number | null
           updated_at?: string | null
+          username?: string | null
         }
         Relationships: []
       }
