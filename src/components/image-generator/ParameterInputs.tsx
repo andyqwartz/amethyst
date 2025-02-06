@@ -4,14 +4,17 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { HelpCircle } from 'lucide-react';
-import type { ImageSettings } from '@/types/generation';
+import type { GenerationSettings } from '@/types/replicate';
 
 interface ParameterInputsProps {
-  settings: ImageSettings;
-  onSettingsChange: (settings: Partial<ImageSettings>) => void;
+  settings: GenerationSettings;
+  onSettingsChange: (settings: Partial<GenerationSettings>) => void;
 }
 
 export const ParameterInputs = ({ settings, onSettingsChange }: ParameterInputsProps) => {
+  console.log('ParameterInputs - numOutputs:', settings.num_outputs);
+  console.log('ParameterInputs - settings:', settings);
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-4">
@@ -23,14 +26,14 @@ export const ParameterInputs = ({ settings, onSettingsChange }: ParameterInputsP
 
       <div className="space-y-2">
         <Label className="flex items-center gap-2">
-          Number of Images
+          Nombre d'images
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
                 <HelpCircle className="h-4 w-4 text-muted-foreground" />
               </TooltipTrigger>
               <TooltipContent>
-                <p>Number of images to generate (1-4)</p>
+                <p>Nombre d'images à générer (1-4)</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -40,7 +43,7 @@ export const ParameterInputs = ({ settings, onSettingsChange }: ParameterInputsP
           onValueChange={(value) => onSettingsChange({ num_outputs: parseInt(value) })}
         >
           <SelectTrigger className="w-full bg-popover border-primary/20">
-            <SelectValue placeholder="Select number of images" />
+            <SelectValue placeholder="Sélectionner le nombre d'images" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="1">1 image</SelectItem>

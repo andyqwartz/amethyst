@@ -1,79 +1,48 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { HelpCircle, Sparkles, User as UserIcon, LogIn } from 'lucide-react';
-import { HelpModal } from './modals/HelpModal';
-import { useAuth } from '@/hooks/use-auth';
-import { useNavigate } from 'react-router-dom';
+import { HelpCircle, Sparkles } from 'lucide-react';
 
-export const Header = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [showHelpModal, setShowHelpModal] = useState(false);
+interface HeaderProps {
+  onSettingsClick: () => void;
+  onHelpClick: () => void;
+}
 
-  const handleHelpClick = () => {
-    setShowHelpModal(true);
-  };
-
-  const handleProfileClick = () => {
-    if (showHelpModal) {
-      setShowHelpModal(false);
-    }
-    if (user) {
-      navigate('/profile');
-    } else {
-      navigate('/auth');
-    }
-  };
+export const Header = ({
+  onSettingsClick,
+  onHelpClick
+}: HeaderProps) => {
+  const [showHelp, setShowHelp] = useState(false);
 
   return (
-    <>
-      <div className="relative p-4 sm:p-6 flex justify-between items-center">
-        <div className="flex-1">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={handleProfileClick}
-            className="relative hover:bg-[#D6BCFA]/10 active:bg-[#D6BCFA]/20 transition-all duration-300 hover:scale-105 touch-manipulation rounded-xl"
-          >
-            {user ? (
-              <UserIcon className="h-5 w-5 text-[#D6BCFA]" />
-            ) : (
-              <LogIn className="h-5 w-5 text-[#D6BCFA]" />
-            )}
-          </Button>
+    <div className="relative flex justify-center items-center mb-4">
+      {/* Logo and Name */}
+      <div className="flex items-center gap-3">
+        <div className="relative">
+          <div className="absolute inset-0 bg-primary/20 blur-xl animate-pulse rounded-full"></div>
+          <Sparkles className="h-8 w-8 text-primary relative animate-pulse" />
         </div>
-
-        <div 
-          className="flex items-center gap-3 sm:gap-4 cursor-pointer hover:scale-[1.02] transition-all duration-500 group"
-          onClick={() => window.location.reload()}
-        >
-          <div className="relative">
-            <div className="absolute inset-0 bg-[#D6BCFA]/20 blur-xl animate-pulse rounded-full group-hover:scale-110 transition-transform duration-500"></div>
-            <Sparkles className="h-9 w-9 sm:h-12 sm:w-12 text-[#D6BCFA] relative animate-pulse group-hover:animate-[pulse_2s_ease-in-out_infinite]" />
-          </div>
-          <div className="flex flex-col items-start">
-            <h1 className="text-3xl sm:text-5xl font-bold font-outfit title-gradient tracking-tight group-hover:tracking-normal transition-all duration-500">
-              Amethyst
-            </h1>
-          </div>
-        </div>
-        
-        <div className="flex-1 flex justify-end">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={handleHelpClick}
-            className="relative hover:bg-[#D6BCFA]/10 active:bg-[#D6BCFA]/20 transition-all duration-300 hover:scale-105 touch-manipulation rounded-xl"
-          >
-            <HelpCircle className="h-5 w-5 text-[#D6BCFA]" />
-          </Button>
-        </div>
+        <h1 className="text-3xl font-bold font-outfit bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent bg-[length:200%] animate-[gradient_8s_linear_infinite] tracking-tight">
+          Amethyst
+        </h1>
       </div>
       
-      <HelpModal 
-        open={showHelpModal}
-        onOpenChange={setShowHelpModal}
-      />
-    </>
+      {/* Floating Help Button */}
+      <div 
+        className="fixed top-4 right-4 z-50 transition-opacity duration-300"
+        onMouseEnter={() => setShowHelp(true)}
+        onMouseLeave={() => setShowHelp(false)}
+        style={{ opacity: showHelp ? 1 : 0.2 }}
+      >
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={onHelpClick}
+          className="relative group hover:bg-primary/10 transition-all duration-300 hover-scale"
+        >
+          <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 blur transition-all duration-300 rounded-lg"></div>
+          <HelpCircle className="h-5 w-5 text-primary relative z-10" />
+        </Button>
+      </div>
+    </div>
   );
 };

@@ -1,45 +1,46 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Settings2, Wand2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Settings, Sparkles } from 'lucide-react';
 
 interface GenerationButtonsProps {
-  onGenerate: () => void;
   onToggleSettings: () => void;
+  onGenerate: () => void;
   isGenerating: boolean;
-  showSettings: boolean;
-  className?: string;
 }
 
-export const GenerationButtons: React.FC<GenerationButtonsProps> = ({
-  onGenerate,
-  onToggleSettings,
-  isGenerating,
-  showSettings,
-  className
-}) => {
+export const GenerationButtons = ({ 
+  onToggleSettings, 
+  onGenerate, 
+  isGenerating 
+}: GenerationButtonsProps) => {
+  const handleGenerateClick = () => {
+    if (!isGenerating) {
+      console.log('GenerationButtons - Triggering generation');
+      onGenerate();
+    } else {
+      console.log('GenerationButtons - Generation already in progress');
+    }
+  };
+  
   return (
-    <div className={cn("flex flex-col items-center gap-3", className)}>
+    <div className="flex flex-col gap-3 px-4">
       <Button
-        onClick={onGenerate}
+        onClick={onToggleSettings}
+        className="w-full bg-card hover:bg-card/80 text-foreground border border-primary/20 rounded-full transition-all duration-200"
+        variant="secondary"
         disabled={isGenerating}
-        className="w-full max-w-[200px] bg-[#D6BCFA] hover:bg-[#C4B5FD] text-background"
       >
-        <Wand2 className="mr-2 h-4 w-4" />
-        {isGenerating ? 'Generating...' : 'Generate'}
+        <Settings className="h-4 w-4 mr-2" />
+        Paramètres avancés
       </Button>
 
       <Button
-        variant="ghost"
-        size="icon"
-        onClick={onToggleSettings}
-        className={cn(
-          "mx-auto transition-all duration-200",
-          showSettings && "rotate-180 text-[#D6BCFA]"
-        )}
-        aria-label="Toggle advanced settings"
+        onClick={handleGenerateClick}
+        disabled={isGenerating}
+        className="w-full bg-primary hover:bg-primary-hover text-primary-foreground rounded-full transition-all duration-200"
       >
-        <Settings2 className="h-5 w-5" />
+        <Sparkles className={`h-4 w-4 mr-2 ${isGenerating ? 'animate-spin' : ''}`} />
+        {isGenerating ? 'Génération en cours...' : 'Générer'}
       </Button>
     </div>
   );

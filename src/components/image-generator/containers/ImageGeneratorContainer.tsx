@@ -1,10 +1,10 @@
 import React from 'react';
 import { MainContent } from '../MainContent';
+import { Header } from '../Header';
 import { HelpModal } from '../modals/HelpModal';
 import { GenerationLoadingState } from '../GenerationLoadingState';
 import { DeleteHistoryModal } from '../modals/DeleteHistoryModal';
-import { AdvancedSettings } from '../AdvancedSettings';
-import type { ImageSettings } from '@/types/generation';
+import type { GenerationSettings } from '@/types/replicate';
 
 interface ImageGeneratorContainerProps {
   showSettings: boolean;
@@ -13,25 +13,25 @@ interface ImageGeneratorContainerProps {
   setShowHelp: (show: boolean) => void;
   isGenerating: boolean;
   referenceImage: string | null;
-  settings: ImageSettings;
+  settings: GenerationSettings;
   generatedImages: string[];
-  history: Array<{ url: string; settings: ImageSettings }>;
+  history: { url: string; settings: GenerationSettings }[];
+  allHistory: { url: string; settings: GenerationSettings }[];
   isLoading: boolean;
   progress: number;
   currentLogs?: string;
   handleImageUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleImageClick: () => void;
   handleGenerate: () => void;
-  handleTweak: (settings: Partial<ImageSettings>) => void;
-  handleDownload: (imageUrl: string, outputFormat: string) => Promise<void>;
-  handleDeleteImage: (imageUrl: string) => void;
-  updateSettings: (settings: Partial<ImageSettings>) => void;
+  handleTweak: (settings: GenerationSettings) => void;
+  handleDownload: (imageUrl: string) => void;
+  updateSettings: (settings: Partial<GenerationSettings>) => void;
   setReferenceImage: (image: string | null) => void;
   handleRemoveReferenceImage: () => void;
   handleDeleteHistory: () => Promise<void>;
 }
 
-export const ImageGeneratorContainer: React.FC<ImageGeneratorContainerProps> = ({
+export const ImageGeneratorContainer = ({
   showSettings,
   setShowSettings,
   showHelp,
@@ -41,6 +41,7 @@ export const ImageGeneratorContainer: React.FC<ImageGeneratorContainerProps> = (
   settings,
   generatedImages,
   history,
+  allHistory,
   isLoading,
   progress,
   currentLogs,
@@ -49,12 +50,11 @@ export const ImageGeneratorContainer: React.FC<ImageGeneratorContainerProps> = (
   handleGenerate,
   handleTweak,
   handleDownload,
-  handleDeleteImage,
   updateSettings,
   setReferenceImage,
   handleRemoveReferenceImage,
   handleDeleteHistory
-}) => {
+}: ImageGeneratorContainerProps) => {
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
 
   const handleDeleteClick = () => {
@@ -68,14 +68,19 @@ export const ImageGeneratorContainer: React.FC<ImageGeneratorContainerProps> = (
 
   return (
     <div className="min-h-screen p-4 md:p-6 animate-fade-in">
-      <div className="max-w-2xl mx-auto space-y-6">
+      <div className="max-w-2xl mx-auto">
+        <Header
+          onHelpClick={() => setShowHelp(true)}
+          onSettingsClick={() => setShowSettings(!showSettings)}
+        />
+
         <MainContent
           referenceImage={referenceImage}
           showSettings={showSettings}
           settings={settings}
           isGenerating={isGenerating}
           generatedImages={generatedImages}
-          history={history}
+          history={allHistory}
           isLoading={isLoading}
           onImageUpload={handleImageUpload}
           onImageClick={handleImageClick}
@@ -85,22 +90,11 @@ export const ImageGeneratorContainer: React.FC<ImageGeneratorContainerProps> = (
           onToggleSettings={() => setShowSettings(!showSettings)}
           onTweak={handleTweak}
           onDownload={handleDownload}
-          onDeleteImage={handleDeleteImage}
           onDeleteHistory={handleDeleteClick}
-        />
-
-        <AdvancedSettings
-          settings={settings}
-          onSettingsChange={updateSettings}
-          isOpen={showSettings}
-          onToggle={() => setShowSettings(!showSettings)}
         />
       </div>
 
-      <HelpModal 
-        open={showHelp}
-        onOpenChange={setShowHelp}
-      />
+      <HelpModal open={showHelp} onOpenChange={setShowHelp} />
       
       <DeleteHistoryModal
         open={showDeleteModal}

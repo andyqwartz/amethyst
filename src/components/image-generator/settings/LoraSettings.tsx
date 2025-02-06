@@ -1,139 +1,115 @@
-import React, { useEffect } from 'react';
-import type { ImageSettings } from '@/types/generation';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import React, { useState, useEffect } from 'react';
 import { Label } from "@/components/ui/label";
-import { Trash2, Plus } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { HelpCircle, Plus } from 'lucide-react';
+import { LoraField } from './lora/LoraField';
+import type { GenerationSettings } from '@/types/replicate';
 
-export interface LoraSettingsProps {
-  settings: ImageSettings;
-  onSettingsChange: (settings: Partial<ImageSettings>) => void;
-  disabled?: boolean;
+const DEFAULT_LORAS = [
+  'AndyVampiro/andy',
+  'AndyVampiro/joa',
+  'stabilityai/sd-vae-ft-mse',
+  'AndyVampiro/ilenana',
+  'AndyVampiro/fog'
+];
+
+interface LoraSettingsProps {
+  settings: GenerationSettings;
+  onSettingsChange: (settings: Partial<GenerationSettings>) => void;
 }
 
-const DEFAULT_LORA = 'AndyVampiro/fog';
-const DEFAULT_SCALE = 1.0;
+export const LoraSettings = ({ settings, onSettingsChange }: LoraSettingsProps) => {
+  const [loraHistory, setLoraHistory] = useState<string[]>(() => {
+    const saved = localStorage.getItem('lora_history');
+    return saved ? JSON.parse(saved).filter((item: string) => item && item.trim()) : DEFAULT_LORAS;
+  });
 
-export const LoraSettings: React.FC<LoraSettingsProps> = ({
-  settings,
-  onSettingsChange,
-  disabled = false
-}) => {
-  // Initialize default LoRAs if needed
   useEffect(() => {
+    // Set default LoRAs if none exists
     if (!settings.hf_loras || settings.hf_loras.length === 0) {
       onSettingsChange({
-        hf_loras: [DEFAULT_LORA],
-        lora_scales: [DEFAULT_SCALE]
+        hf_loras: [DEFAULT_LORAS[0], DEFAULT_LORAS[1]],
+        lora_scales: [1.0, 1.0],
       });
     }
   }, []);
 
-  const handleAddLora = () => {
-    const currentLoras = settings.hf_loras || [];
-    const currentScales = settings.lora_scales || [];
+  useEffect(() => {
+    const uniqueLoras = Array.from(new Set([
+      ...settings.hf_loras.filter(lora => lora && lora.trim()),
+      ...loraHistory.filter(lora => lora && lora.trim())
+    ]));
+    localStorage.setItem('lora_history', JSON.stringify(uniqueLoras));
+    setLoraHistory(uniqueLoras);
+  }, [settings.hf_loras]);
 
+  const addLoraField = () => {
     onSettingsChange({
-      hf_loras: [...currentLoras, ''],
-      lora_scales: [...currentScales, DEFAULT_SCALE]
+      hf_loras: [...settings.hf_loras, DEFAULT_LORAS[0]],
+      lora_scales: [...settings.lora_scales, 1.0],
     });
   };
 
-  const handleLoraChange = (index: number, value: string) => {
-    if (!value.trim()) return;
-    
-    const currentLoras = [...(settings.hf_loras || [])];
-    currentLoras[index] = value.trim();
-    onSettingsChange({ hf_loras: currentLoras });
-  };
-
-  const handleLoraScaleChange = (index: number, value: number) => {
-    const currentScales = [...(settings.lora_scales || [])];
-    currentScales[index] = value;
-    onSettingsChange({ lora_scales: currentScales });
-  };
-
-  const handleRemoveLora = (index: number) => {
-    if (index === 0) return; // Don't remove the first LoRA
-    
-    const currentLoras = [...(settings.hf_loras || [])];
-    const currentScales = [...(settings.lora_scales || [])];
-    
-    currentLoras.splice(index, 1);
-    currentScales.splice(index, 1);
-    
+  const removeLoraField = (index: number) => {
     onSettingsChange({
-      hf_loras: currentLoras,
-      lora_scales: currentScales
+      hf_loras: settings.hf_loras.filter((_, i) => i !== index),
+      lora_scales: settings.lora_scales.filter((_, i) => i !== index),
     });
+  };
+
+  const updateLoraField = (index: number, value: string, isScale: boolean = false) => {
+    if (isScale) {
+      const newScales = [...settings.lora_scales];
+      newScales[index] = parseFloat(value);
+      onSettingsChange({ lora_scales: newScales });
+    } else {
+      if (!value || !value.trim()) return;
+      
+      const newLoras = [...settings.hf_loras];
+      newLoras[index] = value.trim();
+      onSettingsChange({ hf_loras: newLoras });
+    }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 p-4 md:p-6 bg-card/95 backdrop-blur-xl rounded-xl border border-primary/10 shadow-xl w-full overflow-x-hidden">
       <div className="flex items-center justify-between">
-        <Label className="text-lg font-semibold">LoRA Settings</Label>
+        <Label className="flex items-center">
+          LoRA Weights
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger className="ml-2">
+                <HelpCircle className="h-4 w-4 text-primary/50" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="max-w-xs text-sm">Huggingface path or URL to the LoRA weights</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </Label>
         <Button
-          type="button"
-          onClick={handleAddLora}
-          disabled={disabled}
-          variant="outline"
+          onClick={addLoraField}
+          variant="ghost"
           size="sm"
-          className="flex items-center gap-2"
+          className="text-primary hover:bg-primary/10"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4 mr-1" />
           Add LoRA
         </Button>
       </div>
 
-      <div className="space-y-4">
-        {(settings.hf_loras || []).map((lora, index) => (
-          <div key={index} className="flex items-center gap-3 group">
-            <div className="flex-1">
-              <Input
-                type="text"
-                value={lora}
-                onChange={(e) => handleLoraChange(index, e.target.value)}
-                disabled={disabled || index === 0}
-                placeholder="LoRA model path"
-                className="w-full"
-              />
-            </div>
-            <div className="w-24">
-              <Input
-                type="number"
-                value={settings.lora_scales?.[index] || DEFAULT_SCALE}
-                onChange={(e) => handleLoraScaleChange(index, parseFloat(e.target.value))}
-                disabled={disabled}
-                min={0}
-                max={2}
-                step={0.1}
-                className="w-full text-center"
-              />
-            </div>
-            {index > 0 && (
-              <Button
-                type="button"
-                onClick={() => handleRemoveLora(index)}
-                disabled={disabled}
-                variant="ghost"
-                size="icon"
-                className="opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <Trash2 className="h-4 w-4 text-destructive" />
-              </Button>
-            )}
-          </div>
-        ))}
-      </div>
-
-      <div className="text-sm text-muted-foreground">
-        <p>Tips:</p>
-        <ul className="list-disc list-inside space-y-1 ml-2">
-          <li>Scale values between 0.1 and 2.0</li>
-          <li>Combine multiple LoRAs for unique results</li>
-          <li>The default LoRA cannot be removed</li>
-        </ul>
-      </div>
+      {settings.hf_loras.map((lora, index) => (
+        <LoraField
+          key={index}
+          lora={lora || DEFAULT_LORAS[0]}
+          scale={settings.lora_scales[index]}
+          loraHistory={loraHistory}
+          onLoraChange={(value) => updateLoraField(index, value)}
+          onScaleChange={(value) => updateLoraField(index, value.toString(), true)}
+          onRemove={() => removeLoraField(index)}
+        />
+      ))}
     </div>
   );
 };

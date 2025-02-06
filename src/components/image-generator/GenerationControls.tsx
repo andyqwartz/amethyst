@@ -1,26 +1,24 @@
 import React from 'react';
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { PromptInput } from './controls/PromptInput';
 import { GenerationButtons } from './controls/GenerationButtons';
-import type { ImageSettings } from '@/types/generation';
+import type { GenerationSettings } from '@/types/replicate';
 
 interface GenerationControlsProps {
-  settings: ImageSettings;
-  onSettingsChange: (settings: Partial<ImageSettings>) => void;
+  settings: GenerationSettings;
+  onSettingsChange: (settings: Partial<GenerationSettings>) => void;
   onGenerate: () => void;
   onToggleSettings: () => void;
   isGenerating: boolean;
-  showSettings?: boolean;
 }
 
-export const GenerationControls: React.FC<GenerationControlsProps> = ({
+export const GenerationControls = ({
   settings,
   onSettingsChange,
   onGenerate,
   onToggleSettings,
-  isGenerating,
-  showSettings = false
-}) => {
+  isGenerating
+}: GenerationControlsProps) => {
   const { toast } = useToast();
 
   const handleGenerate = () => {
@@ -38,20 +36,17 @@ export const GenerationControls: React.FC<GenerationControlsProps> = ({
   };
 
   return (
-    <div className="space-y-4 w-full">
+    <div className="space-y-6">
       <PromptInput
         settings={settings}
         onSettingsChange={onSettingsChange}
         onGenerate={handleGenerate}
       />
-      <div className="flex justify-center">
-        <GenerationButtons
-          onToggleSettings={onToggleSettings}
-          onGenerate={handleGenerate}
-          isGenerating={isGenerating}
-          showSettings={showSettings}
-        />
-      </div>
+      <GenerationButtons
+        onToggleSettings={onToggleSettings}
+        onGenerate={handleGenerate}
+        isGenerating={isGenerating}
+      />
     </div>
   );
 };

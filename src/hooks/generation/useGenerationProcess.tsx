@@ -1,4 +1,4 @@
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { generateImage } from '@/services/replicate';
 import type { GenerationSettings } from '@/types/replicate';
 import { useImageHistory } from '../useImageHistory';
@@ -63,11 +63,6 @@ export const useGenerationProcess = (
     }
 
     if (!settings.prompt.trim()) {
-      toast({
-        variant: "destructive",
-        title: "Erreur de validation",
-        description: "Le prompt ne peut pas être vide"
-      });
       throw new Error('Le prompt ne peut pas être vide');
     }
 
@@ -127,25 +122,11 @@ export const useGenerationProcess = (
               await handleGenerationSuccess(pollResponse.output, formattedSettings);
             } else if (pollResponse.status === 'failed') {
               clearInterval(pollIntervalRef.current!);
-              const errorMessage = pollResponse.error || 'La génération a échoué';
-              cleanupGeneration();
-              toast({
-                variant: "destructive",
-                title: "Échec de la génération",
-                description: errorMessage
-              });
-              throw new Error(errorMessage);
+              throw new Error(pollResponse.error || 'La génération a échoué');
             }
           } catch (error) {
             console.error('Error checking generation status:', error);
             clearInterval(pollIntervalRef.current!);
-            setStatus('error');
-            toast({
-              variant: "destructive",
-              title: "Erreur lors du suivi de la génération",
-              description: error instanceof Error ? error.message : "Une erreur est survenue lors du suivi de la génération"
-            });
-            cleanupGeneration();
             throw error;
           }
         }, 1000);
@@ -156,11 +137,6 @@ export const useGenerationProcess = (
       console.error('Generation failed:', error);
       setStatus('error');
       cleanupGeneration();
-      toast({
-        variant: "destructive",
-        title: "Erreur de génération",
-        description: error instanceof Error ? error.message : "Une erreur est survenue lors de la génération"
-      });
       throw error;
     }
   };

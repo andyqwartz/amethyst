@@ -1,8 +1,26 @@
+export interface ReplicateInput {
+  prompt: string;
+  negative_prompt?: string;
+  seed?: number;
+  image?: string;
+  hf_loras?: string[];
+  lora_scales?: number[];
+  num_outputs?: number;
+  aspect_ratio?: string;
+  output_format?: 'webp' | 'jpg' | 'png';
+  guidance_scale?: number;
+  output_quality?: number;
+  prompt_strength?: number;
+  num_inference_steps?: number;
+  disable_safety_checker?: boolean;
+}
+
 export interface GenerationSettings {
   prompt: string;
   negative_prompt: string;
   guidance_scale: number;
   num_inference_steps: number;
+  seed?: number;
   num_outputs: number;
   aspect_ratio: string;
   output_format: 'webp' | 'jpg' | 'png';
@@ -11,76 +29,20 @@ export interface GenerationSettings {
   hf_loras: string[];
   lora_scales: number[];
   disable_safety_checker: boolean;
-  seed?: number;
   reference_image_url?: string | null;
-}
-
-export interface GenerationState {
-  status: GenerationStatus;
-  predictionId: string | null;
-  generatedImages: string[];
-  progress: number;
-  currentLogs?: string;
-  isPaused: boolean;
-  isGenerating: boolean;
-  error?: string;
 }
 
 export type GenerationStatus = 'idle' | 'loading' | 'success' | 'error';
 
-export interface ReplicateInput {
-  prompt: string;
-  negative_prompt?: string;
-  guidance_scale?: number;
-  num_inference_steps?: number;
-  seed?: number;
-  width?: number;
-  height?: number;
-  num_outputs?: number;
-  scheduler?: string;
-  safety_checker?: boolean;
-  image?: string;
-  prompt_strength?: number;
-  aspect_ratio?: string;
-  output_format?: string;
-  output_quality?: number;
-  hf_loras?: string[];
-  lora_scales?: number[];
-  disable_safety_checker?: boolean;
-}
-
-export interface ImageFormatsSelectorProps {
-  value: string;
-  onChange: (value: string) => void;
-  disabled?: boolean;
-}
-
-export interface LoraSelectorProps {
-  value: string[];
-  onChange: (value: string[]) => void;
-  disabled?: boolean;
-}
-
-export interface NumberOfImagesSelectorProps {
-  value: number;
-  onChange: (value: number) => void;
-  disabled?: boolean;
-}
-
-export interface PromptStrengthSelectorProps {
-  value: number;
-  onChange: (value: number) => void;
-  disabled?: boolean;
-}
-
-export interface OutputFormatSelectorProps {
-  value: string;
-  onChange: (value: string) => void;
-  disabled?: boolean;
-}
-
-export interface OutputQualitySelectorProps {
-  value: number;
-  onChange: (value: number) => void;
-  disabled?: boolean;
+export interface ReplicatePrediction {
+  id: string;
+  version: string;
+  input: ReplicateInput;
+  output: string[] | null;
+  status: 'starting' | 'processing' | 'succeeded' | 'failed' | 'canceled';
+  error: string | null;
+  logs: string;
+  metrics: {
+    predict_time: number;
+  };
 }

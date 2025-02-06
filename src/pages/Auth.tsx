@@ -1,213 +1,208 @@
-
-import { useState, KeyboardEvent } from 'react';
+import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Card } from "@/components/ui/card";
-import { useAuth } from '@/hooks/use-auth';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Eye, EyeOff, Github, Globe, Mail, Lock } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
 import { Checkbox } from "@/components/ui/checkbox";
+import { Github, Sparkles } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { useNavigate } from 'react-router-dom';
 
 export const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { handleEmailAuth } = useAuth();
 
-  const handleAuth = async (isSignUp: boolean) => {
-    if (!email || !password) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Veuillez remplir tous les champs"
-      });
-      return;
-    }
-
+  const handleAuth = async (type: 'login' | 'signup') => {
     try {
-      setIsLoading(true);
-      const { success, error } = await handleEmailAuth(email, password, isSignUp);
+      if (!email || !password) {
+        toast({
+          title: "Erreur",
+          description: "Veuillez remplir tous les champs",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setLoading(true);
+      
+      const { data, error } = type === 'login' 
+        ? await supabase.auth.signInWithPassword({ 
+            email, 
+            password,
+          })
+        : await supabase.auth.signUp({ email, password });
 
       if (error) {
         let errorMessage = "Une erreur est survenue";
         
-        if (error.includes("Email not confirmed")) {
-          errorMessage = "Veuillez confirmer votre email avant de vous connecter";
-        } else if (error.includes("Invalid login credentials")) {
+        // Messages d'erreur personnalisés
+        if (error.message.includes("Email not confirmed")) {
+          errorMessage = "Email non confirmé. Veuillez vérifier votre boîte mail.";
+        } else if (error.message.includes("Invalid login credentials")) {
           errorMessage = "Email ou mot de passe incorrect";
-        } else if (error.includes("User already registered")) {
-          errorMessage = "Un compte existe déjà avec cet email";
-        } else if (error.includes("503")) {
-          errorMessage = "Le service est temporairement indisponible. Veuillez réessayer dans quelques instants.";
-        } else if (error.includes("upstream connect error")) {
-          errorMessage = "Impossible de se connecter au service d'authentification. Veuillez vérifier votre connexion et réessayer.";
+        } else if (error.message.includes("User already registered")) {
+          errorMessage = "Cet email est déjà utilisé";
         }
-
+        
         toast({
+          title: "Erreur d'authentification",
+          description: errorMessage,
           variant: "destructive",
-          title: "Erreur",
-          description: errorMessage
         });
+        return;
       }
 
-      if (success) {
-        toast({
-          title: isSignUp ? "Compte créé" : "Connexion réussie",
-          description: isSignUp ? "Vérifiez votre email pour confirmer votre compte" : "Bienvenue !"
-        });
-        
-        if (!isSignUp) {
-          navigate('/');
+      if (data.user) {
+        if (!rememberMe) {
+          await supabase.auth.setSession({
+            access_token: data.session?.access_token || '',
+            refresh_token: data.session?.refresh_token || '',
+          });
         }
+
+        toast({
+          title: type === 'login' ? "Connexion réussie" : "Inscription réussie",
+          description: "Vous allez être redirigé...",
+        });
+        navigate('/');
       }
     } catch (error: any) {
-      console.error('Auth error:', error);
       toast({
-        variant: "destructive",
         title: "Erreur",
-        description: "Le service est temporairement indisponible. Veuillez réessayer dans quelques instants."
+        description: error.message,
+        variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && email && password) {
-      handleAuth(false);
+  const handleGithubAuth = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: window.location.origin,
+        }
+      });
+
+      if (error) {
+        console.error("Erreur GitHub:", error);
+        toast({
+          title: "Erreur de connexion GitHub",
+          description: "Impossible de se connecter avec GitHub. Veuillez réessayer.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+
+    } catch (error: any) {
+      console.error("Erreur complète:", error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la connexion avec GitHub",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_#1a103d_0%,_#0d0621_100%)]"></div>
-      <div className="absolute inset-0 bg-purple-900/20 animate-pulse-slowest"></div>
-      
-      {/* Portal Effect Rings */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full border border-purple-300/10 animate-pulse-slow"></div>
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full border border-purple-300/10 animate-pulse-slower"></div>
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full border border-purple-300/10 animate-pulse-slowest"></div>
-
-      <Card className="w-full max-w-md p-8 space-y-8 relative backdrop-blur-xl bg-background/30 border-purple-300/20 shadow-2xl shadow-purple-900/20">
-        <div className="space-y-6 text-center">
-          <h1 className="text-5xl font-bold tracking-tight">
-            <span className="text-white drop-shadow-[0_0_30px_rgba(167,139,250,0.5)]">✧</span>
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-purple-200 drop-shadow-[0_0_15px_rgba(167,139,250,0.3)]">Amethyst</span>
-            <span className="text-white drop-shadow-[0_0_30px_rgba(167,139,250,0.5)]">✧</span>
-          </h1>
-          <p className="text-xl font-light text-purple-200/90">Bienvenue sur le portail</p>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-primary/20 to-secondary/20">
+      <Card className="w-full max-w-md p-6 space-y-6 backdrop-blur-xl bg-background/80">
+        <div className="space-y-2 text-center">
+          <h1 className="text-3xl font-bold">Bienvenue</h1>
+          <p className="text-muted-foreground">Connectez-vous pour continuer</p>
         </div>
-
+        
         <div className="space-y-4">
           <Button 
             variant="outline" 
-            className="w-full relative overflow-hidden transition-all duration-300 hover:bg-purple-900/20 hover:border-purple-300/50" 
-            onClick={() => {}} // OAuth coming soon
-            disabled={isLoading}
+            className="w-full" 
+            onClick={handleGithubAuth}
+            disabled={loading}
           >
-            {isLoading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Github className="mr-2 h-4 w-4" />
-            )}
+            <Github className="mr-2 h-4 w-4" />
             Continuer avec Github
           </Button>
-
-          <Button 
-            variant="outline" 
-            className="w-full relative overflow-hidden transition-all duration-300 hover:bg-purple-900/20 hover:border-purple-300/50" 
-            onClick={() => {}} // OAuth coming soon
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Globe className="mr-2 h-4 w-4" />
-            )}
-            Continuer avec Google
-          </Button>
-
+          
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <Separator className="bg-purple-300/20" />
+              <Separator />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background/50 px-2 text-purple-200/60">
-                Ou continuer avec
+              <span className="bg-background px-2 text-muted-foreground">
+                Ou continuez avec
               </span>
             </div>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-purple-100">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-200/50 h-4 w-4" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="votre@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  disabled={isLoading}
-                  className="pl-10 bg-background/30 border-purple-300/30 focus:border-purple-300/50 transition-all"
-                />
-              </div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
-
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-purple-100">Mot de passe</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-200/50 h-4 w-4" />
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  disabled={isLoading}
-                  className="pl-10 pr-10 bg-background/30 border-purple-300/30 focus:border-purple-300/50 transition-all"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  disabled={isLoading}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-purple-200/50 hover:text-purple-200 transition-colors"
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
+              <Label htmlFor="password">Mot de passe</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Mot de passe"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="remember" 
+                checked={rememberMe}
+                onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+              />
+              <label
+                htmlFor="remember"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Se souvenir de moi
+              </label>
             </div>
           </div>
         </div>
 
         <div className="space-y-4">
           <Button 
-            className="w-full bg-purple-300 hover:bg-purple-200 text-purple-950 font-medium shadow-lg transition-all duration-300" 
-            onClick={() => handleAuth(false)}
-            disabled={isLoading || !email || !password}
+            className="w-full" 
+            onClick={() => handleAuth('login')}
+            disabled={loading}
           >
-            {isLoading ? (
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            ) : null}
-            Entrer dans le portail
+            <Sparkles className="mr-2 h-4 w-4" />
+            Entrer dans le portail Amethyst
           </Button>
-
           <Button 
-            className="w-full bg-background/30 hover:bg-purple-900/20 border-purple-300/30 hover:border-purple-300/50 transition-all duration-300" 
+            className="w-full" 
             variant="outline"
-            onClick={() => handleAuth(true)}
-            disabled={isLoading || !email || !password}
+            onClick={() => handleAuth('signup')}
+            disabled={loading}
           >
-            Créer un nouveau compte
+            Créer un compte
           </Button>
         </div>
       </Card>

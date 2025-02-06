@@ -1,30 +1,32 @@
 import React from 'react';
-import { GenerationControls } from './GenerationControls';
-import { ImagePreview } from './ImagePreview';
+import { Card } from "@/components/ui/card";
 import { ReferenceImageUpload } from './ReferenceImageUpload';
-import type { ImageSettings } from '@/types/generation';
+import { GenerationControls } from './GenerationControls';
+import { AdvancedSettings } from './AdvancedSettings';
+import { ImageSection } from './content/ImageSection';
+import { DeleteHistoryButton } from './content/DeleteHistoryButton';
+import type { GenerationSettings } from '@/types/replicate';
 
 interface MainContentProps {
   referenceImage: string | null;
   showSettings: boolean;
-  settings: ImageSettings;
+  settings: GenerationSettings;
   isGenerating: boolean;
   generatedImages: string[];
-  history: Array<{ url: string; settings: ImageSettings }>;
+  history: { url: string; settings: GenerationSettings }[];
   isLoading: boolean;
   onImageUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onImageClick: () => void;
   onRemoveImage: () => void;
-  onSettingsChange: (settings: Partial<ImageSettings>) => void;
+  onSettingsChange: (settings: Partial<GenerationSettings>) => void;
   onGenerate: () => void;
   onToggleSettings: () => void;
-  onTweak: (settings: Partial<ImageSettings>) => void;
-  onDownload: (imageUrl: string, outputFormat: string) => Promise<void>;
-  onDeleteImage: (imageUrl: string) => void;
+  onTweak: (settings: GenerationSettings) => void;
+  onDownload: (imageUrl: string) => void;
   onDeleteHistory: () => void;
 }
 
-export const MainContent: React.FC<MainContentProps> = ({
+export const MainContent = ({
   referenceImage,
   showSettings,
   settings,
@@ -40,39 +42,55 @@ export const MainContent: React.FC<MainContentProps> = ({
   onToggleSettings,
   onTweak,
   onDownload,
-  onDeleteImage,
   onDeleteHistory
-}) => {
+}: MainContentProps) => {
   return (
-    <div className="space-y-6">
-      {/* Reference Image Upload */}
-      <ReferenceImageUpload
-        referenceImage={referenceImage}
-        onImageUpload={onImageUpload}
-        onImageClick={onImageClick}
-        onRemoveImage={onRemoveImage}
-      />
+    <Card className="border-none glass-card shadow-xl relative">
+      <div className="p-6 space-y-8">
+        <ReferenceImageUpload
+          referenceImage={referenceImage}
+          onImageUpload={onImageUpload}
+          onImageClick={onImageClick}
+          onRemoveImage={onRemoveImage}
+        />
 
-      {/* Generation Controls */}
-      <GenerationControls
-        settings={settings}
-        onSettingsChange={onSettingsChange}
-        onGenerate={onGenerate}
-        onToggleSettings={onToggleSettings}
-        isGenerating={isGenerating}
-        showSettings={showSettings}
-      />
+        <GenerationControls
+          settings={settings}
+          onSettingsChange={onSettingsChange}
+          onGenerate={onGenerate}
+          onToggleSettings={onToggleSettings}
+          isGenerating={isGenerating}
+        />
 
-      {/* Image Preview */}
-      <ImagePreview
-        generatedImages={generatedImages}
-        history={history}
-        isLoading={isLoading}
-        onTweak={onTweak}
-        onDownload={onDownload}
-        onDeleteImage={onDeleteImage}
-        onDeleteHistory={onDeleteHistory}
-      />
-    </div>
+        {showSettings && (
+          <AdvancedSettings
+            settings={settings}
+            onSettingsChange={onSettingsChange}
+          />
+        )}
+
+        {generatedImages.length > 0 && (
+          <ImageSection
+            title="Images générées"
+            images={generatedImages}
+            onTweak={onTweak}
+            onDownload={onDownload}
+            settings={settings}
+          />
+        )}
+
+        {!isLoading && history.length > 0 && (
+          <ImageSection
+            title="Historique des générations"
+            images={history.map(h => h.url)}
+            onTweak={onTweak}
+            onDownload={onDownload}
+            settings={settings}
+          />
+        )}
+
+        <DeleteHistoryButton onDelete={onDeleteHistory} />
+      </div>
+    </Card>
   );
 };

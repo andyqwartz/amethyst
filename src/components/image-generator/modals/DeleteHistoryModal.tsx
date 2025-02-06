@@ -1,14 +1,12 @@
 import React from 'react';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface DeleteHistoryModalProps {
   open: boolean;
@@ -27,24 +25,32 @@ export const DeleteHistoryModal = ({
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="bg-background/95 backdrop-blur-xl">
-        <AlertDialogHeader>
-          <AlertDialogTitle>Delete Generation History</AlertDialogTitle>
-          <AlertDialogDescription>
-            Are you sure you want to delete your entire generation history? This action cannot be undone.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel className="bg-background hover:bg-muted">Cancel</AlertDialogCancel>
-          <AlertDialogAction 
-            onClick={handleConfirm}
-            className="bg-destructive hover:bg-destructive/90"
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="bg-transparent border-none shadow-none">
+        <DialogHeader className="text-center">
+          <DialogTitle className="text-xl font-semibold text-white">
+            Supprimer l'historique
+          </DialogTitle>
+          <DialogDescription className="text-gray-300 mt-2">
+            Êtes-vous sûr de vouloir supprimer tout l'historique de génération ? Cette action est irréversible.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex justify-center space-x-3 pt-4">
+          <Button
+            variant="ghost"
+            onClick={() => onOpenChange(false)}
+            className="text-white hover:bg-white/10 transition-all duration-300"
           >
-            Delete
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+            Annuler
+          </Button>
+          <Button
+            onClick={handleConfirm}
+            className="bg-accent hover:bg-accent/80 text-black font-medium transition-all duration-300"
+          >
+            Supprimer
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };

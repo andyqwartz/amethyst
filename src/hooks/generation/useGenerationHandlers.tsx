@@ -1,4 +1,4 @@
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import type { GenerationSettings } from '@/types/replicate';
 
 export const useGenerationHandlers = (
@@ -32,11 +32,6 @@ export const useGenerationHandlers = (
     } catch (error) {
       console.error('Generation failed:', error);
       setIsGenerating(false);
-      toast({
-        title: "Generation Failed",
-        description: "An error occurred while generating your image. Please try again.",
-        variant: "destructive",
-      });
       throw error;
     }
   };

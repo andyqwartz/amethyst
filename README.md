@@ -1,129 +1,69 @@
-# Amethyst - Générateur d'images IA
+# Amethyst - AI Image Generator
 
-## Configuration requise
+## Project info
 
-1. **Variables d'environnement**
-Créez un fichier `.env` à la racine du projet en vous basant sur `.env.example` :
-```bash
-# Supabase
-VITE_SUPABASE_URL=votre_url_projet
-VITE_SUPABASE_ANON_KEY=votre_clé_anon
+**URL**: https://lovable.dev/projects/95b71d01-c387-4969-9aec-e13d23fad593
 
-# Stripe
-VITE_STRIPE_PUBLIC_KEY=votre_clé_publique_stripe
-```
+## How can I edit this code?
 
-2. **Base de données**
-Exécutez les migrations dans l'ordre suivant :
-```bash
-# Structure de base
-supabase/migrations/20250205183327_setup_base_tables.sql
-supabase/migrations/20250205183347_fix_constraints.sql
-supabase/migrations/20250205183401_final_setup.sql
+There are several ways of editing your application.
 
-# Système de crédits
-supabase/migrations/20250205181725_setup_credit_system.sql
-supabase/migrations/20250205181753_add_credit_columns.sql
-supabase/migrations/20250205220000_add_credit_functions.sql
+**Use Lovable**
 
-# Sécurité
-supabase/migrations/20250205220100_fix_credit_policies.sql
-supabase/migrations/20250205222400_fix_profile_trigger.sql
-supabase/migrations/20250205191015_update_profile_policies.sql
+Simply visit the [Lovable Project](https://lovable.dev/projects/95b71d01-c387-4969-9aec-e13d23fad593) and start prompting.
 
-# Stripe
-supabase/migrations/20250205190128_add_stripe_customer_id_to_profiles.sql
-```
+Changes made via Lovable will be committed automatically to this repo.
 
-## Installation
+**Use your preferred IDE**
 
-```bash
-# Installation des dépendances
-npm install
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-# Démarrage en développement
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+
+Follow these steps:
+
+```sh
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
+
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
+
+# Step 3: Install the necessary dependencies.
+npm i
+
+# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
-
-# Build pour la production
-npm run build
 ```
 
-## Structure du projet
+**Edit a file directly in GitHub**
 
-- `/src/components/` - Composants React
-  - `/admin/` - Interface d'administration
-  - `/account/` - Pages du compte utilisateur
-  - `/credits/` - Système de crédits et paiements
-  - `/image-generator/` - Générateur d'images
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
 
-- `/src/lib/` - Utilitaires et configurations
-  - `/supabase/` - Client et hooks Supabase
-  - `/stripe.ts` - Configuration Stripe
+**Use GitHub Codespaces**
 
-- `/src/pages/` - Pages principales
-  - `/account/` - Pages du compte (paramètres, sécurité, etc.)
-  - `Auth.tsx` - Authentification
-  - `Admin.tsx` - Administration
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
 
-- `/supabase/` - Configuration Supabase
-  - `/migrations/` - Migrations SQL
-  - `/functions/` - Edge Functions
+## What technologies are used for this project?
 
-## Fonctionnalités
+This project is built with:
 
-1. **Authentification**
-   - Email/Mot de passe
-   - Google OAuth
-   - Vérification en deux étapes (à venir)
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
 
-2. **Gestion des crédits**
-   - Achat via Stripe
-   - Gains par publicités
-   - Historique des transactions
+## How can I deploy this project?
 
-3. **Profil utilisateur**
-   - Informations personnelles
-   - Préférences
-   - Sécurité
-   - Abonnements
+Simply open [Lovable](https://lovable.dev/projects/95b71d01-c387-4969-9aec-e13d23fad593) and click on Share -> Publish.
 
-4. **Génération d'images**
-   - Paramètres avancés
-   - Images de référence
-   - Historique des générations
+## I want to use a custom domain - is that possible?
 
-## Développement
-
-1. **Conventions de code**
-   - TypeScript strict
-   - ESLint + Prettier
-   - Tests avec Vitest
-
-2. **Base de données**
-   - PostgreSQL via Supabase
-   - Migrations versionnées
-   - Politiques RLS
-
-3. **Sécurité**
-   - Authentification Supabase
-   - Validation des données
-   - Protection CSRF
-
-## Déploiement
-
-1. **Prérequis**
-   - Node.js 18+
-   - Base de données PostgreSQL
-   - Compte Supabase
-   - Compte Stripe
-
-2. **Étapes**
-   ```bash
-   # Build
-   npm run build
-   
-   # Migrations
-   supabase db reset
-   
-   # Démarrage
-   npm run start
+We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)

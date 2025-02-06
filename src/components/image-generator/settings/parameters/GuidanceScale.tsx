@@ -2,8 +2,7 @@ import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { HelpCircle } from 'lucide-react';
-import type { ImageSettings } from '@/types/generation';
+import type { GenerationSettings } from '@/types/replicate';
 
 interface GuidanceScaleProps {
   value: number;
@@ -18,10 +17,10 @@ export const GuidanceScale = ({ value, onChange }: GuidanceScaleProps) => {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger>
-              <HelpCircle className="h-4 w-4 text-muted-foreground" />
+              <span className="text-xs text-primary/50">(?)</span>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Controls how closely the output adheres to the prompt (default: 3.5)</p>
+              <p>Controls how closely the output adheres to the prompt</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
