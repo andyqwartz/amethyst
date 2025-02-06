@@ -1,3 +1,4 @@
+
 export interface GenerationSettings {
   prompt: string;
   negative_prompt: string;
@@ -125,17 +126,17 @@ export const defaultSettings: ImageSettings = {
   prompt: '',
   negative_prompt: '',
   aspect_ratio: '1:1',
-  prompt_strength: 0.8, // Default from Replicate API
-  steps: 28, // Default from Replicate API
-  guidance_scale: 3.5, // Default from Replicate API
-  num_inference_steps: 28, // Default from Replicate API
-  num_outputs: 1, // Default from Replicate API
+  prompt_strength: 0.8,
+  steps: 28,
+  guidance_scale: 3.5,
+  num_inference_steps: 28,
+  num_outputs: 1,
   seed: -1,
-  output_format: 'webp', // Default from Replicate API
-  output_quality: 80, // Default from Replicate API
-  disable_safety_checker: false, // Default from Replicate API
+  output_format: 'webp',
+  output_quality: 80,
+  disable_safety_checker: false,
   hf_loras: ['lucataco/flux-dev-multi-lora:2389224e115448d9a77c07d7d45672b3f0aa45acacf1c5bcf51857ac295e3aec'],
-  lora_scales: [0.8], // Default from Replicate API
+  lora_scales: [0.8],
   width: 512,
   height: 512,
   img2img: false,

@@ -92,7 +92,6 @@ export const useGenerationHistory = () => {
     history,
     loading,
     error,
-    isLoading: loading,
     removeFromHistory,
     clearHistory,
     fetchHistory
