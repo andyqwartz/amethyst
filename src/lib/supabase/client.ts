@@ -9,6 +9,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
+// Create the client instance
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
@@ -21,6 +22,9 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     schema: 'public'
   }
 });
+
+// Export a function to get the client instance
+export const getSupabaseClient = () => supabase;
 
 export const checkSession = async () => {
   const { data: { session }, error } = await supabase.auth.getSession();

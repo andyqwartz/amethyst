@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from 'react';
-import { getSupabaseClient, handleAuthError } from '@/lib/supabase/client';
-import type { User, Session } from '@supabase/supabase-js';
+import { supabase, getSupabaseClient } from '@/lib/supabase/client';
+import type { User } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from './use-toast';
 
 interface AuthResponse {
   success: boolean;
@@ -15,7 +16,6 @@ export const useAuth = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const supabase = getSupabaseClient();
 
   const checkAdminStatus = async (userId: string | undefined): Promise<boolean> => {
     console.log('Checking admin status for user:', userId);
@@ -54,45 +54,6 @@ export const useAuth = () => {
       return data?.[0] || { exists_in_auth: false, is_banned: false };
     } catch (err) {
       console.error('Error in checkEmailStatus:', err);
-      throw err;
-    }
-  };
-
-  const createProfile = async (userId: string, email: string, metadata: any) => {
-    console.log('Creating profile for user:', userId, 'with metadata:', metadata);
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .insert([{
-          id: userId,
-          email,
-          full_name: metadata.full_name || email.split('@')[0],
-          avatar_url: metadata.avatar_url,
-          language: metadata.language || 'Français',
-          theme: metadata.theme || 'light',
-          credits_balance: 0,
-          lifetime_credits: 0,
-          subscription_tier: 'free',
-          subscription_status: 'inactive',
-          ads_enabled: true,
-          ads_watched_today: 0,
-          daily_ads_limit: 5,
-          ads_credits_earned: 0,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }])
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error creating profile:', error);
-        throw error;
-      }
-
-      console.log('Profile created successfully:', data);
-      return data;
-    } catch (err) {
-      console.error('Error in createProfile:', err);
       throw err;
     }
   };
@@ -180,7 +141,7 @@ export const useAuth = () => {
         }
 
         console.log('Email status check passed, proceeding with sign up');
-        const { data, error } = await supabase.auth.signUp({
+        const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -194,15 +155,7 @@ export const useAuth = () => {
           }
         });
 
-        if (error) {
-          console.error('Sign up error:', error);
-          throw error;
-        }
-
-        if (data.user) {
-          console.log('User created successfully:', data.user.id);
-          await createProfile(data.user.id, email, data.user.user_metadata);
-        }
+        if (error) throw error;
 
         toast({
           title: "Inscription réussie",
@@ -211,129 +164,25 @@ export const useAuth = () => {
 
         return { success: true, error: null };
       } else {
-        // Try to sign in multiple times in case of temporary 500 error
-        let attempts = 0;
-        const maxAttempts = 3;
-        let lastError;
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
 
-        while (attempts < maxAttempts) {
-          try {
-            console.log(`Sign in attempt ${attempts + 1} of ${maxAttempts}`);
-            const { data, error } = await supabase.auth.signInWithPassword({
-              email,
-              password
-            });
+        if (error) throw error;
 
-            if (!error) {
-              if (data?.user) {
-                console.log('Sign in successful for user:', data.user.id);
-                const emailStatus = await checkEmailStatus(email);
+        toast({
+          title: "Connexion réussie",
+          description: "Bienvenue !"
+        });
 
-                if (emailStatus.is_banned) {
-                  console.log('User is banned, signing out');
-                  await supabase.auth.signOut();
-                  throw new Error("Votre compte a été suspendu");
-                }
-
-                toast({
-                  title: "Connexion réussie",
-                  description: "Bienvenue !"
-                });
-
-                return { success: true, error: null };
-              }
-              break;
-            }
-
-            if (error.status !== 500) {
-              console.error('Non-500 error during sign in:', error);
-              throw error;
-            }
-
-            console.log('Got 500 error, will retry');
-            lastError = error;
-            attempts++;
-            if (attempts < maxAttempts) {
-              await new Promise(resolve => setTimeout(resolve, 1000));
-            }
-          } catch (error) {
-            if (error instanceof Error && error.message !== "Le service d'authentification est temporairement indisponible") {
-              throw error;
-            }
-            lastError = error;
-            attempts++;
-            if (attempts < maxAttempts) {
-              await new Promise(resolve => setTimeout(resolve, 1000));
-            }
-          }
-        }
-
-        if (lastError) {
-          console.error('All sign in attempts failed:', lastError);
-          throw lastError;
-        }
-
-        throw new Error("Erreur inconnue lors de la connexion");
+        return { success: true, error: null };
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Auth error:', error);
-      const message = handleAuthError(error);
+      const message = error.message;
       toast({
         title: "Erreur",
-        description: message,
-        variant: "destructive"
-      });
-      return { success: false, error: message };
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleGithubAuth = async (): Promise<AuthResponse> => {
-    console.log('Starting GitHub auth');
-    try {
-      setIsLoading(true);
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'github',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`
-        }
-      });
-
-      if (error) throw error;
-      return { success: true, error: null };
-    } catch (error) {
-      console.error('GitHub auth error:', error);
-      const message = handleAuthError(error);
-      toast({
-        title: "Erreur GitHub",
-        description: message,
-        variant: "destructive"
-      });
-      return { success: false, error: message };
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleGoogleAuth = async (): Promise<AuthResponse> => {
-    console.log('Starting Google auth');
-    try {
-      setIsLoading(true);
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`
-        }
-      });
-
-      if (error) throw error;
-      return { success: true, error: null };
-    } catch (error) {
-      console.error('Google auth error:', error);
-      const message = handleAuthError(error);
-      toast({
-        title: "Erreur Google",
         description: message,
         variant: "destructive"
       });
@@ -358,12 +207,11 @@ export const useAuth = () => {
         title: "Déconnexion réussie",
         description: "À bientôt !"
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Sign out error:', error);
-      const message = handleAuthError(error);
       toast({
         title: "Erreur de déconnexion",
-        description: message,
+        description: error.message,
         variant: "destructive"
       });
     } finally {
@@ -377,9 +225,6 @@ export const useAuth = () => {
     isAdmin,
     isAuthenticated: !!user,
     handleEmailAuth,
-    handleGithubAuth,
-    handleGoogleAuth,
-    checkAdminStatus,
     signOut
   };
 };
