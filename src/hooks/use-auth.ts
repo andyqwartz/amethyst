@@ -155,7 +155,12 @@ export const useAuth = () => {
           }
         });
 
-        if (error) throw error;
+        if (error) {
+          if (error.status === 503) {
+            throw new Error("Le service d'authentification est temporairement indisponible. Veuillez réessayer dans quelques minutes.");
+          }
+          throw error;
+        }
 
         toast({
           title: "Inscription réussie",
@@ -169,7 +174,15 @@ export const useAuth = () => {
           password
         });
 
-        if (error) throw error;
+        if (error) {
+          if (error.status === 503) {
+            throw new Error("Le service d'authentification est temporairement indisponible. Veuillez réessayer dans quelques minutes.");
+          }
+          if (error.message === 'Invalid login credentials') {
+            throw new Error("Email ou mot de passe incorrect");
+          }
+          throw error;
+        }
 
         toast({
           title: "Connexion réussie",
@@ -228,4 +241,3 @@ export const useAuth = () => {
     signOut
   };
 };
-
